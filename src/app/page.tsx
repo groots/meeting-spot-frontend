@@ -21,7 +21,7 @@ export default function Home() {
     user_b_contact: string;
   }) => {
     try {
-      const response = await fetch('/api/meeting-requests/', {
+      const response = await fetch('/api/meeting-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +94,9 @@ export default function Home() {
       if (!requestId) return;
       
       try {
-        const response = await fetch(`/api/meeting-requests/${requestId}/status`);
+        const response = await fetch(`/api/meeting-requests/${requestId}/status`, {
+          method: 'GET',
+        });
         const data = await response.json();
         console.log('Status response:', data);
         
@@ -102,7 +104,9 @@ export default function Home() {
         
         // If status is calculating, start polling for results
         if (data.status === 'calculating') {
-          const resultsResponse = await fetch(`/api/meeting-requests/${requestId}/results`);
+          const resultsResponse = await fetch(`/api/meeting-requests/${requestId}/results`, {
+            method: 'GET',
+          });
           const resultsData = await resultsResponse.json();
           console.log('Results response:', resultsData);
           
