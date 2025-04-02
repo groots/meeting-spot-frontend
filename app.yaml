@@ -1,0 +1,39 @@
+runtime: custom
+env: flex
+
+service: frontend
+
+env_variables:
+  NODE_ENV: "production"
+  NEXT_PUBLIC_API_URL: "https://meeting-spot-backend-270814322595.us-east1.run.app"
+
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: 1
+  memory_gb: 2
+  disk_size_gb: 10
+
+vpc_access_connector:
+  name: "projects/find-a-meeting-spot/locations/us-east1/connectors/meeting-spot-connector"
+
+handlers:
+  - url: /_next/static/(.*)
+    static_files: .next/static/\1
+    upload: .next/static/.*
+    secure: always
+
+  - url: /static/(.*)
+    static_files: public/static/\1
+    upload: public/static/.*
+    secure: always
+
+  - url: /(.*\.(gif|png|jpg|ico|txt|json))$
+    static_files: public/\1
+    upload: public/.*\.(gif|png|jpg|ico|txt|json)$
+    secure: always
+
+  - url: /.*
+    script: auto
+    secure: always 

@@ -20,7 +20,7 @@ export default function RequestStatus({ requestId }: RequestStatusProps) {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch(`/api/v1/requests/${requestId}/status`);
+        const response = await fetch(`/api/meeting-requests/${requestId}/status`);
         if (!response.ok) {
           throw new Error('Failed to fetch status');
         }

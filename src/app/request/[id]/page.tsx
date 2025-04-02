@@ -25,7 +25,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
           setToken(urlToken);
         }
 
-        const response = await fetch(`/api/v1/requests/${params.id}/status`);
+        const response = await fetch(`/api/meeting-requests/${params.id}/status`);
         const data = await response.json();
         console.log('Loaded request data:', data);
         
@@ -33,7 +33,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
         
         // If we have results, load them
         if (data.status === 'completed') {
-          const resultsResponse = await fetch(`/api/v1/requests/${params.id}/results`);
+          const resultsResponse = await fetch(`/api/meeting-requests/${params.id}/results`);
           const resultsData = await resultsResponse.json();
           if (resultsData.results?.meeting_spots) {
             setMeetingSpots(resultsData.results.meeting_spots);
@@ -64,7 +64,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
 
     try {
       console.log('Sending response to backend:', data);
-      const response = await fetch(`/api/v1/respond/${token}`, {
+      const response = await fetch(`/api/meeting-requests/${params.id}/respond`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
 
   const handleSelectSpot = async (spot: any) => {
     try {
-      const response = await fetch(`/api/v1/requests/${params.id}/select-spot`, {
+      const response = await fetch(`/api/meeting-requests/${params.id}/select-spot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
     
     const pollStatus = async () => {
       try {
-        const response = await fetch(`/api/v1/requests/${params.id}/status`);
+        const response = await fetch(`/api/meeting-requests/${params.id}/status`);
         const data = await response.json();
         console.log('Status response:', data);
         
@@ -133,7 +133,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
         
         // If status is calculating, start polling for results
         if (data.status === 'calculating') {
-          const resultsResponse = await fetch(`/api/v1/requests/${params.id}/results`);
+          const resultsResponse = await fetch(`/api/meeting-requests/${params.id}/results`);
           const resultsData = await resultsResponse.json();
           console.log('Results response:', resultsData);
           

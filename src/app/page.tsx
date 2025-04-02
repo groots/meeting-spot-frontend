@@ -5,10 +5,8 @@ import CreateRequestForm from '@/components/CreateRequestForm';
 import RespondToRequestForm from '@/components/RespondToRequestForm';
 import RequestStatus from '@/components/RequestStatus';
 import MeetingSpotResults from '@/components/MeetingSpotResults';
-import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const router = useRouter();
   const [requestId, setRequestId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [showResponseForm, setShowResponseForm] = useState(false);
@@ -23,7 +21,7 @@ export default function Home() {
     user_b_contact: string;
   }) => {
     try {
-      const response = await fetch('/api/v1/requests', {
+      const response = await fetch('/api/meeting-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,12 +36,13 @@ export default function Home() {
       const result = await response.json();
       console.log('Create request response:', result);
       
-      if (!result.user_b_token) {
+      if (!result.token_b) {
         throw new Error('No token received from server');
       }
 
-      // Redirect to the request page
-      router.push(`/request/${result.request_id}`);
+      setRequestId(result.id);
+      setToken(result.token_b);
+      setShowResponseForm(true);
     } catch (error) {
       console.error('Error creating request:', error);
       throw error;
@@ -55,12 +54,15 @@ export default function Home() {
 
     try {
       console.log('Sending response to backend:', data);
-      const response = await fetch(`/api/v1/respond/${token}`, {
+      const response = await fetch(`/api/meeting-requests/${requestId}/respond`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          token: token
+        }),
       });
 
       if (!response.ok) {
@@ -92,7 +94,7 @@ export default function Home() {
       if (!requestId) return;
       
       try {
-        const response = await fetch(`/api/v1/requests/${requestId}/status`);
+        const response = await fetch(`/api/meeting-requests/${requestId}/status`);
         const data = await response.json();
         console.log('Status response:', data);
         
@@ -100,12 +102,12 @@ export default function Home() {
         
         // If status is calculating, start polling for results
         if (data.status === 'calculating') {
-          const resultsResponse = await fetch(`/api/v1/requests/${requestId}/results`);
+          const resultsResponse = await fetch(`/api/meeting-requests/${requestId}/results`);
           const resultsData = await resultsResponse.json();
           console.log('Results response:', resultsData);
           
-          if (resultsData.status === 'completed' && resultsData.results?.meeting_spots) {
-            setMeetingSpots(resultsData.results.meeting_spots);
+          if (resultsData.status === 'completed' && resultsData.suggested_options) {
+            setMeetingSpots(resultsData.suggested_options);
             setShowResponseForm(false);
             setShowResults(true);
             // Stop polling once we have results
@@ -145,7 +147,9 @@ export default function Home() {
           </p>
         </div>
 
-        <CreateRequestForm onSubmit={handleCreateRequest} />
+        {!requestId && (
+          <CreateRequestForm onSubmit={handleCreateRequest} />
+        )}
 
         {requestId && showResponseForm && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -200,7 +204,7 @@ export default function Home() {
             </div>
           </div>
         )}
-        </div>
-      </main>
+      </div>
+    </main>
   );
 }

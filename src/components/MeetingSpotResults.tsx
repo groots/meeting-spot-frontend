@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 interface MeetingSpot {
   name: string;
   address: string;
-  distance_a: number;
-  distance_b: number;
+  distance: number;
   rating?: number;
+  type: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface MeetingSpotResultsProps {
@@ -13,21 +15,19 @@ interface MeetingSpotResultsProps {
 }
 
 export default function MeetingSpotResults({ requestId }: MeetingSpotResultsProps) {
-  const [spots, setSpots] = useState<MeetingSpot[]>([]);
+  const [spot, setSpot] = useState<MeetingSpot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await fetch(`/api/v1/requests/${requestId}/results`);
+        const response = await fetch(`/api/meeting-requests/${requestId}/results`);
         if (!response.ok) {
           throw new Error('Failed to fetch results');
         }
         const data = await response.json();
-        if (data.results && data.results.meeting_spots) {
-          setSpots(data.results.meeting_spots);
-        }
+        setSpot(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load results');
       } finally {
@@ -60,7 +60,7 @@ export default function MeetingSpotResults({ requestId }: MeetingSpotResultsProp
     );
   }
 
-  if (spots.length === 0) {
+  if (!spot) {
     return (
       <div className="text-center p-6">
         <p className="text-gray-600 dark:text-gray-400">No results available yet.</p>
@@ -73,54 +73,48 @@ export default function MeetingSpotResults({ requestId }: MeetingSpotResultsProp
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Meeting Spots
+            Your Meeting Spot
           </h2>
           
-          <div className="space-y-6">
-            {spots.map((spot, index) => (
-              <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    {spot.name}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">{spot.address}</p>
-                </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                {spot.name}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">{spot.address}</p>
+            </div>
 
-                <div className="flex items-center space-x-4 mt-2">
-                  <div className="flex items-center">
-                    <span className="text-gray-600 dark:text-gray-400 mr-2">Distance from A:</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {spot.distance_a.toFixed(1)} miles
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-gray-600 dark:text-gray-400 mr-2">Distance from B:</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {spot.distance_b.toFixed(1)} miles
-                    </span>
-                  </div>
-                  {spot.rating && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 dark:text-gray-400 mr-2">Rating:</span>
-                      <span className="font-medium text-gray-800 dark:text-gray-200">
-                        {spot.rating.toFixed(1)}/5
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4">
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.address)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Get Directions
-                  </a>
-                </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <span className="text-gray-600 dark:text-gray-400 mr-2">Type:</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">{spot.type}</span>
               </div>
-            ))}
+              <div className="flex items-center">
+                <span className="text-gray-600 dark:text-gray-400 mr-2">Distance:</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">
+                  {spot.distance.toFixed(1)} miles
+                </span>
+              </div>
+              {spot.rating && (
+                <div className="flex items-center">
+                  <span className="text-gray-600 dark:text-gray-400 mr-2">Rating:</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                    {spot.rating.toFixed(1)}/5
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Get Directions
+              </a>
+            </div>
           </div>
         </div>
       </div>
