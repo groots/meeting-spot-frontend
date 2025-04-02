@@ -18,8 +18,12 @@ export default function RespondToRequestForm({ token, onSubmit }: RespondToReque
     setError(null);
     
     try {
+      console.log('Submitting response with data:', formData);
+      console.log('Using token:', token);
       await onSubmit(formData);
+      console.log('Response submitted successfully');
     } catch (err) {
+      console.error('Error submitting response:', err);
       setError(err instanceof Error ? err.message : 'Failed to submit response');
     } finally {
       setIsSubmitting(false);
