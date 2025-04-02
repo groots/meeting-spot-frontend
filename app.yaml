@@ -18,6 +18,10 @@ resources:
 vpc_access_connector:
   name: "projects/find-a-meeting-spot/locations/us-east1/connectors/meeting-spot-connector"
 
+network:
+  name: "projects/find-a-meeting-spot/global/networks/default"
+  subnetwork_name: "projects/find-a-meeting-spot/regions/us-east1/subnetworks/default"
+
 handlers:
   - url: /_next/static/(.*)
     static_files: .next/static/\1
