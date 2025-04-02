@@ -18,26 +18,7 @@ resources:
 vpc_access_connector:
   name: "projects/find-a-meeting-spot/locations/us-east1/connectors/meeting-spot-connector"
 
-network:
-  name: "default"
-  subnetwork_name: "default"
-
 handlers:
-  - url: /_next/static/(.*)
-    static_files: .next/static/\1
-    upload: .next/static/.*
-    secure: always
-
-  - url: /static/(.*)
-    static_files: public/static/\1
-    upload: public/static/.*
-    secure: always
-
-  - url: /(.*\.(gif|png|jpg|ico|txt|json))$
-    static_files: public/\1
-    upload: public/.*\.(gif|png|jpg|ico|txt|json)$
-    secure: always
-
   - url: /.*
     script: auto
     secure: always 
