@@ -18,9 +18,6 @@ resources:
 vpc_access_connector:
   name: "projects/find-a-meeting-spot/locations/us-east1/connectors/meeting-spot-connector"
 
-beta_settings:
-  cloud_sql_instances: "find-a-meeting-spot:us-east1:meeting-spot-db"
-
 handlers:
   - url: /.*
     script: auto

@@ -23,5 +23,19 @@ EXPOSE 8080
 ENV NODE_ENV=production
 ENV PORT=8080
 
+# Copy only the necessary files to the production image
+FROM node:20-slim AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=8080
+
+COPY --from=0 /app/next.config.js ./
+COPY --from=0 /app/public ./public
+COPY --from=0 /app/.next/standalone ./
+COPY --from=0 /app/.next/static ./.next/static
+
+EXPOSE 8080
+
 # Start the application
 CMD ["node", "server.js"] 

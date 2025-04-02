@@ -4,6 +4,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  distDir: '.next',
+  generateEtags: false,
+  poweredByHeader: false,
   async rewrites() {
     return [
       {
