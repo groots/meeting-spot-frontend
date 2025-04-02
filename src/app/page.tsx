@@ -21,7 +21,7 @@ export default function Home() {
     user_b_contact: string;
   }) => {
     try {
-      const response = await fetch('/api/meeting-requests', {
+      const response = await fetch('/api/meeting-requests/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
