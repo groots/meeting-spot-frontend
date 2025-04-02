@@ -6,6 +6,8 @@ service: frontend
 env_variables:
   NODE_ENV: "production"
   NEXT_PUBLIC_API_URL: "https://meeting-spot-backend-270814322595.us-east1.run.app"
+  DEBUG: "*"
+  NODE_DEBUG: "*"
 
 manual_scaling:
   instances: 1
@@ -21,4 +23,11 @@ vpc_access_connector:
 handlers:
   - url: /.*
     script: auto
-    secure: always 
+    secure: always
+
+inbound_services:
+  - warmup
+
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 10m 
