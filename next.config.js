@@ -14,7 +14,13 @@ const nextConfig = {
         destination: process.env.NODE_ENV === 'production'
           ? 'https://meeting-spot-backend-270814322595.us-east1.run.app/api/:path*'
           : 'http://localhost:3001/api/:path*',
-        basePath: false,
+        has: [
+          {
+            type: 'header',
+            key: 'x-forwarded-proto',
+            value: 'https',
+          },
+        ],
       },
     ]
   },

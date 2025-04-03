@@ -6,8 +6,6 @@ service: frontend
 env_variables:
   NODE_ENV: "production"
   NEXT_PUBLIC_API_URL: "https://meeting-spot-backend-270814322595.us-east1.run.app"
-  DEBUG: "*"
-  NODE_DEBUG: "*"
 
 manual_scaling:
   instances: 1
@@ -21,12 +19,9 @@ vpc_access_connector:
   name: "projects/find-a-meeting-spot/locations/us-east1/connectors/meeting-spot-connector"
 
 handlers:
-  - url: /.*
+  - url: /api/.*
     script: auto
     secure: always
-
-inbound_services:
-  - warmup
-
-beta_settings:
-  cloud_sql_instances: "find-a-meeting-spot:us-east1:meeting-spot-db" 
+  - url: /.*
+    script: auto
+    secure: always 
