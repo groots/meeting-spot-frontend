@@ -6,6 +6,9 @@ service: frontend
 env_variables:
   NODE_ENV: "production"
   NEXT_PUBLIC_API_URL: "https://meeting-spot-backend-270814322595.us-east1.run.app"
+  DEBUG: "*"
+  NODE_DEBUG: "*"
+  NODE_OPTIONS: "--trace-warnings --trace-uncaught"
 
 manual_scaling:
   instances: 1
@@ -24,4 +27,7 @@ handlers:
     secure: always
   - url: /.*
     script: auto
-    secure: always 
+    secure: always
+
+logging:
+  level: debug 
