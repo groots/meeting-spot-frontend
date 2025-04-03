@@ -27,7 +27,4 @@ handlers:
     secure: always
   - url: /.*
     script: auto
-    secure: always
-
-logging:
-  level: debug 
+    secure: always 
