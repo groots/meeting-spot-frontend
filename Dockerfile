@@ -33,6 +33,7 @@ EXPOSE 8080
 ENV NODE_ENV=production
 ENV DEBUG=*
 ENV NODE_DEBUG=*
+ENV PORT=8080
 
 # Start the application with verbose logging
 CMD ["node", "--trace-warnings", "--trace-uncaught", "server.js"] 

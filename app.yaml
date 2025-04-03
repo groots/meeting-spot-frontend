@@ -22,9 +22,6 @@ vpc_access_connector:
   name: "projects/find-a-meeting-spot/locations/us-east1/connectors/meeting-spot-connector"
 
 handlers:
-  - url: /api/.*
-    script: auto
-    secure: always
   - url: /.*
     script: auto
     secure: always 

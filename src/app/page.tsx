@@ -96,6 +96,9 @@ export default function Home() {
       try {
         const response = await fetch(`/api/meeting-requests/${requestId}/status`, {
           method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         });
         const data = await response.json();
         console.log('Status response:', data);
@@ -106,6 +109,9 @@ export default function Home() {
         if (data.status === 'calculating') {
           const resultsResponse = await fetch(`/api/meeting-requests/${requestId}/results`, {
             method: 'GET',
+            headers: {
+              'Cache-Control': 'no-cache',
+            },
           });
           const resultsData = await resultsResponse.json();
           console.log('Results response:', resultsData);
