@@ -8,7 +8,6 @@ env_variables:
   NEXT_PUBLIC_API_URL: "https://meeting-spot-backend-270814322595.us-east1.run.app"
   DEBUG: "*"
   NODE_DEBUG: "*"
-  PORT: "8080"
 
 manual_scaling:
   instances: 1
