@@ -52,4 +52,4 @@ jobs:
             --platform managed \
             --region us-east1 \
             --allow-unauthenticated \
-            --set-env-vars="VITE_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" 
+            --set-env-vars="NEXT_PUBLIC_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" 

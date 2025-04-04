@@ -5,6 +5,7 @@ import CreateRequestForm from '@/components/CreateRequestForm';
 import RespondToRequestForm from '@/components/RespondToRequestForm';
 import RequestStatus from '@/components/RequestStatus';
 import MeetingSpotResults from '@/components/MeetingSpotResults';
+import { API_ENDPOINTS } from './config';
 
 export default function Home() {
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -21,7 +22,7 @@ export default function Home() {
     user_b_contact: string;
   }) => {
     try {
-      const response = await fetch('/api/meeting-requests', {
+      const response = await fetch(API_ENDPOINTS.meetingRequests, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,11 +51,11 @@ export default function Home() {
   };
 
   const handleRespondToRequest = async (data: { address_b: string }) => {
-    if (!token) return;
+    if (!token || !requestId) return;
 
     try {
       console.log('Sending response to backend:', data);
-      const response = await fetch(`/api/meeting-requests/${requestId}/respond`, {
+      const response = await fetch(API_ENDPOINTS.meetingRequestRespond(requestId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export default function Home() {
       if (!requestId) return;
       
       try {
-        const response = await fetch(`/api/meeting-requests/${requestId}/status`, {
+        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId), {
           method: 'GET',
           headers: {
             'Cache-Control': 'no-cache',
@@ -107,7 +108,7 @@ export default function Home() {
         
         // If status is calculating, start polling for results
         if (data.status === 'calculating') {
-          const resultsResponse = await fetch(`/api/meeting-requests/${requestId}/results`, {
+          const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId), {
             method: 'GET',
             headers: {
               'Cache-Control': 'no-cache',
