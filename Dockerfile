@@ -35,5 +35,13 @@ ENV PORT=8080
 # Ensure the API URL is set even if not provided
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2}
 
+# Create a non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+RUN chown -R nextjs:nodejs /app
+
+# Switch to the non-root user
+USER nextjs
+
 # Start the application
 CMD ["node", "server.js"] 

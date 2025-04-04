@@ -54,4 +54,9 @@ jobs:
             --allow-unauthenticated \
             --set-env-vars="NEXT_PUBLIC_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" \
             --set-env-vars="NODE_ENV=production" \
-            --port=8080 
+            --port=8080 \
+            --memory=512Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=10 \
+            --concurrency=80 

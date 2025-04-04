@@ -7,6 +7,7 @@ const nextConfig = {
   distDir: '.next',
   generateEtags: false,
   poweredByHeader: false,
+  trailingSlash: true,
   async rewrites() {
     return [
       {
