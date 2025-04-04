@@ -52,4 +52,6 @@ jobs:
             --platform managed \
             --region us-east1 \
             --allow-unauthenticated \
-            --set-env-vars="NEXT_PUBLIC_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" 
+            --set-env-vars="NEXT_PUBLIC_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" \
+            --set-env-vars="NODE_ENV=production" \
+            --port=8080 
