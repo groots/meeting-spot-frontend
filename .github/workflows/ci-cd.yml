@@ -3,15 +3,14 @@ name: Frontend CI/CD
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  test:
+  test-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       
+      # Test and Build Steps
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -28,14 +27,8 @@ jobs:
       - name: Build
         run: |
           npm run build
-
-  deploy:
-    needs: test
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
+          
+      # Deployment Steps
       - name: Google Auth
         uses: google-github-actions/auth@v1
         with:
@@ -44,6 +37,19 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         
-      - name: Deploy to App Engine
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+        
+      - name: Build and Push Frontend Container
         run: |
-          gcloud app deploy app.yaml 
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/meeting-spot-frontend:${{ github.sha }} .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/meeting-spot-frontend:${{ github.sha }}
+          
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy meeting-spot-frontend \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/meeting-spot-frontend:${{ github.sha }} \
+            --platform managed \
+            --region us-east1 \
+            --allow-unauthenticated \
+            --set-env-vars="VITE_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" 
