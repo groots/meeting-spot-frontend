@@ -43,5 +43,5 @@ RUN chown -R nextjs:nodejs /app
 # Switch to the non-root user
 USER nextjs
 
-# Start the application
-CMD ["node", "server.js"] 
+# Start the application with the correct host
+CMD ["node", "server.js", "-H", "0.0.0.0"] 

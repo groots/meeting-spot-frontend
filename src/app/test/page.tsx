@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config';
 
 export default function TestPage() {
