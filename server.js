@@ -3,7 +3,17 @@ const next = require('next');
 const path = require('path');
 
 const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+const app = next({ 
+  dev,
+  // Explicitly set the directory to the app directory
+  dir: __dirname,
+  // Ensure we're using the App Router
+  conf: {
+    experimental: {
+      appDir: true,
+    },
+  },
+});
 const handle = app.getRequestHandler();
 
 const port = process.env.PORT || 8080;

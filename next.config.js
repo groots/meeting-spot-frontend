@@ -8,6 +8,9 @@ const nextConfig = {
   generateEtags: false,
   poweredByHeader: false,
   trailingSlash: false,
+  experimental: {
+    appDir: true,
+  },
   async rewrites() {
     return [
       {

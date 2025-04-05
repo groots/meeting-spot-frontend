@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
 
 interface MeetingSpot {
   name: string;
@@ -25,46 +26,47 @@ export default function MeetingSpotResults({ spots }: MeetingSpotResultsProps) {
     <div className="max-w-3xl mx-auto">
       <div className="space-y-6">
         {spots.map((spot, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          <div key={index} className="bg-card text-card-foreground rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-bold mb-2">
               {spot.name}
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">{spot.address}</p>
+            <p className="text-muted-foreground mb-4">{spot.address}</p>
             
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Distance from you</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm text-muted-foreground">Distance from you</p>
+                <p className="text-lg font-semibold">
                   {spot.distance_a.toFixed(1)} miles
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Distance from them</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm text-muted-foreground">Distance from them</p>
+                <p className="text-lg font-semibold">
                   {spot.distance_b.toFixed(1)} miles
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Rating</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm text-muted-foreground">Rating</p>
+                <p className="text-lg font-semibold">
                   {spot.rating} ({spot.total_ratings})
                 </p>
               </div>
             </div>
 
             <div className="flex space-x-4">
-              <button
+              <Button
                 onClick={() => handleOpenInMaps(spot.address)}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex-1"
               >
                 Open in Maps
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleOpenInMaps(spot.address)}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                variant="secondary"
+                className="flex-1"
               >
                 Get Directions
-              </button>
+              </Button>
             </div>
           </div>
         ))}
