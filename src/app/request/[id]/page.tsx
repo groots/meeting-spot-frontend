@@ -1,75 +1,126 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import RespondToRequestForm from '@/components/RespondToRequestForm';
-import { useRouter, useSearchParams } from 'next/navigation';
+import RequestStatus from '@/components/RequestStatus';
+import MeetingSpotResults from '@/components/MeetingSpotResults';
+import { API_ENDPOINTS } from '@/app/config';
 
-export default function RequestPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+export default function RequestPage() {
+  const params = useParams();
   const searchParams = useSearchParams();
-  const [token, setToken] = useState<string | null>(null);
-  const [showResponseForm, setShowResponseForm] = useState(false);
+  const requestId = params.id as string;
+  const token = searchParams.get('token');
+  
   const [status, setStatus] = useState<string | null>(null);
   const [meetingSpots, setMeetingSpots] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [selectedSpot, setSelectedSpot] = useState<any>(null);
-  const [showSelectedSpot, setShowSelectedSpot] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load request data and token on mount
+  // Fetch initial status
   useEffect(() => {
-    const loadRequestData = async () => {
+    const fetchStatus = async () => {
+      if (!requestId) return;
+      
       try {
-        // Get token from URL if present
-        const urlToken = searchParams.get('token');
-        if (urlToken) {
-          setToken(urlToken);
+        setIsLoading(true);
+        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId));
+        if (!response.ok) {
+          throw new Error('Failed to fetch status');
         }
-
-        const response = await fetch(`/api/meeting-requests/${params.id}/status/`);
         const data = await response.json();
-        console.log('Loaded request data:', data);
+        console.log('Status response:', data);
         
         setStatus(data.status);
         
-        // If we have results, load them
         if (data.status === 'completed') {
-          const resultsResponse = await fetch(`/api/meeting-requests/${params.id}/results/`);
-          const resultsData = await resultsResponse.json();
-          if (resultsData.results?.meeting_spots) {
-            setMeetingSpots(resultsData.results.meeting_spots);
-            setShowResults(true);
+          setShowResults(true);
+          // Fetch results when status is completed
+          const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId));
+          if (!resultsResponse.ok) {
+            throw new Error('Failed to fetch results');
           }
-        }
-
-        // Check if a spot has been selected
-        if (data.selected_place_details) {
-          setSelectedSpot(data.selected_place_details);
-          setShowSelectedSpot(true);
-        }
-
-        // Only show response form if we have a token (user B) and status is pending_b_address
-        if (urlToken && data.status === 'pending_b_address') {
-          setShowResponseForm(true);
+          const resultsData = await resultsResponse.json();
+          console.log('Results data:', resultsData);
+          setMeetingSpots(resultsData.suggested_options || []);
         }
       } catch (error) {
-        console.error('Error loading request data:', error);
+        console.error('Error fetching status:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch status');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadRequestData();
-  }, [params.id, searchParams]);
+    fetchStatus();
+  }, [requestId]);
+
+  // Poll for status updates
+  useEffect(() => {
+    let pollInterval: NodeJS.Timeout;
+    
+    const pollStatus = async () => {
+      if (!requestId) return;
+      
+      try {
+        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId));
+        if (!response.ok) {
+          throw new Error('Failed to fetch status');
+        }
+        const data = await response.json();
+        console.log('Status response:', data);
+        
+        setStatus(data.status);
+        
+        if (data.status === 'completed') {
+          setShowResults(true);
+          // Fetch results when status is completed
+          const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId));
+          if (!resultsResponse.ok) {
+            throw new Error('Failed to fetch results');
+          }
+          const resultsData = await resultsResponse.json();
+          console.log('Results data:', resultsData);
+          setMeetingSpots(resultsData.suggested_options || []);
+        }
+      } catch (error) {
+        console.error('Error polling status:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch status');
+      }
+    };
+
+    if (requestId && !showResults) {
+      pollStatus();
+      pollInterval = setInterval(pollStatus, 5000);
+    }
+
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [requestId, showResults]);
 
   const handleRespondToRequest = async (data: { address_b: string }) => {
-    if (!token) return;
+    if (!token || !requestId) {
+      setError('Missing token or request ID');
+      return;
+    }
 
     try {
-      console.log('Sending response to backend:', data);
-      const response = await fetch(`/api/meeting-requests/${params.id}/respond/`, {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch(API_ENDPOINTS.meetingRequestRespond(requestId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          token: token
+        }),
       });
 
       if (!response.ok) {
@@ -80,240 +131,103 @@ export default function RequestPage({ params }: { params: { id: string } }) {
       const result = await response.json();
       console.log('Response from backend:', result);
       
-      setShowResponseForm(false);
+      // Update status to show calculating
+      setStatus('calculating');
     } catch (error) {
       console.error('Error submitting response:', error);
+      setError(error instanceof Error ? error.message : 'Failed to submit response');
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSelectSpot = async (spot: any) => {
-    try {
-      const response = await fetch(`/api/meeting-requests/${params.id}/select-spot/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ place_id: spot.place_id }),
-      });
+  if (isLoading && !status) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+              Loading Request...
+            </h1>
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to select spot');
-      }
-
-      const result = await response.json();
-      setSelectedSpot(result.selected_spot);
-      setShowSelectedSpot(true);
-    } catch (error) {
-      console.error('Error selecting spot:', error);
-      throw error;
-    }
-  };
-
-  const handleOpenInMaps = (address: string) => {
-    const encodedAddress = encodeURIComponent(address);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-  };
-
-  // Poll for status updates
-  useEffect(() => {
-    let pollInterval: NodeJS.Timeout;
-    let currentInterval = 20000; // Start with 20 seconds
-    const maxInterval = 120000; // Max 2 minutes
-    const backoffFactor = 1.5; // Increase interval by 50% each time
-    
-    const pollStatus = async () => {
-      try {
-        const response = await fetch(`/api/meeting-requests/${params.id}/status/`);
-        const data = await response.json();
-        console.log('Status response:', data);
-        
-        setStatus(data.status);
-        
-        // If status is calculating, start polling for results
-        if (data.status === 'calculating') {
-          const resultsResponse = await fetch(`/api/meeting-requests/${params.id}/results/`);
-          const resultsData = await resultsResponse.json();
-          console.log('Results response:', resultsData);
-          
-          if (resultsData.status === 'completed' && resultsData.results?.meeting_spots) {
-            setMeetingSpots(resultsData.results.meeting_spots);
-            setShowResponseForm(false);
-            setShowResults(true);
-            // Stop polling once we have results
-            if (pollInterval) {
-              clearInterval(pollInterval);
-            }
-          } else {
-            // If still calculating, increase the polling interval
-            currentInterval = Math.min(currentInterval * backoffFactor, maxInterval);
-            if (pollInterval) {
-              clearInterval(pollInterval);
-            }
-            pollInterval = setInterval(pollStatus, currentInterval);
-          }
-        }
-      } catch (error) {
-        console.error('Error polling status:', error);
-        // On error, increase the polling interval
-        currentInterval = Math.min(currentInterval * backoffFactor, maxInterval);
-        if (pollInterval) {
-          clearInterval(pollInterval);
-        }
-        pollInterval = setInterval(pollStatus, currentInterval);
-      }
-    };
-
-    // Initial poll
-    pollStatus();
-    // Set up initial polling interval
-    pollInterval = setInterval(pollStatus, currentInterval);
-
-    return () => {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-      }
-    };
-  }, [params.id]);
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+              Error
+            </h1>
+            <div className="max-w-md mx-auto p-6 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-lg">
+              {error}
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <main className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
             Meeting Request
           </h1>
-          <p className="text-lg text-gray-600">
-            View and respond to your meeting request
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
+            {status === 'completed' 
+              ? 'Here are the suggested meeting spots!' 
+              : 'Enter your address to find a meeting spot.'}
           </p>
         </div>
 
-        {status === 'pending_b_address' && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              {showResponseForm ? 'Enter Your Address' : 'Waiting for Response'}
-            </h2>
-            {showResponseForm ? (
-              <RespondToRequestForm 
-                onSubmit={handleRespondToRequest} 
-                token={token || ''} 
-              />
-            ) : (
-              <p className="text-lg text-gray-600">
-                Waiting for the other person to submit their address...
-              </p>
-            )}
+        {isLoading && (
+          <div className="max-w-md mx-auto mb-8 p-4 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100 rounded-lg">
+            Loading...
           </div>
         )}
 
-        {status && status !== 'pending_b_address' && !showResults && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Request Status
+        {/* Show response form if status is pending_b_address */}
+        {status === 'pending_b_address' && token && (
+          <RespondToRequestForm
+            token={token}
+            onSubmit={handleRespondToRequest}
+          />
+        )}
+
+        {/* Show status if calculating */}
+        {status === 'calculating' && (
+          <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Calculating Meeting Spots
             </h2>
-            <div className="text-lg text-gray-700">
-              {status === 'calculating' && (
-                <p>Calculating meeting spots...</p>
-              )}
-              {status === 'completed' && (
-                <p>Meeting spots have been found!</p>
-              )}
+            <div className="text-lg text-gray-700 dark:text-gray-300">
+              <p>We're finding the perfect meeting location for you. This may take a moment...</p>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             </div>
           </div>
         )}
 
-        {showResults && meetingSpots.length > 0 && !showSelectedSpot && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Suggested Meeting Spots
-            </h2>
-            <div className="space-y-4">
-              {meetingSpots.map((spot, index) => (
-                <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {spot.name}
-                  </h3>
-                  <p className="text-gray-600 mb-2">{spot.address}</p>
-                  <div className="flex justify-between text-sm text-gray-500 mb-4">
-                    <span>Distance from you: {spot.distance_a} miles</span>
-                    <span>Distance from them: {spot.distance_b} miles</span>
-                    <span>Rating: {spot.rating} ({spot.total_ratings} reviews)</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      console.log('Spot object:', spot);
-                      handleSelectSpot(spot);
-                    }}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    Select This Spot
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {selectedSpot && showSelectedSpot && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Selected Meeting Spot
-              </h2>
-              <button
-                onClick={() => setShowSelectedSpot(false)}
-                className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
-              >
-                Change Meeting Spot
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {selectedSpot.name}
-                </h3>
-                <p className="text-gray-600 mb-2">{selectedSpot.address}</p>
-                {selectedSpot.phone && (
-                  <p className="text-gray-600 mb-2">Phone: {selectedSpot.phone}</p>
-                )}
-                {selectedSpot.website && (
-                  <p className="text-gray-600 mb-2">
-                    <a href={selectedSpot.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      Visit Website
-                    </a>
-                  </p>
-                )}
-                {selectedSpot.opening_hours && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Opening Hours:</h4>
-                    <ul className="list-disc list-inside text-gray-600">
-                      {selectedSpot.opening_hours.map((hour: string, index: number) => (
-                        <li key={index}>{hour}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm text-gray-500 mb-4">
-                  <span>Rating: {selectedSpot.rating} ({selectedSpot.total_ratings} reviews)</span>
-                </div>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => handleOpenInMaps(selectedSpot.address)}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    Open in Maps
-                  </button>
-                  <button
-                    onClick={() => handleOpenInMaps(selectedSpot.address)}
-                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                  >
-                    Get Directions
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Show results if completed */}
+        {showResults && meetingSpots.length > 0 && (
+          <MeetingSpotResults spots={meetingSpots} />
         )}
       </div>
     </main>

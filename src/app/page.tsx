@@ -1,27 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import CreateRequestForm from '@/components/CreateRequestForm';
-import RespondToRequestForm from '@/components/RespondToRequestForm';
 import RequestStatus from '@/components/RequestStatus';
 import MeetingSpotResults from '@/components/MeetingSpotResults';
 import { API_ENDPOINTS } from './config';
 
 export default function Home() {
+  const router = useRouter();
   const [requestId, setRequestId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [showResponseForm, setShowResponseForm] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [meetingSpots, setMeetingSpots] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCreateRequest = async (data: {
-    address_a: string;
-    location_type: string;
-    user_b_contact_type: string;
-    user_b_contact: string;
-  }) => {
+  const handleCreateRequest = async (data: { address_a: string }) => {
     try {
+      setIsLoading(true);
+      setError(null);
       const response = await fetch(API_ENDPOINTS.meetingRequests, {
         method: 'POST',
         headers: {
@@ -31,189 +30,166 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create request');
-      }
-
-      const result = await response.json();
-      console.log('Create request response:', result);
-      
-      if (!result.token_b) {
-        throw new Error('No token received from server');
-      }
-
-      setRequestId(result.id);
-      setToken(result.token_b);
-      setShowResponseForm(true);
-    } catch (error) {
-      console.error('Error creating request:', error);
-      throw error;
-    }
-  };
-
-  const handleRespondToRequest = async (data: { address_b: string }) => {
-    if (!token || !requestId) return;
-
-    try {
-      console.log('Sending response to backend:', data);
-      const response = await fetch(API_ENDPOINTS.meetingRequestRespond(requestId), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          token: token
-        }),
-      });
-
-      if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit response');
+        throw new Error(errorData.message || 'Failed to create request');
       }
 
       const result = await response.json();
       console.log('Response from backend:', result);
       
-      // Update the UI state
-      setShowResponseForm(false);
-      // Force a refresh of the status and results
-      if (requestId) {
-        // Trigger a re-render of the status and results components
-        setRequestId(requestId);
-      }
+      setRequestId(result.id);
+      setToken(result.token_b);
+      setStatus('pending_b_address');
+      
+      // Start polling for status updates
+      pollStatus(result.id);
     } catch (error) {
-      console.error('Error submitting response:', error);
-      throw error;
+      console.error('Error creating request:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create request');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Poll for status updates
-  useEffect(() => {
-    let pollInterval: NodeJS.Timeout;
-    
-    const pollStatus = async () => {
-      if (!requestId) return;
+  const pollStatus = async (id: string) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.meetingRequestStatus(id));
+      if (!response.ok) {
+        throw new Error('Failed to fetch status');
+      }
+      const data = await response.json();
+      console.log('Status response:', data);
       
-      try {
-        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId), {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-          },
-        });
-        const data = await response.json();
-        console.log('Status response:', data);
-        
-        setStatus(data.status);
-        
-        // If status is calculating, start polling for results
-        if (data.status === 'calculating') {
-          const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId), {
-            method: 'GET',
-            headers: {
-              'Cache-Control': 'no-cache',
-            },
-          });
-          const resultsData = await resultsResponse.json();
-          console.log('Results response:', resultsData);
-          
-          if (resultsData.status === 'completed' && resultsData.suggested_options) {
-            setMeetingSpots(resultsData.suggested_options);
-            setShowResponseForm(false);
-            setShowResults(true);
-            // Stop polling once we have results
-            if (pollInterval) {
-              clearInterval(pollInterval);
-            }
-          }
+      setStatus(data.status);
+      
+      if (data.status === 'completed') {
+        setShowResults(true);
+        // Fetch results when status is completed
+        const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(id));
+        if (!resultsResponse.ok) {
+          throw new Error('Failed to fetch results');
         }
-      } catch (error) {
-        console.error('Error polling status:', error);
+        const resultsData = await resultsResponse.json();
+        console.log('Results data:', resultsData);
+        setMeetingSpots(resultsData.suggested_options || []);
+      } else if (data.status !== 'completed') {
+        // Continue polling if not completed
+        setTimeout(() => pollStatus(id), 5000);
       }
-    };
-
-    if (requestId) {
-      // Initial poll
-      pollStatus();
-      // Set up polling interval
-      pollInterval = setInterval(pollStatus, 5000);
+    } catch (error) {
+      console.error('Error polling status:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch status');
     }
+  };
 
-    return () => {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-      }
-    };
-  }, [requestId]);
+  if (isLoading && !requestId) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+              Creating Request...
+            </h1>
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+              Error
+            </h1>
+            <div className="max-w-md mx-auto p-6 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-lg">
+              {error}
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <main className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
             Find a Meeting Spot
           </h1>
-          <p className="text-lg text-gray-600">
-            Easily find the perfect meeting location between two addresses
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
+            {status === 'completed' 
+              ? 'Here are the suggested meeting spots!' 
+              : status === 'pending_b_address'
+              ? 'Waiting for the other person to submit their address...'
+              : 'Enter your address to find a meeting spot.'}
           </p>
         </div>
 
+        {isLoading && (
+          <div className="max-w-md mx-auto mb-8 p-4 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100 rounded-lg">
+            Loading...
+          </div>
+        )}
+
+        {/* Show create form if no request yet */}
         {!requestId && (
           <CreateRequestForm onSubmit={handleCreateRequest} />
         )}
 
-        {requestId && showResponseForm && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Enter Your Address
+        {/* Show waiting screen if waiting for user B */}
+        {status === 'pending_b_address' && (
+          <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Waiting for Response
             </h2>
-            <RespondToRequestForm 
-              onSubmit={handleRespondToRequest} 
-              token={token || ''} 
-            />
-          </div>
-        )}
-
-        {requestId && status && !showResults && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Request Status
-            </h2>
-            <div className="text-lg text-gray-700">
-              {status === 'pending_b_address' && (
-                <p>Waiting for the other person to submit their address...</p>
-              )}
-              {status === 'calculating' && (
-                <p>Calculating meeting spots...</p>
-              )}
-              {status === 'completed' && (
-                <p>Meeting spots have been found!</p>
-              )}
+            <div className="text-lg text-gray-700 dark:text-gray-300">
+              <p>Share this link with the other person:</p>
+              <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg break-all">
+                {`${window.location.origin}/request/${requestId}?token=${token}`}
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/request/${requestId}?token=${token}`);
+                }}
+                className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Copy Link
+              </button>
             </div>
           </div>
         )}
 
+        {/* Show status if calculating */}
+        {status === 'calculating' && (
+          <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Calculating Meeting Spots
+            </h2>
+            <div className="text-lg text-gray-700 dark:text-gray-300">
+              <p>We're finding the perfect meeting location for you. This may take a moment...</p>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          </div>
+        )}
+
+        {/* Show results if completed */}
         {showResults && meetingSpots.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Suggested Meeting Spots
-            </h2>
-            <div className="space-y-4">
-              {meetingSpots.map((spot, index) => (
-                <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {spot.name}
-                  </h3>
-                  <p className="text-gray-600 mb-2">{spot.address}</p>
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>Distance from you: {spot.distance_a} miles</span>
-                    <span>Distance from them: {spot.distance_b} miles</span>
-                    <span>Rating: {spot.rating} ({spot.total_ratings} reviews)</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MeetingSpotResults spots={meetingSpots} />
         )}
       </div>
     </main>

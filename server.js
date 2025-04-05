@@ -23,4 +23,7 @@ app.prepare().then(() => {
     if (err) throw err;
     console.log(`> Ready on http://0.0.0.0:${port}`);
   });
+}).catch((err) => {
+  console.error('Error during app preparation:', err);
+  process.exit(1);
 }); 
