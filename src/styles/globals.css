@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #000000;
+  --background: #ffffff;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #64748b;
+  --accent: #f59e0b;
+  --error: #ef4444;
+  --success: #22c55e;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground min-h-screen;
+  }
+}

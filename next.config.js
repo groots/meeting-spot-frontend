@@ -7,17 +7,16 @@ const nextConfig = {
   distDir: '.next',
   generateEtags: false,
   poweredByHeader: false,
-  trailingSlash: false,
-  experimental: {
-    appDir: true,
-  },
+  trailingSlash: true,
+  experimental: {},
   async rewrites() {
+    // Use environment variable for API URL in production
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+    
     return [
       {
-        source: '/api/:path*',
-        destination: process.env.NODE_ENV === 'production'
-          ? 'https://meeting-spot-backend-270814322595.us-east1.run.app/api/:path*'
-          : 'http://localhost:3001/api/:path*',
+        source: '/api/v1/:path*',
+        destination: `${apiUrl}/v1/:path*`,
       },
     ]
   },

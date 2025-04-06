@@ -10,8 +10,8 @@ import { API_ENDPOINTS } from '@/app/config';
 export default function RequestPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const requestId = params.id as string;
-  const token = searchParams.get('token');
+  const requestId = params?.id as string;
+  const token = searchParams?.get('token');
   
   const [status, setStatus] = useState<string | null>(null);
   const [meetingSpots, setMeetingSpots] = useState<any[]>([]);
