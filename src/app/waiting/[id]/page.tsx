@@ -1,16 +1,13 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { API_ENDPOINTS, API_HEADERS } from '../../config';
 
-type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export default function WaitingPage({ params }: Props) {
+export default function WaitingPage() {
   const router = useRouter();
+  const params = useParams();
+  const requestId = params?.id as string;
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +20,7 @@ export default function WaitingPage({ params }: Props) {
   useEffect(() => {
     const pollStatus = async () => {
       try {
-        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(params.id), {
+        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId), {
           headers: API_HEADERS,
         });
 
@@ -65,7 +62,7 @@ export default function WaitingPage({ params }: Props) {
         setStatus(data.status);
         
         if (data.status === 'completed') {
-          router.push(`/results/${params.id}`);
+          router.push(`/results/${requestId}`);
         } else if (data.status !== 'error') {
           // Continue polling if not completed or error, with a longer interval
           pollTimeoutRef.current = setTimeout(() => pollStatus(), 10000); // Poll every 10 seconds
@@ -78,15 +75,22 @@ export default function WaitingPage({ params }: Props) {
       }
     };
 
-    pollStatus();
+    let pollInterval: NodeJS.Timeout;
 
-    // Cleanup function to clear any pending timeouts
+    if (requestId) {
+      pollStatus();
+      pollInterval = setInterval(pollStatus, 5000);
+    }
+
     return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
       if (pollTimeoutRef.current) {
         clearTimeout(pollTimeoutRef.current);
       }
     };
-  }, [params.id, router]);
+  }, [requestId, router]);
 
   if (isLoading) {
     return (
@@ -145,7 +149,7 @@ export default function WaitingPage({ params }: Props) {
                   {status === 'error' && 'An error occurred. Please try again.'}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Request ID: {params.id}
+                  Request ID: {requestId}
                 </p>
                 {rateLimited && (
                   <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-md">

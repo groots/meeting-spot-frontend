@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { API_ENDPOINTS, API_HEADERS } from '../../config';
 
 interface MeetingSpot {
@@ -11,12 +12,9 @@ interface MeetingSpot {
   photos?: string[];
 }
 
-type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export default function ResultsPage({ params }: Props) {
+export default function ResultsPage() {
+  const params = useParams();
+  const requestId = params?.id as string;
   const [meetingSpots, setMeetingSpots] = useState<MeetingSpot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +22,7 @@ export default function ResultsPage({ params }: Props) {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await fetch(API_ENDPOINTS.meetingRequestResults(params.id), {
+        const response = await fetch(API_ENDPOINTS.meetingRequestResults(requestId), {
           headers: API_HEADERS,
         });
 
@@ -43,8 +41,10 @@ export default function ResultsPage({ params }: Props) {
       }
     };
 
-    fetchResults();
-  }, [params.id]);
+    if (requestId) {
+      fetchResults();
+    }
+  }, [requestId]);
 
   if (isLoading) {
     return (
