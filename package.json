@@ -10,7 +10,7 @@
     "lint": "next lint",
     "test": "jest",
     "test:integration": "jest src/app/__tests__/integration",
-    "prepare": "husky install",
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
     "type-check": "tsc --noEmit",
     "security-check": "npm audit",
     "pre-push": "npm run type-check && npm run test && npm run build && npm run security-check"
@@ -46,6 +46,7 @@
     "clsx": "^2.1.1",
     "eslint": "8.56.0",
     "eslint-config-next": "14.1.0",
+    "husky": "^8.0.3",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^15.5.0",
