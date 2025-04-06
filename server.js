@@ -11,7 +11,7 @@ const app = next({
 const handle = app.getRequestHandler();
 
 const port = process.env.PORT || 3000;
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 app.prepare().then(() => {
   const server = express();

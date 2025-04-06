@@ -35,7 +35,7 @@ EXPOSE 8080
 ENV NODE_ENV=production
 ENV PORT=8080
 # Ensure the API URL is set even if not provided
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v1}
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
