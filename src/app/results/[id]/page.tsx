@@ -11,14 +11,12 @@ interface MeetingSpot {
   photos?: string[];
 }
 
-interface PageProps {
-  params: {
-    id: string;
-  };
+type Props = {
+  params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
-}
+};
 
-export default function ResultsPage({ params }: PageProps) {
+export default function ResultsPage({ params }: Props) {
   const [meetingSpots, setMeetingSpots] = useState<MeetingSpot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
