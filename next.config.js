@@ -7,8 +7,8 @@ const nextConfig = {
   distDir: '.next',
   generateEtags: false,
   poweredByHeader: false,
-  trailingSlash: true,
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/_next' : '',
+  trailingSlash: false,
+  assetPrefix: '',
   experimental: {},
   async rewrites() {
     // Use environment variable for API URL in production

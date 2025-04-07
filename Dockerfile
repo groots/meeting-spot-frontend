@@ -26,7 +26,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/server.js ./server.js
 
 # Expose port 8080 (Cloud Run default)
 EXPOSE 8080
@@ -45,5 +44,5 @@ RUN chown -R nextjs:nodejs /app
 # Switch to the non-root user
 USER nextjs
 
-# Start the application with our custom server
-CMD ["npm", "start"] 
+# Start the Next.js application directly
+CMD ["npm", "run", "start"] 
