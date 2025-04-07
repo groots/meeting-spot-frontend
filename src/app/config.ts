@@ -1,6 +1,12 @@
 // API configuration
-// Use environment variables for API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+// Determine if we're in production mode
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Hard-code the production API URL for deployed environments
+// Use environment variables or localhost for development/testing
+const API_BASE_URL = isProduction 
+  ? 'https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api'
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api');
 
 export const API_ENDPOINTS = {
   meetingRequests: `${API_BASE_URL}/v1/meeting-requests/`,
