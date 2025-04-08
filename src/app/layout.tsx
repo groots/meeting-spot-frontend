@@ -1,27 +1,36 @@
-import '@/styles/globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+'use client';
 
-const inter = Inter({ subsets: ['latin'] })
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { AuthProvider } from './contexts/AuthContext';
+import Navbar from './components/Navbar';
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Find a Meeting Spot',
-  description: 'Easily find the perfect meeting location between two addresses',
-}
+  title: "Find a Meeting Spot",
+  description: "Find the perfect meeting location between two addresses",
+  keywords: ["meeting spot", "location finder", "meeting place", "geocoding"],
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-      <body className={`${inter.className} min-h-screen bg-background font-sans antialiased`}>
-        {children}
+    <html lang="en">
+      <body className={inter.className}>
+        <AuthProvider>
+          <div className="min-h-screen bg-gray-100">
+            <Navbar />
+            <main className="py-10">
+              {children}
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
-  )
+  );
 }
