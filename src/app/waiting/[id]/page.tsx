@@ -138,7 +138,7 @@ export default function WaitingPage() {
         setIsLoading(false);
       }
     }
-  }, [requestId, router, pollingStopped, isLoading]); // Include isLoading
+  }, [requestId, router, pollingStopped, isLoading, rateLimited]); // Include isLoading & rateLimited
 
   // Effect for initial fetch
   useEffect(() => {
