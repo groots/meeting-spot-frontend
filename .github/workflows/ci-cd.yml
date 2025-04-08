@@ -52,11 +52,14 @@ jobs:
             --platform managed \
             --region us-east1 \
             --allow-unauthenticated \
-            --set-env-vars="NEXT_PUBLIC_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2" \
+            --set-env-vars="NEXT_PUBLIC_API_URL=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v1" \
             --set-env-vars="NODE_ENV=production" \
             --port=8080 \
             --memory=512Mi \
             --cpu=1 \
             --min-instances=0 \
             --max-instances=10 \
-            --concurrency=80 
+            --concurrency=80 \
+            --set-env-vars="DATABASE_URL=postgresql+pg8000://postgres:YOUR_ACTUAL_PASSWORD@/findameetingspot?unix_sock=/cloudsql/find-a-meeting-spot:us-east1:findameetingspot/.s.PGSQL.5432" \
+            --set-env-vars="ENCRYPTION_KEY=your_32_bytes_encryption_key" \
+            --set-env-vars="GOOGLE_MAPS_API_KEY=your_google_maps_api_key" 

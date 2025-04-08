@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   meetingRequestStatus: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/status/`,
   meetingRequestRespond: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/respond/`,
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results/`,
+  dbCheck: `${API_BASE_URL.replace('/api', '')}/debug/db-check`,
 };
 
 export const API_HEADERS = {
