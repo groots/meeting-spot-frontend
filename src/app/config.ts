@@ -10,9 +10,9 @@ const API_BASE_URL = isProduction
 
 export const API_ENDPOINTS = {
   meetingRequests: `${API_BASE_URL}/v1/meeting-requests/`,
-  meetingRequestStatus: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/status/`,
-  meetingRequestRespond: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/respond/`,
-  meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results/`,
+  meetingRequestStatus: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/status`,
+  meetingRequestRespond: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/respond`,
+  meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
   dbCheck: `${API_BASE_URL.replace('/api', '')}/debug/db-check`,
 };
 
