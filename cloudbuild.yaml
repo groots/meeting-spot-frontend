@@ -2,7 +2,7 @@ steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/meeting-spot-frontend:$COMMIT_SHA', 
-           '--build-arg', 'NEXT_PUBLIC_API_URL_ARG=https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api',
+           '--build-arg', 'NEXT_PUBLIC_API_URL_ARG=https://meeting-spot-api-270814322595.us-east1.run.app/api',
            '.']
 
   # Push the container image to Container Registry
