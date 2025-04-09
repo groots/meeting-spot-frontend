@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Script from 'next/script';
 import { API_ENDPOINTS, GOOGLE_CLIENT_ID, FACEBOOK_APP_ID, LINKEDIN_CLIENT_ID } from '../config';
 
@@ -29,26 +29,30 @@ declare global {
 }
 
 export default function SocialLogin() {
-  useEffect(() => {
-    // Initialize Google Sign-In
-    if (typeof window !== 'undefined' && window.google && GOOGLE_CLIENT_ID) {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true,
-      });
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
-      const googleButton = document.getElementById('google-signin');
-      if (googleButton) {
-        window.google.accounts.id.renderButton(googleButton, {
+  const initializeGoogleSignIn = () => {
+    if (window.google && GOOGLE_CLIENT_ID && googleButtonRef.current) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+
+        window.google.accounts.id.renderButton(googleButtonRef.current, {
           theme: 'outline',
           size: 'large',
           width: '100%',
         });
+      } catch (error) {
+        console.error('Error initializing Google Sign-In:', error);
       }
     }
+  };
 
+  useEffect(() => {
     // Initialize Facebook SDK
     if (typeof window !== 'undefined' && FACEBOOK_APP_ID) {
       window.fbAsyncInit = function() {
@@ -68,6 +72,9 @@ export default function SocialLogin() {
         authorize: true,
       });
     }
+
+    // Try to initialize Google Sign-In if the script is already loaded
+    initializeGoogleSignIn();
   }, []);
 
   const handleGoogleResponse = async (response: any) => {
@@ -146,7 +153,8 @@ export default function SocialLogin() {
     <>
       <Script
         src="https://accounts.google.com/gsi/client"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
+        onLoad={initializeGoogleSignIn}
         id="google-signin-script"
       />
       <Script
@@ -174,7 +182,7 @@ export default function SocialLogin() {
         </div>
 
         <div className="mt-6 grid grid-cols-3 gap-3">
-          <div id="google-signin" className="w-full" />
+          <div ref={googleButtonRef} className="w-full" />
           
           <button
             onClick={handleFacebookLogin}

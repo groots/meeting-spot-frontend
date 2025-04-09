@@ -5,8 +5,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Hard-code the production API URL for deployed environments
 // Use environment variables or localhost for development/testing
 const API_BASE_URL = isProduction 
-  ? 'https://meeting-spot-api-270814322595.us-east1.run.app/api'
-  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api');
+  ? 'https://meeting-spot-backend-270814322595.us-east1.run.app/api'
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
 
 export const API_ENDPOINTS = {
   meetingRequests: `${API_BASE_URL}/v1/meeting-requests/`,
