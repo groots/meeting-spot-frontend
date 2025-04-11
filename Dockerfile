@@ -3,6 +3,12 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
+# Declare the build argument
+ARG NEXT_PUBLIC_API_URL_ARG
+
+# Set the environment variable from the build argument
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL_ARG
+
 # Copy package files
 COPY package*.json ./
 
@@ -12,7 +18,7 @@ RUN npm ci
 # Copy the rest of the application
 COPY . .
 
-# Build the application
+# Build the application (will now use NEXT_PUBLIC_API_URL)
 RUN npm run build
 
 # Production stage

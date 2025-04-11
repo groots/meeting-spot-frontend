@@ -2,27 +2,6 @@ steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/meeting-spot-frontend:$COMMIT_SHA', 
-           '--build-arg', 'NEXT_PUBLIC_API_URL_ARG=https://meeting-spot-api-270814322595.us-east1.run.app/api',
+           '--build-arg', 'NEXT_PUBLIC_API_URL_ARG=https://meeting-spot-backend-270814322595.us-east1.run.app/api',
            '.']
-
-  # Push the container image to Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/meeting-spot-frontend:$COMMIT_SHA']
-
-  # Deploy container image to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
-    args:
-    - 'run'
-    - 'deploy'
-    - 'meeting-spot-frontend'
-    - '--image'
-    - 'gcr.io/$PROJECT_ID/meeting-spot-frontend:$COMMIT_SHA'
-    - '--region'
-    - 'us-east1'
-    - '--platform'
-    - 'managed'
-    - '--allow-unauthenticated'
-
-images:
-  - 'gcr.io/$PROJECT_ID/meeting-spot-frontend:$COMMIT_SHA' 
+# ... rest of file 
