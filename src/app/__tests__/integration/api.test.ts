@@ -38,7 +38,7 @@ describe('Meeting Request API Integration', () => {
       jest.resetModules();
       const { API_ENDPOINTS } = require('@/app/config');
       
-      expect(API_ENDPOINTS.meetingRequests).toBe('http://localhost:8000/api/v1/meeting-requests/');
+      expect(API_ENDPOINTS.meetingRequests).toBe('http://localhost:8081/api/v1/meeting-requests/');
     });
   });
 
