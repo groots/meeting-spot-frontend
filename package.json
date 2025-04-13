@@ -17,7 +17,12 @@
     "e2e:auth": "playwright test -g 'Authentication Flow'",
     "e2e:auth:debug": "playwright test -g 'Authentication Flow' --debug",
     "e2e:journey": "playwright test -g 'Authentication Journey'",
-    "e2e:journey:debug": "playwright test -g 'Authentication Journey' --debug"
+    "e2e:journey:debug": "playwright test -g 'Authentication Journey' --debug",
+    "e2e:dbcheck": "playwright test -g 'Debug API Endpoints'",
+    "e2e:dbcheck:debug": "playwright test -g 'Debug API Endpoints' --debug",
+    "e2e:api-diag": "playwright test -g 'API Diagnostics'",
+    "e2e:api-diag:debug": "playwright test -g 'API Diagnostics' --debug",
+    "debug:api": "node debug-tools/api-troubleshoot.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

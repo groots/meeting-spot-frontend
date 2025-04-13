@@ -8,12 +8,17 @@ const API_BASE_URL = isProduction
   ? 'https://api.findameetingspot.com/api'
   : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api');
 
+// Base URL without the /api suffix for non-standard endpoints
+const BASE_URL = isProduction
+  ? 'https://api.findameetingspot.com'
+  : (process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8081');
+
 export const API_ENDPOINTS = {
   meetingRequests: `${API_BASE_URL}/v1/meeting-requests/`,
   meetingRequestStatus: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/status`,
   meetingRequestRespond: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/respond`,
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
-  dbCheck: `${API_BASE_URL.replace('/api', '')}/debug/db-check`,
+  dbCheck: `${BASE_URL}/api/debug/db-check`,
   // Auth endpoints
   login: `${API_BASE_URL}/v1/auth/login`,
   register: `${API_BASE_URL}/v1/auth/register`,

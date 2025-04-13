@@ -55,6 +55,18 @@ jobs:
         env:
           BASE_URL: ${{ secrets.E2E_TEST_URL || 'https://findameetingspot.com' }}
       
+      - name: Run db-check endpoint test
+        run: npm run e2e:dbcheck
+        env:
+          BASE_URL: ${{ secrets.E2E_TEST_URL || 'https://findameetingspot.com' }}
+        continue-on-error: true # Don't fail the workflow if this test fails
+      
+      - name: Run API diagnostics tests
+        run: npm run e2e:api-diag
+        env:
+          BASE_URL: ${{ secrets.E2E_TEST_URL || 'https://findameetingspot.com' }}
+        continue-on-error: true # Don't fail the workflow if these tests fail
+      
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
