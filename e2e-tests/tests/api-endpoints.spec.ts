@@ -12,8 +12,8 @@ test.describe('API Endpoint Construction', () => {
       try {
         const response = await request.get('/api/debug/db-check');
         console.log('Direct API response status:', response.status());
-      } catch (apiError) {
-        console.log('Could not connect to API directly:', apiError.message);
+      } catch (apiError: any) {
+        console.log('Could not connect to API directly:', apiError.message || String(apiError));
       }
       test.skip();
       return;
@@ -41,8 +41,8 @@ test.describe('API Endpoint Construction', () => {
       } else {
         console.log('Could not find the database check button');
       }
-    } catch (e) {
-      console.log('Error interacting with page:', e.message);
+    } catch (e: any) {
+      console.log('Error interacting with page:', e.message || String(e));
     }
   });
   
@@ -87,8 +87,8 @@ test.describe('API Endpoint Construction', () => {
         console.log('Could not interact with page links');
       }
       
-    } catch (e) {
-      console.log('Test error:', e.message);
+    } catch (e: any) {
+      console.log('Test error:', e.message || String(e));
     }
   });
 }); 
