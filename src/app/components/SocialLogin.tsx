@@ -44,7 +44,7 @@ export default function SocialLogin() {
         window.google.accounts.id.renderButton(googleButtonRef.current, {
           theme: 'outline',
           size: 'large',
-          width: '100%',
+          width: '300px',
         });
       } catch (error) {
         console.error('Error initializing Google Sign-In:', error);
