@@ -1,10 +1,12 @@
-name: E2E Tests
+# DISABLED: This workflow has been consolidated into unified-workflow.yml
+name: E2E Tests (Disabled)
 
 on:
+  # Disabling triggers
   push:
-    branches: [ main ]
+    branches: [ disabled ]
   pull_request:
-    branches: [ main ]
+    branches: [ disabled ]
   # Allow manual trigger
   workflow_dispatch:
 

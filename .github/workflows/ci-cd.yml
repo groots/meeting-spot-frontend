@@ -1,8 +1,10 @@
-name: Frontend CI/CD
+# DISABLED: This workflow has been consolidated into unified-workflow.yml
+name: Frontend CI/CD (Disabled)
 
 on:
+  # Disabling triggers
   push:
-    branches: [ main ]
+    branches: [ disabled ]
 
 jobs:
   test-and-deploy:
