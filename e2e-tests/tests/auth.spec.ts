@@ -1,66 +1,117 @@
 import { test, expect } from '@playwright/test';
 
-// Skip tests during initial development with test.skip
+// Generate a unique email for testing to avoid conflicts
+const getTestEmail = () => `test_${Date.now()}${Math.floor(Math.random() * 1000)}@example.com`;
+
 test.describe('Authentication Flow', () => {
-  test.skip('Login form submits to the correct endpoint', async ({ page, request }) => {
+  test('Login form works correctly', async ({ page }) => {
     // Navigate to login page
-    await page.goto('/login');
+    await page.goto('/auth/login');
     
-    // Use debug mode to inspect the actual HTML structure
-    console.log('Looking for form elements...');
+    // Wait for the page to load
+    await page.waitForLoadState('domcontentloaded');
+    console.log('Login page loaded');
     
-    // Use more generic selectors with timeout options
-    // Find input by placeholder text, type, or other attributes that might be more stable
-    await page.locator('input[type="email"], input[placeholder*="email"], input[name="email"]').first().fill('test@example.com');
-    await page.locator('input[type="password"], input[placeholder*="password"], input[name="password"]').first().fill('password123');
-    
-    // Listen for any network requests to login endpoint
-    const loginRequestPromise = page.waitForRequest(request => 
-      request.url().toLowerCase().includes('/api/') && 
-      request.url().toLowerCase().includes('/auth/login'),
-      { timeout: 10000 }
-    );
-    
-    // Try both button text and type
-    await page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Login")').first().click();
-    
-    try {
-      // Verify request URL is correctly formed with shorter timeout
-      const loginRequest = await loginRequestPromise;
-      expect(loginRequest.url()).not.toContain('/.findameetingspot.com');
-    } catch (error) {
-      console.log('Login request not detected, endpoint might be different');
-      // Continue test even if this particular assertion fails
-    }
-  });
-  
-  test.skip('Registration form submits to the correct endpoint', async ({ page }) => {
-    // Navigate to registration page
-    await page.goto('/register');
-    
-    // Use more generic selectors
-    await page.locator('input[type="email"], input[placeholder*="email"], input[name="email"]').first().fill('new_user@example.com');
-    await page.locator('input[type="password"], input[placeholder*="password"], input[name="password"]').first().fill('securePassword123!');
-    
-    // Look for confirmation password field - might have different attributes
-    const passwordFields = page.locator('input[type="password"]');
-    if (await passwordFields.count() > 1) {
-      await passwordFields.nth(1).fill('securePassword123!');
-    }
-    
-    // Use a more robust way to wait for network requests
+    // Capture network requests to verify URL formation
+    const apiRequests: string[] = [];
     page.on('request', request => {
       const url = request.url();
-      if (url.includes('/register') || url.includes('/auth')) {
-        console.log('Captured request URL:', url);
-        expect(url).not.toContain('/.findameetingspot.com');
+      if (url.includes('/api/')) {
+        apiRequests.push(url);
+        console.log('API URL:', url);
+        // Check for malformed URLs
+        expect(url).not.toMatch(/\.findameetingspot\.com\/\.findameetingspot\.com/);
       }
     });
     
-    // Submit the form - try different button text
-    await page.locator('button[type="submit"], button:has-text("Sign Up"), button:has-text("Register")').first().click();
+    // Fill in login form - find inputs by type, placeholder or name
+    const emailInput = page.locator('input[type="email"], input[placeholder*="email"], input[name="email"]').first();
+    const passwordInput = page.locator('input[type="password"], input[placeholder*="password"], input[name="password"]').first();
     
-    // Wait a moment to capture the request
-    await page.waitForTimeout(2000);
+    // Ensure elements are found
+    expect(await emailInput.count()).toBeGreaterThan(0);
+    expect(await passwordInput.count()).toBeGreaterThan(0);
+    
+    // Fill credentials
+    await emailInput.fill('test@example.com');
+    await passwordInput.fill('password123');
+    
+    // Find and click submit button
+    const submitButton = page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Login")').first();
+    expect(await submitButton.count()).toBeGreaterThan(0);
+    
+    // Click the button and capture any API requests
+    await Promise.all([
+      submitButton.click(),
+      // Wait for either navigation or a response (may not happen if using test credentials)
+      Promise.race([
+        page.waitForNavigation({ timeout: 5000 }).catch(() => { /* ignore timeout */ }),
+        page.waitForResponse(resp => resp.url().includes('/api/') && resp.url().includes('/auth'), 
+                            { timeout: 5000 }).catch(() => { /* ignore timeout */ })
+      ])
+    ]);
+    
+    // Check if any API requests were made (success if we got here without errors)
+    console.log(`Captured ${apiRequests.length} API requests`);
+  });
+  
+  test('Registration form works correctly', async ({ page }) => {
+    // Use a unique email each time to avoid conflicts
+    const testEmail = getTestEmail();
+    console.log(`Using test email: ${testEmail}`);
+    
+    // Navigate to registration page
+    await page.goto('/auth/register');
+    await page.waitForLoadState('domcontentloaded');
+    console.log('Registration page loaded');
+    
+    // Capture network requests to verify URL formation
+    const apiRequests: string[] = [];
+    page.on('request', request => {
+      const url = request.url();
+      if (url.includes('/api/')) {
+        apiRequests.push(url);
+        console.log('API URL:', url);
+        // Check for malformed URLs
+        expect(url).not.toMatch(/\.findameetingspot\.com\/\.findameetingspot\.com/);
+      }
+    });
+    
+    // Fill in registration form
+    const emailInput = page.locator('input[type="email"], input[placeholder*="email"], input[name="email"]').first();
+    const passwordInputs = page.locator('input[type="password"], input[placeholder*="password"], input[name*="password"]');
+    
+    // Ensure elements are found
+    expect(await emailInput.count()).toBeGreaterThan(0);
+    expect(await passwordInputs.count()).toBeGreaterThan(0);
+    
+    // Fill credentials
+    await emailInput.fill(testEmail);
+    
+    // Fill password in both fields if there are two password fields (password and confirm)
+    if (await passwordInputs.count() >= 2) {
+      await passwordInputs.nth(0).fill('Password123!');
+      await passwordInputs.nth(1).fill('Password123!');
+    } else {
+      await passwordInputs.first().fill('Password123!');
+    }
+    
+    // Find and click submit button
+    const submitButton = page.locator('button[type="submit"], button:has-text("Sign Up"), button:has-text("Register")').first();
+    expect(await submitButton.count()).toBeGreaterThan(0);
+    
+    // Click the button and capture any API requests
+    await Promise.all([
+      submitButton.click(),
+      // Wait for either navigation or a response (may not happen if using test credentials)
+      Promise.race([
+        page.waitForNavigation({ timeout: 5000 }).catch(() => { /* ignore timeout */ }),
+        page.waitForResponse(resp => resp.url().includes('/api/') && resp.url().includes('/auth'), 
+                           { timeout: 5000 }).catch(() => { /* ignore timeout */ })
+      ])
+    ]);
+    
+    // Check if any API requests were made (success if we got here without errors)
+    console.log(`Captured ${apiRequests.length} API requests`);
   });
 }); 

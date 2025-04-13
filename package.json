@@ -13,7 +13,11 @@
     "pre-push": "npm run type-check && npm run test && npm run build",
     "e2e": "playwright test",
     "e2e:debug": "playwright test --debug",
-    "e2e:basic": "playwright test -g 'Homepage loads without URL errors'"
+    "e2e:basic": "playwright test -g 'Homepage loads without URL errors'",
+    "e2e:auth": "playwright test -g 'Authentication Flow'",
+    "e2e:auth:debug": "playwright test -g 'Authentication Flow' --debug",
+    "e2e:journey": "playwright test -g 'Authentication Journey'",
+    "e2e:journey:debug": "playwright test -g 'Authentication Journey' --debug"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
