@@ -21,7 +21,7 @@ export default function LoginPage() {
     
     try {
       await login(email, password, rememberMe);
-      router.push('/');
+      router.push('/create');
     } catch (err) {
       // Error is handled by AuthContext
     } finally {

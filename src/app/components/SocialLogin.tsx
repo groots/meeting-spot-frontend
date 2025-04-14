@@ -88,7 +88,7 @@ export default function SocialLogin() {
       });
 
       if (res.ok) {
-        window.location.href = '/';
+        window.location.href = '/create';
       } else {
         console.error('Google authentication failed');
       }
@@ -112,7 +112,7 @@ export default function SocialLogin() {
           });
 
           if (res.ok) {
-            window.location.href = '/';
+            window.location.href = '/create';
           } else {
             console.error('Facebook authentication failed');
           }
@@ -137,7 +137,7 @@ export default function SocialLogin() {
         })
         .then(res => {
           if (res.ok) {
-            window.location.href = '/';
+            window.location.href = '/create';
           } else {
             console.error('LinkedIn authentication failed');
           }
