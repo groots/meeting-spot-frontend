@@ -14,7 +14,7 @@ const config = {
   apiUrl: 'https://api.findameetingspot.com',
   endpoints: [
     '/api/v1/auth/register',
-    '/api/debug/db-check'
+    '/debug/db-check'
   ],
   logPath: './api-debug-logs.json',
   testsToRun: ['direct-call', 'url-construction']
@@ -98,8 +98,8 @@ async function testDirectCalls() {
   
   // Test db-check endpoint
   try {
-    console.log('Testing /api/debug/db-check endpoint...');
-    results.dbCheckEndpoint = await makeRequest('GET', `${config.apiUrl}/api/debug/db-check`);
+    console.log('Testing /debug/db-check endpoint...');
+    results.dbCheckEndpoint = await makeRequest('GET', `${config.apiUrl}/debug/db-check`);
     console.log(`DB check endpoint status: ${results.dbCheckEndpoint.statusCode}`);
   } catch (error) {
     results.dbCheckEndpoint = { error: error.message };

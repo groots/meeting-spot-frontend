@@ -18,22 +18,24 @@ export const API_ENDPOINTS = {
   meetingRequestStatus: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/status`,
   meetingRequestRespond: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/respond`,
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
-  dbCheck: `${BASE_URL}/api/debug/db-check`,
+  dbCheck: `${BASE_URL}/debug/db-check`,
   // Auth endpoints
-  login: `${API_BASE_URL}/v1/auth/login`,
+  login: `${BASE_URL}/api/auth/login`,
   register: `${API_BASE_URL}/v1/auth/register`,
   profile: `${API_BASE_URL}/v1/auth/me`,
-  resetPassword: `${API_BASE_URL}/v1/auth/reset-password`,
+  resetPassword: `${BASE_URL}/api/auth/reset-password`,
   resetPasswordConfirm: `${API_BASE_URL}/v1/auth/reset-password/confirm`,
-  verifyEmail: `${API_BASE_URL}/auth/verify-email`,
+  verifyEmail: `${BASE_URL}/api/auth/verify-email`,
   resendVerification: `${API_BASE_URL}/auth/resend-verification`,
   // Social auth endpoints
-  googleAuth: `${API_BASE_URL}/v1/auth/google`,
+  googleAuth: `${BASE_URL}/api/auth/google`,
   googleCallback: `${API_BASE_URL}/v1/auth/google/callback`,
-  facebookAuth: `${API_BASE_URL}/v1/auth/facebook`,
+  facebookAuth: `${BASE_URL}/api/auth/facebook`,
   facebookCallback: `${API_BASE_URL}/v1/auth/facebook/callback`,
-  linkedinAuth: `${API_BASE_URL}/v1/auth/linkedin`,
+  linkedinAuth: `${BASE_URL}/api/auth/linkedin`,
   linkedinCallback: `${API_BASE_URL}/v1/auth/linkedin/callback`,
+  findMeetingSpot: `${BASE_URL}/api/meeting-spot/find`,
+  versions: `${BASE_URL}/api/versions`,
 };
 
 export const API_HEADERS = {
