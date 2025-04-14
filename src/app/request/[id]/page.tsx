@@ -103,7 +103,11 @@ export default function RequestPage() {
     };
   }, [requestId, showResults]);
 
-  const handleRespondToRequest = async (data: { address_b: string }) => {
+  const handleRespondToRequest = async (data: { 
+    address_b: string; 
+    address_b_lat?: number;
+    address_b_lon?: number;
+  }) => {
     if (!token || !requestId) {
       setError('Missing token or request ID');
       return;

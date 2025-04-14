@@ -15,6 +15,8 @@ export default function CreatePage() {
     location_type: string;
     contact_method: string;
     contact_info: string;
+    address_a_lat?: number;
+    address_a_lon?: number;
   }) => {
     if (!token) {
       console.error('No token found in auth state');
@@ -37,6 +39,14 @@ export default function CreatePage() {
       user_b_contact_type: data.contact_method,
       user_b_contact: data.contact_info,
     };
+    
+    // Add coordinates if available
+    if (data.address_a_lat !== undefined && data.address_a_lon !== undefined) {
+      Object.assign(requestData, {
+        address_a_lat: data.address_a_lat,
+        address_a_lon: data.address_a_lon
+      });
+    }
 
     console.log('Request data:', requestData);
 

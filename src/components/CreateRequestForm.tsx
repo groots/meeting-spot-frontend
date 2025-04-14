@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import LocationButton from './LocationButton';
 
 // Define categories matching backend
 const PLACE_CATEGORIES = {
@@ -32,11 +33,15 @@ interface CreateRequestFormProps {
     location_type: string;
     contact_method: string;
     contact_info: string;
+    address_a_lat?: number;
+    address_a_lon?: number;
   }) => Promise<void>;
 }
 
 export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) {
   const [address, setAddress] = useState('');
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [category, setCategory] = useState('Food & Drink');
   const [subcategory, setSubcategory] = useState('');
   const [contactMethod, setContactMethod] = useState('EMAIL');
@@ -67,12 +72,21 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
     try {
       setIsLoading(true);
       setError(null);
-      await onSubmit({
+      
+      const requestData: any = {
         address_a: address.trim(),
         location_type: getLocationType(),
         contact_method: contactMethod,
         contact_info: contactInfo.trim()
-      });
+      };
+      
+      // If we have coordinates (from geolocation), add them
+      if (latitude !== undefined && longitude !== undefined) {
+        requestData.address_a_lat = latitude;
+        requestData.address_a_lon = longitude;
+      }
+      
+      await onSubmit(requestData);
     } catch (error) {
       console.error('Error submitting form:', error);
       setError(error instanceof Error ? error.message : 'Failed to submit form');
@@ -81,20 +95,47 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
     }
   };
 
+  // Handle location success from the LocationButton
+  const handleLocationSuccess = (address: string, lat: number, lng: number) => {
+    setAddress(address);
+    setLatitude(lat);
+    setLongitude(lng);
+    setError(null);
+  };
+
+  // Handle location error from the LocationButton
+  const handleLocationError = (errorMessage: string) => {
+    setError(`Location error: ${errorMessage}`);
+  };
+
   return (
     <div className="max-w-md mx-auto bg-card p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-card-foreground mb-6">Create Meeting Request</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="address">Your Address</Label>
-          <Input
-            id="address"
-            name="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter your address"
-            disabled={isLoading}
-          />
+          <div className="space-y-2">
+            <Input
+              id="address"
+              name="address"
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
+                // Clear coordinates if user manually changes the address
+                if (latitude !== undefined || longitude !== undefined) {
+                  setLatitude(undefined);
+                  setLongitude(undefined);
+                }
+              }}
+              placeholder="Enter your address"
+              disabled={isLoading}
+            />
+            <LocationButton 
+              onLocationSuccess={handleLocationSuccess}
+              onLocationError={handleLocationError}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
