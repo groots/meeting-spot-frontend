@@ -5,6 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// Define categories matching backend
+const PLACE_CATEGORIES = {
+  "Accommodation": "Places to stay",
+  "Food & Drink": "Places to eat and drink",
+  "Night Life": "Bars, clubs, and entertainment",
+  "Fun & Family": "Activities for everyone",
+  "Cultural": "Museums, galleries, and attractions",
+  "Shopping": "Retail and markets",
+  "Transport": "Transportation hubs"
+};
+
+// Food subcategories 
+const FOOD_SUBCATEGORIES = {
+  "fine dining": "Upscale restaurants",
+  "hole in the wall": "Hidden local gems",
+  "cheap eats": "Budget-friendly options",
+  "vegetarian": "Vegetarian and vegan-friendly",
+  "outdoor seating": "Places with patios or terraces",
+  "quick bite": "Fast service options"
+};
+
 interface CreateRequestFormProps {
   onSubmit: (data: {
     address_a: string;
@@ -16,11 +37,20 @@ interface CreateRequestFormProps {
 
 export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) {
   const [address, setAddress] = useState('');
-  const [locationType, setLocationType] = useState('restaurant');
-  const [contactMethod, setContactMethod] = useState('email');
+  const [category, setCategory] = useState('Food & Drink');
+  const [subcategory, setSubcategory] = useState('');
+  const [contactMethod, setContactMethod] = useState('EMAIL');
   const [contactInfo, setContactInfo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get combined location type value
+  const getLocationType = () => {
+    if (category === 'Food & Drink' && subcategory) {
+      return `${category}: ${subcategory}`;
+    }
+    return category;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +69,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
       setError(null);
       await onSubmit({
         address_a: address.trim(),
-        location_type: locationType,
+        location_type: getLocationType(),
         contact_method: contactMethod,
         contact_info: contactInfo.trim()
       });
@@ -68,20 +98,43 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="locationType">Preferred Location Type</Label>
+          <Label htmlFor="category">Category</Label>
           <select
-            id="locationType"
-            value={locationType}
-            onChange={(e) => setLocationType(e.target.value)}
+            id="category"
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              // Reset subcategory when changing category
+              if (e.target.value !== 'Food & Drink') {
+                setSubcategory('');
+              }
+            }}
             className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             disabled={isLoading}
           >
-            <option value="restaurant">Restaurant</option>
-            <option value="cafe">Cafe</option>
-            <option value="park">Park</option>
-            <option value="library">Library</option>
+            {Object.entries(PLACE_CATEGORIES).map(([key, description]) => (
+              <option key={key} value={key}>{key} - {description}</option>
+            ))}
           </select>
         </div>
+
+        {category === 'Food & Drink' && (
+          <div className="space-y-2">
+            <Label htmlFor="subcategory">Specific Food Preference</Label>
+            <select
+              id="subcategory"
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              disabled={isLoading}
+            >
+              <option value="">Any food type</option>
+              {Object.entries(FOOD_SUBCATEGORIES).map(([key, description]) => (
+                <option key={key} value={key}>{key} - {description}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="contactMethod">Contact Method</Label>
@@ -105,8 +158,8 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
             name="contactInfo"
             value={contactInfo}
             onChange={(e) => setContactInfo(e.target.value)}
-            placeholder={contactMethod === 'email' ? 'Enter your email' : 'Enter your phone number'}
-            type={contactMethod === 'email' ? 'email' : 'tel'}
+            placeholder={contactMethod === 'EMAIL' ? 'Enter your email' : 'Enter your phone number'}
+            type={contactMethod === 'EMAIL' ? 'email' : 'tel'}
             disabled={isLoading}
           />
         </div>
