@@ -135,6 +135,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           error: null,
         }));
         console.log('Setting auth state:', { user: data.user, token }); // Debug log
+        console.log('Login successful, token stored in storage'); // Add more debug info
+        
+        // Verify token is stored correctly
+        const storedToken = storage.getItem(TOKEN_KEY);
+        console.log('Verified token in storage:', storedToken ? 'Token exists' : 'Token missing');
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Login failed');

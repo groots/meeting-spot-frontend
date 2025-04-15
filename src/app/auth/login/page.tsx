@@ -21,7 +21,8 @@ export default function LoginPage() {
     
     try {
       await login(email, password, rememberMe);
-      router.push('/create');
+      // Use a hard redirect instead of Next.js router
+      window.location.href = '/create';
     } catch (err) {
       // Error is handled by AuthContext
     } finally {
