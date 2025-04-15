@@ -20,9 +20,18 @@ export const API_ENDPOINTS = {
   resetPassword: `${API_URL}/api/v1/auth/reset-password`,
   resetPasswordConfirm: `${API_URL}/api/v1/auth/reset-password/confirm`,
   forgotPassword: `${API_URL}/api/v1/auth/forgot-password`,
+  // Social auth endpoints
+  googleCallback: `${API_URL}/api/v1/auth/google/callback`,
+  facebookCallback: `${API_URL}/api/v1/auth/facebook/callback`,
 };
 
 export const API_HEADERS = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
-}; 
+};
+
+// Google Client ID for OAuth
+export const GOOGLE_CLIENT_ID = '270814322595-hueraif6brli58po5gishfvcmocv6n04.apps.googleusercontent.com';
+
+// Facebook App ID
+export const FACEBOOK_APP_ID = '1484265795195128'; 
