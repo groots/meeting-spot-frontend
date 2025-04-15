@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -17,7 +17,8 @@ const STRIPE_PRICE_IDS: Record<string, string> = {
   premium: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID || 'price_1Pv2GfCVP5VPWd1qQ5QIivyi'
 };
 
-const SubscriptionPage = () => {
+// Separate component that uses useSearchParams to resolve Next.js warnings
+function SubscriptionContent() {
   const { token, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -199,154 +200,144 @@ const SubscriptionPage = () => {
         
         {activeSubscription ? (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-gray-600">Plan</p>
-                <p className="font-medium">{activeSubscription.plan_id.toUpperCase()}</p>
-              </div>
-              <div>
-                <p className="text-gray-600">Status</p>
-                <p className="font-medium capitalize">{activeSubscription.status}</p>
-              </div>
-              <div>
-                <p className="text-gray-600">Started On</p>
-                <p className="font-medium">
-                  {new Date(activeSubscription.current_period_start).toLocaleDateString()}
-                </p>
-              </div>
-              {subscriptionEndsAt && (
-                <div>
-                  <p className="text-gray-600">
-                    {activeSubscription.cancel_at_period_end ? 'Ends On' : 'Renews On'}
-                  </p>
-                  <p className="font-medium">{subscriptionEndsAt}</p>
-                </div>
-              )}
-            </div>
-            
+            <p><span className="font-medium">Plan:</span> {activeSubscription.plan_id.charAt(0).toUpperCase() + activeSubscription.plan_id.slice(1)}</p>
+            <p><span className="font-medium">Status:</span> {activeSubscription.status.charAt(0).toUpperCase() + activeSubscription.status.slice(1)}</p>
+            {subscriptionEndsAt && <p><span className="font-medium">Current period ends:</span> {subscriptionEndsAt}</p>}
+            {activeSubscription.cancel_at_period_end && (
+              <p className="mt-2 text-amber-600">Your subscription is set to cancel at the end of the current billing period.</p>
+            )}
             {activeSubscription.status === 'active' && !activeSubscription.cancel_at_period_end && (
               <button
                 onClick={handleCancelSubscription}
+                className="mt-4 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded"
                 disabled={loading}
-                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50"
               >
                 {loading ? 'Processing...' : 'Cancel Subscription'}
               </button>
             )}
-            
-            {activeSubscription.cancel_at_period_end && (
-              <div className="mt-4 p-4 bg-yellow-50 rounded border border-yellow-200">
-                <p className="text-yellow-800">
-                  Your subscription has been canceled and will end on {subscriptionEndsAt}.
-                </p>
-              </div>
-            )}
           </div>
         ) : (
-          <p>You don't have an active subscription.</p>
+          <p>You currently don't have an active subscription.</p>
         )}
       </div>
-
+      
       {/* Subscription Plans */}
       {(!activeSubscription || activeSubscription.cancel_at_period_end) && (
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-6">Choose a Plan</h2>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Available Plans</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Free Plan */}
             <div 
-              className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                selectedPlan === 'free' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
-              }`}
+              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'free' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
               onClick={() => handleSelectPlan('free')}
             >
-              <h3 className="text-lg font-medium mb-2">Free</h3>
-              <p className="text-2xl font-bold mb-4">$0<span className="text-sm font-normal text-gray-500">/month</span></p>
-              <ul className="text-sm space-y-2 mb-4">
-                <li>✓ Basic features</li>
-                <li>✓ 10 meeting requests/month</li>
-                <li>✓ Basic location search</li>
+              <h3 className="text-lg font-semibold mb-2">Free</h3>
+              <p className="text-2xl font-bold mb-4">$0 <span className="text-sm font-normal text-gray-600">/month</span></p>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>5 meeting requests/month</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Basic features</span>
+                </li>
               </ul>
             </div>
             
             {/* Basic Plan */}
             <div 
-              className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                selectedPlan === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
-              }`}
+              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
               onClick={() => handleSelectPlan('basic')}
             >
-              <h3 className="text-lg font-medium mb-2">Basic</h3>
-              <p className="text-2xl font-bold mb-4">$9.99<span className="text-sm font-normal text-gray-500">/month</span></p>
-              <ul className="text-sm space-y-2 mb-4">
-                <li>✓ All free features</li>
-                <li>✓ Unlimited meeting requests</li>
-                <li>✓ Advanced location filtering</li>
-                <li>✓ Priority support</li>
+              <h3 className="text-lg font-semibold mb-2">Basic</h3>
+              <p className="text-2xl font-bold mb-4">$9.99 <span className="text-sm font-normal text-gray-600">/month</span></p>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Unlimited meeting requests</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Contact management</span>
+                </li>
               </ul>
             </div>
             
             {/* Premium Plan */}
             <div 
-              className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                selectedPlan === 'premium' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
-              }`}
+              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'premium' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
               onClick={() => handleSelectPlan('premium')}
             >
-              <h3 className="text-lg font-medium mb-2">Premium</h3>
-              <p className="text-2xl font-bold mb-4">$19.99<span className="text-sm font-normal text-gray-500">/month</span></p>
-              <ul className="text-sm space-y-2 mb-4">
-                <li>✓ All basic features</li>
-                <li>✓ Team collaboration</li>
-                <li>✓ Analytics and reporting</li>
-                <li>✓ Premium support</li>
-                <li>✓ Custom preferences</li>
+              <h3 className="text-lg font-semibold mb-2">Premium</h3>
+              <p className="text-2xl font-bold mb-4">$19.99 <span className="text-sm font-normal text-gray-600">/month</span></p>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Everything in Basic</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Advanced analytics</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Priority support</span>
+                </li>
               </ul>
             </div>
           </div>
           
-          <button
-            onClick={handleSubscribe}
-            disabled={loading}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
-          >
-            {loading 
-              ? 'Processing...' 
-              : selectedPlan === 'free' 
-                ? 'Continue with Free Plan' 
-                : `Subscribe to ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Plan`
-            }
-          </button>
+          <div className="mt-6">
+            <button
+              onClick={handleSubscribe}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded"
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : `Subscribe to ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)}`}
+            </button>
+          </div>
         </div>
       )}
-
+      
       {/* Subscription History */}
-      {subscriptions.length > 1 && (
-        <div className="mt-8 bg-white shadow-md rounded-lg p-6">
+      {subscriptions.length > 0 && (
+        <div>
           <h2 className="text-xl font-semibold mb-4">Subscription History</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
+                  <th className="px-4 py-2 border-b text-left">Plan</th>
+                  <th className="px-4 py-2 border-b text-left">Status</th>
+                  <th className="px-4 py-2 border-b text-left">Created</th>
+                  <th className="px-4 py-2 border-b text-left">Period End</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {subscriptions
-                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                  .map(sub => (
-                    <tr key={sub.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">{sub.plan_id.toUpperCase()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap capitalize">{sub.status}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{new Date(sub.current_period_start).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : '-'}
-                      </td>
-                    </tr>
-                  ))}
+              <tbody>
+                {subscriptions.map(sub => (
+                  <tr key={sub.id}>
+                    <td className="px-4 py-2 border-b">{sub.plan_id.charAt(0).toUpperCase() + sub.plan_id.slice(1)}</td>
+                    <td className="px-4 py-2 border-b">{sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}</td>
+                    <td className="px-4 py-2 border-b">{new Date(sub.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-2 border-b">{sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : 'N/A'}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -354,6 +345,17 @@ const SubscriptionPage = () => {
       )}
     </div>
   );
-};
+}
 
-export default SubscriptionPage; 
+// Main component with Suspense boundary
+export default function SubscriptionPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    }>
+      <SubscriptionContent />
+    </Suspense>
+  );
+} 
