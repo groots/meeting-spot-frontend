@@ -3,12 +3,28 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_ENDPOINTS, API_HEADERS } from '../config';
 
+interface Subscription {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  plan_type: string;
+  status: string;
+  current_period_start: string;
+  current_period_end: string;
+  end_date?: string;
+  cancel_at_period_end: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 interface User {
   id: string;
   email: string;
   created_at: string;
   updated_at: string;
   is_oauth_user: boolean;
+  is_premium: boolean;
+  subscription?: Subscription;
 }
 
 interface AuthState {
