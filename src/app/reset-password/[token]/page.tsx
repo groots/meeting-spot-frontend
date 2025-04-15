@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { Button, Container, TextField, Typography, Box, Alert } from "@mui/material";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { API_URL } from "@/config";
+import { API_ENDPOINTS } from "@/config";
 
 interface ResetPasswordProps {
   params: {
@@ -51,7 +51,7 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
     setError("");
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/reset-password`, {
+      const response = await fetch(API_ENDPOINTS.resetPasswordConfirm, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -114,7 +114,7 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
               id="password"
               autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               disabled={isSubmitting}
             />
 
@@ -129,7 +129,7 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
               id="confirmPassword"
               autoComplete="new-password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
               disabled={isSubmitting}
             />
 

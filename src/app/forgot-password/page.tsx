@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { Button, Container, TextField, Typography, Box, Alert } from "@mui/material";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { API_URL } from "@/config";
+import { API_ENDPOINTS } from "@/config";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -27,7 +27,7 @@ const ForgotPasswordPage = () => {
       }
 
       // Send request to API
-      const response = await fetch(`${API_URL}/api/v1/auth/forgot-password`, {
+      const response = await fetch(API_ENDPOINTS.forgotPassword, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +89,7 @@ const ForgotPasswordPage = () => {
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               disabled={isSubmitting}
             />
 
