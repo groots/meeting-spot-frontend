@@ -5,29 +5,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LocationButton from './LocationButton';
+import ContactSelector from './ContactSelector';
 
 // Define categories matching backend
-const PLACE_CATEGORIES = {
-  "Accommodation": "Places to stay",
-  "Food & Drink": "Places to eat and drink",
-  "Night Life": "Bars, clubs, and entertainment",
-  "Fun & Family": "Activities for everyone",
-  "Cultural": "Museums, galleries, and attractions",
-  "Shopping": "Retail and markets",
-  "Transport": "Transportation hubs"
+export const PLACE_CATEGORIES = {
+  "Restaurant / Food": "A food establishment serving sit-down meals",
+  "Cafe": "A place primarily serving coffee and light refreshments",
+  "Bar": "A place serving alcoholic beverages",
+  "Meeting Space": "A shared office or meeting room",
+  "Hotel": "Accommodation with meeting facilities",
+  "Park": "An outdoor recreational area or garden",
+  "Library": "A quiet public space with study areas",
+  "Other": "Any other type of meeting location"
 };
 
-// Food subcategories 
-const FOOD_SUBCATEGORIES = {
-  "fine dining": "Upscale restaurants",
-  "hole in the wall": "Hidden local gems",
-  "cheap eats": "Budget-friendly options",
-  "vegetarian": "Vegetarian and vegan-friendly",
-  "outdoor seating": "Places with patios or terraces",
-  "quick bite": "Fast service options"
-};
+// Define specific subcategories for food preference
+export const FOOD_SUBCATEGORIES = [
+  "Any Food",
+  "American",
+  "Italian",
+  "Chinese",
+  "Mexican",
+  "Japanese",
+  "Thai",
+  "Indian",
+  "Mediterranean",
+  "Vegetarian/Vegan",
+  "Fast Food",
+  "Bakery",
+  "Seafood",
+  "BBQ/Steakhouse",
+  "Pizza",
+  "Brunch/Breakfast",
+  "Other"
+];
 
-interface CreateRequestFormProps {
+export interface CreateRequestFormProps {
   onSubmit: (data: {
     address_a: string;
     location_type: string;
@@ -40,77 +53,68 @@ interface CreateRequestFormProps {
 
 export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) {
   const [address, setAddress] = useState('');
-  const [latitude, setLatitude] = useState<number | undefined>(undefined);
-  const [longitude, setLongitude] = useState<number | undefined>(undefined);
-  const [category, setCategory] = useState('Food & Drink');
-  const [subcategory, setSubcategory] = useState('');
+  const [category, setCategory] = useState(Object.keys(PLACE_CATEGORIES)[0]);
+  const [subcategory, setSubcategory] = useState(FOOD_SUBCATEGORIES[0]);
   const [contactMethod, setContactMethod] = useState('EMAIL');
   const [contactInfo, setContactInfo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Get combined location type value
-  const getLocationType = () => {
-    if (category === 'Food & Drink' && subcategory) {
-      return `${category}: ${subcategory}`;
-    }
-    return category;
-  };
+  const [error, setError] = useState('');
+  const [coords, setCoords] = useState<{ lat?: number; lon?: number }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!address.trim()) {
+    setIsLoading(true);
+    setError('');
+
+    if (!address) {
       setError('Please enter your address');
+      setIsLoading(false);
       return;
     }
 
-    if (!contactInfo.trim()) {
-      setError('Please enter your contact information');
+    if (!contactInfo) {
+      setError('Please enter contact information');
+      setIsLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
-      setError(null);
+      const locationType = category === 'Food & Drink' ? subcategory : category;
       
-      const requestData: any = {
-        address_a: address.trim(),
-        location_type: getLocationType(),
+      await onSubmit({
+        address_a: address,
+        location_type: locationType,
         contact_method: contactMethod,
-        contact_info: contactInfo.trim()
-      };
-      
-      // If we have coordinates (from geolocation), add them
-      if (latitude !== undefined && longitude !== undefined) {
-        requestData.address_a_lat = latitude;
-        requestData.address_a_lon = longitude;
-      }
-      
-      await onSubmit(requestData);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setError(error instanceof Error ? error.message : 'Failed to submit form');
+        contact_info: contactInfo,
+        ...(coords.lat && coords.lon ? { 
+          address_a_lat: coords.lat, 
+          address_a_lon: coords.lon 
+        } : {})
+      });
+    } catch (err: any) {
+      setError(err?.message || 'Failed to create meeting request');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle location success from the LocationButton
   const handleLocationSuccess = (address: string, lat: number, lng: number) => {
     setAddress(address);
-    setLatitude(lat);
-    setLongitude(lng);
-    setError(null);
+    setCoords({ lat, lon: lng });
   };
 
-  // Handle location error from the LocationButton
   const handleLocationError = (errorMessage: string) => {
     setError(`Location error: ${errorMessage}`);
   };
 
+  const handleContactChange = (info: string, method: string) => {
+    setContactInfo(info);
+    setContactMethod(method);
+  };
+
   return (
-    <div className="max-w-md mx-auto bg-card p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-card-foreground mb-6">Create Meeting Request</h2>
+    <div className="bg-white shadow-md rounded-lg p-6">
+      <h1 className="text-2xl font-bold mb-6">Create Meeting Request</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="address">Your Address</Label>
@@ -118,19 +122,12 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
             <Input
               id="address"
               name="address"
-              value={address}
-              onChange={(e) => {
-                setAddress(e.target.value);
-                // Clear coordinates if user manually changes the address
-                if (latitude !== undefined || longitude !== undefined) {
-                  setLatitude(undefined);
-                  setLongitude(undefined);
-                }
-              }}
               placeholder="Enter your address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               disabled={isLoading}
             />
-            <LocationButton 
+            <LocationButton
               onLocationSuccess={handleLocationSuccess}
               onLocationError={handleLocationError}
               isLoading={isLoading}
@@ -143,13 +140,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
           <select
             id="category"
             value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              // Reset subcategory when changing category
-              if (e.target.value !== 'Food & Drink') {
-                setSubcategory('');
-              }
-            }}
+            onChange={(e) => setCategory(e.target.value)}
             className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             disabled={isLoading}
           >
@@ -169,39 +160,19 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
               className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               disabled={isLoading}
             >
-              <option value="">Any food type</option>
-              {Object.entries(FOOD_SUBCATEGORIES).map(([key, description]) => (
-                <option key={key} value={key}>{key} - {description}</option>
+              {FOOD_SUBCATEGORIES.map((subcat) => (
+                <option key={subcat} value={subcat}>{subcat}</option>
               ))}
             </select>
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="contactMethod">Contact Method</Label>
-          <select
-            id="contactMethod"
-            value={contactMethod}
-            onChange={(e) => setContactMethod(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            disabled={isLoading}
-          >
-            <option value="EMAIL">Email</option>
-            <option value="PHONE">Phone</option>
-            <option value="SMS">SMS</option>
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="contactInfo">Contact Information</Label>
-          <Input
-            id="contactInfo"
-            name="contactInfo"
-            value={contactInfo}
-            onChange={(e) => setContactInfo(e.target.value)}
-            placeholder={contactMethod === 'EMAIL' ? 'Enter your email' : 'Enter your phone number'}
-            type={contactMethod === 'EMAIL' ? 'email' : 'tel'}
-            disabled={isLoading}
+        <div className="border-t border-gray-200 my-6 pt-6">
+          <h2 className="text-lg font-semibold mb-4">Contact Information</h2>
+          <ContactSelector
+            onChange={handleContactChange}
+            defaultContactType={contactMethod}
+            defaultContactInfo={contactInfo}
           />
         </div>
 

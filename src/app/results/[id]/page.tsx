@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { API_ENDPOINTS, API_HEADERS } from '../../config';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import AddContactModal from '@/components/AddContactModal';
 
 interface MeetingSpot {
   name: string;
@@ -37,6 +40,11 @@ interface ResultsData {
       lng: number;
     };
   };
+  meeting_contact_info?: {
+    email?: string;
+    phone?: string;
+    name?: string;
+  };
 }
 
 // Helper function to display price level
@@ -48,18 +56,30 @@ const getPriceLevel = (level?: number) => {
 };
 
 export default function ResultsPage() {
+  const router = useRouter();
   const params = useParams();
+  const { user, token } = useAuth();
   const requestId = params?.id as string;
   const [meetingSpots, setMeetingSpots] = useState<MeetingSpot[]>([]);
   const [resultsData, setResultsData] = useState<ResultsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
+  const [contactAddedSuccessMessage, setContactAddedSuccessMessage] = useState<string | null>(null);
+  
+  // Get the contact email from the meeting request if available
+  const contactEmail = resultsData?.meeting_contact_info?.email || '';
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
+        const headers: Record<string, string> = { ...API_HEADERS };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(API_ENDPOINTS.meetingRequestResults(requestId), {
-          headers: API_HEADERS,
+          headers,
         });
 
         if (!response.ok) {
@@ -81,7 +101,7 @@ export default function ResultsPage() {
     if (requestId) {
       fetchResults();
     }
-  }, [requestId]);
+  }, [requestId, token]);
 
   const openInMaps = (spot: MeetingSpot) => {
     if (spot.location) {
@@ -99,6 +119,21 @@ export default function ResultsPage() {
       const { lat, lng } = resultsData.midpoint;
       window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
     }
+  };
+
+  const handleAddContact = () => {
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    setIsAddContactModalOpen(true);
+  };
+
+  const handleContactAdded = () => {
+    setContactAddedSuccessMessage('Contact added successfully!');
+    setTimeout(() => {
+      setContactAddedSuccessMessage(null);
+    }, 3000);
   };
 
   if (isLoading) {
@@ -160,17 +195,39 @@ export default function ResultsPage() {
               Category: {categoryInfo}
             </p>
           )}
-          {resultsData?.midpoint && (
-            <button 
-              onClick={openMidpointMap}
-              className="inline-flex items-center justify-center px-4 py-2 mb-8 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-              View Midpoint on Map
-            </button>
+
+          {/* Success message for contact add */}
+          {contactAddedSuccessMessage && (
+            <div className="my-4 p-4 bg-green-100 text-green-800 rounded-md max-w-md mx-auto">
+              {contactAddedSuccessMessage}
+            </div>
           )}
+
+          <div className="flex justify-center gap-4 mb-8">
+            {resultsData?.midpoint && (
+              <Button 
+                onClick={openMidpointMap}
+                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                View Midpoint on Map
+              </Button>
+            )}
+            
+            {contactEmail && (
+              <Button 
+                onClick={handleAddContact}
+                className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Add to Contacts
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -230,6 +287,17 @@ export default function ResultsPage() {
           </div>
         )}
       </div>
+
+      {/* Contact Modal */}
+      {contactEmail && (
+        <AddContactModal
+          meetingId={requestId}
+          contactEmail={contactEmail}
+          isOpen={isAddContactModalOpen}
+          onClose={() => setIsAddContactModalOpen(false)}
+          onSuccess={handleContactAdded}
+        />
+      )}
     </div>
   );
 } 

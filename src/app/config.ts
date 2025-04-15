@@ -36,6 +36,9 @@ export const API_ENDPOINTS = {
   linkedinCallback: `${API_BASE_URL}/v1/auth/linkedin/callback`,
   findMeetingSpot: `${API_BASE_URL}/v1/meeting-spot/find`,
   versions: `${BASE_URL}/api/versions`,
+  // Contacts endpoints
+  contacts: `${API_BASE_URL}/v1/contacts`,
+  contactFromMeeting: (meetingId: string) => `${API_BASE_URL}/v1/contacts/from-meeting/${meetingId}`,
 };
 
 export const API_HEADERS = {
