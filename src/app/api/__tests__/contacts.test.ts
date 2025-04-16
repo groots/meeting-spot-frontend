@@ -94,6 +94,7 @@ describe('Contacts API', () => {
       const contactId = '123';
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: jest.fn().mockResolvedValueOnce(mockContact)
       });
 
@@ -118,6 +119,7 @@ describe('Contacts API', () => {
       
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
+        status: 201,
         json: jest.fn().mockResolvedValueOnce(mockContact)
       });
 
@@ -138,10 +140,12 @@ describe('Contacts API', () => {
     it('should update a contact successfully', async () => {
       const contactId = '123';
       const updateData = { name: 'Updated Name' };
+      const updatedContact = {...mockContact, name: 'Updated Name'};
       
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({...mockContact, name: 'Updated Name'})
+        status: 200,
+        json: jest.fn().mockResolvedValueOnce(updatedContact)
       });
 
       const result = await updateContact(contactId, updateData, mockToken);
@@ -163,6 +167,7 @@ describe('Contacts API', () => {
       
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: jest.fn().mockResolvedValueOnce({})
       });
 
@@ -187,6 +192,7 @@ describe('Contacts API', () => {
       
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
+        status: 201,
         json: jest.fn().mockResolvedValueOnce(mockContact)
       });
 
