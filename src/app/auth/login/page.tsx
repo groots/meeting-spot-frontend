@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
@@ -13,7 +13,15 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, error } = useAuth();
+  const { login, error, user, token } = useAuth();
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (user && token) {
+      console.log('User already logged in, redirecting to dashboard');
+      window.location.href = '/create';
+    }
+  }, [user, token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +29,10 @@ export default function LoginPage() {
     
     try {
       await login(email, password, rememberMe);
-      // Use a hard redirect instead of Next.js router
+      console.log('Login successful, redirecting to dashboard');
       window.location.href = '/create';
     } catch (err) {
+      console.error('Login failed:', err);
       // Error is handled by AuthContext
     } finally {
       setIsLoading(false);

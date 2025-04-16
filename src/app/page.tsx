@@ -31,18 +31,37 @@ export default function Home() {
         </div>
         
         <div className="flex gap-4">
-          <Link 
-            href="/auth/register" 
-            className="bg-lime-500 text-black px-6 py-2 rounded-full font-medium hover:bg-lime-400 transition-all"
-          >
-            Sign up →
-          </Link>
-          <Link 
-            href="/auth/login" 
-            className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-all"
-          >
-            Log in
-          </Link>
+          {user && token ? (
+            <>
+              <Link 
+                href="/create" 
+                className="bg-lime-500 text-black px-6 py-2 rounded-full font-medium hover:bg-lime-400 transition-all"
+              >
+                Dashboard →
+              </Link>
+              <Link 
+                href="/profile" 
+                className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-all"
+              >
+                Profile
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link 
+                href="/auth/register" 
+                className="bg-lime-500 text-black px-6 py-2 rounded-full font-medium hover:bg-lime-400 transition-all"
+              >
+                Sign up →
+              </Link>
+              <Link 
+                href="/auth/login" 
+                className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-all"
+              >
+                Log in
+              </Link>
+            </>
+          )}
         </div>
       </header>
 

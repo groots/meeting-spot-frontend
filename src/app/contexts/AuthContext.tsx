@@ -56,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check if user is logged in on mount
     const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    console.log('Initial auth check - token found:', !!token);
     if (token) {
       fetchProfile(token);
     } else {
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (token: string) => {
     try {
-      console.log('Fetching profile with token:', token); // Debug log
+      console.log('Fetching profile with token:', token.substring(0, 10) + '...');
       const response = await fetch(API_ENDPOINTS.profile, {
         headers: {
           ...API_HEADERS,
@@ -75,15 +76,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json();
+        console.log('Profile fetched successfully:', userData.email);
+        
+        // Update auth state with user data
         setAuthState(prev => ({
           ...prev,
           user: userData,
           token: token,
           loading: false,
+          error: null,
         }));
-        console.log('Profile fetched, setting auth state:', { user: userData, token }); // Debug log
       } else {
-        console.log('Profile fetch failed, clearing tokens'); // Debug log
+        console.error('Profile fetch failed with status:', response.status);
+        // Clear tokens on profile fetch failure
         localStorage.removeItem(TOKEN_KEY);
         sessionStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REMEMBER_KEY);
@@ -92,10 +97,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           user: null,
           token: null,
           loading: false,
+          error: 'Session expired. Please login again.',
         }));
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
+      // Clear tokens on error
       localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REMEMBER_KEY);
@@ -104,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: null,
         token: null,
         loading: false,
+        error: 'Failed to authenticate. Please login again.',
       }));
     }
   };
