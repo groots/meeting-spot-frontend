@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: null,
         token: null,
         loading: false,
-        error: 'Failed to authenticate. Please login again.',
+        error: 'Session expired. Please login again.',
       }));
       console.log('[Auth] 🔴 Authentication failed - user is not logged in');
     }
