@@ -22,6 +22,8 @@
     "e2e:dbcheck:debug": "playwright test -g 'Debug API Endpoints' --debug",
     "e2e:api-diag": "playwright test -g 'API Diagnostics'",
     "e2e:api-diag:debug": "playwright test -g 'API Diagnostics' --debug",
+    "e2e:critical-path": "playwright test -g 'Critical User Journey'",
+    "e2e:critical-path:debug": "playwright test -g 'Critical User Journey' --debug",
     "debug:api": "node debug-tools/api-troubleshoot.js"
   },
   "lint-staged": {

@@ -114,11 +114,45 @@ jobs:
           path: ./test-results/
           retention-days: 30
   
+  critical-path-e2e-tests:
+    name: Critical Path E2E Tests
+    needs: auth-e2e-tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run critical path tests
+        run: npm run e2e:critical-path
+        env:
+          BASE_URL: ${{ secrets.E2E_TEST_URL || 'https://findameetingspot.com' }}
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      
+      - name: Upload critical path test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: critical-path-test-results
+          path: ./test-results/
+          retention-days: 30
+  
   deploy:
     name: Deploy to Cloud Run
     # Only deploy on push to main (skip for PRs)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test-and-build, basic-e2e-tests, auth-e2e-tests]
+    needs: [test-and-build, basic-e2e-tests, auth-e2e-tests, critical-path-e2e-tests]
     runs-on: ubuntu-latest
     
     steps:
