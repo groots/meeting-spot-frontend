@@ -40,9 +40,15 @@ export default function ContactSelector({
         if (fetchedContacts.length > 0) {
           setUseExistingContact(true);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error loading contacts:', err);
-        setError('Could not load contacts. You can still enter contact information manually.');
+        
+        // Check if this is a premium feature error (402 status)
+        if (err.message && err.message.includes('premium subscription')) {
+          setError('Contacts management requires a premium subscription. You can still enter contact information manually.');
+        } else {
+          setError('Could not load contacts. You can still enter contact information manually.');
+        }
       } finally {
         setLoading(false);
       }

@@ -49,6 +49,9 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
 
   if (!response.ok) {
     const error = await response.json();
+    if (response.status === 402) {
+      throw new Error(error.message || 'This feature requires a premium subscription');
+    }
     throw new Error(error.message || 'Failed to fetch contacts');
   }
 
