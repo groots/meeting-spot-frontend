@@ -139,6 +139,21 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <p className="text-center text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Sign up
+                </Link>
+              </p>
+            </div>
           </form>
 
           <SocialLogin />

@@ -55,18 +55,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if user is logged in on mount
+    console.log('[Auth] 🔍 Initializing authentication context');
     const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
-    console.log('Initial auth check - token found:', !!token);
+    console.log('[Auth] 🔑 Initial auth check - token found:', !!token);
     if (token) {
+      console.log('[Auth] 🔄 Token found, fetching user profile');
       fetchProfile(token);
     } else {
+      console.log('[Auth] ❌ No token found, user is not authenticated');
       setAuthState(prev => ({ ...prev, loading: false }));
     }
   }, []);
 
   const fetchProfile = async (token: string) => {
+    console.log('[Auth] 🔄 Starting profile fetch');
     try {
-      console.log('Fetching profile with token:', token.substring(0, 10) + '...');
+      console.log('[Auth] 📡 Fetching profile with token:', token.substring(0, 10) + '...');
       const response = await fetch(API_ENDPOINTS.profile, {
         headers: {
           ...API_HEADERS,
@@ -76,9 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json();
-        console.log('Profile fetched successfully:', userData.email);
+        console.log('[Auth] ✅ Profile fetched successfully:', userData.email);
         
         // Update auth state with user data
+        console.log('[Auth] 📝 Updating authentication state with user data');
         setAuthState(prev => ({
           ...prev,
           user: userData,
@@ -86,9 +91,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           loading: false,
           error: null,
         }));
+        console.log('[Auth] 🟢 Authentication complete - user is logged in');
       } else {
-        console.error('Profile fetch failed with status:', response.status);
+        console.error(`[Auth] ❌ Profile fetch failed with status: ${response.status}`, await response.text());
         // Clear tokens on profile fetch failure
+        console.log('[Auth] 🗑️ Clearing stored tokens due to profile fetch failure');
         localStorage.removeItem(TOKEN_KEY);
         sessionStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REMEMBER_KEY);
@@ -99,10 +106,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           loading: false,
           error: 'Session expired. Please login again.',
         }));
+        console.log('[Auth] 🔴 Authentication failed - user is not logged in');
       }
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      console.error('[Auth] 💥 Error fetching profile:', err);
       // Clear tokens on error
+      console.log('[Auth] 🗑️ Clearing stored tokens due to fetch error');
       localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REMEMBER_KEY);
@@ -113,12 +122,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading: false,
         error: 'Failed to authenticate. Please login again.',
       }));
+      console.log('[Auth] 🔴 Authentication failed - user is not logged in');
     }
   };
 
   const login = async (email: string, password: string, remember: boolean = false) => {
+    console.log('[Auth] 🔄 Starting login process');
     try {
       setAuthState(prev => ({ ...prev, error: null }));
+      console.log('[Auth] 📡 Sending login request');
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: API_HEADERS,
@@ -127,44 +139,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Login response:', data); // Debug log
+        console.log('[Auth] ✅ Login successful');
         
         const token = data.access_token;
         const storage = remember ? localStorage : sessionStorage;
+        console.log(`[Auth] 💾 Storing token in ${remember ? 'localStorage' : 'sessionStorage'}`);
         storage.setItem(TOKEN_KEY, token);
         if (remember) {
           localStorage.setItem(REMEMBER_KEY, 'true');
         }
         
+        console.log('[Auth] 📝 Updating authentication state');
         setAuthState(prev => ({
           ...prev,
           user: data.user,
           token: token,
           error: null,
         }));
-        console.log('Setting auth state:', { user: data.user, token }); // Debug log
-        console.log('Login successful, token stored in storage'); // Add more debug info
         
         // Verify token is stored correctly
         const storedToken = storage.getItem(TOKEN_KEY);
-        console.log('Verified token in storage:', storedToken ? 'Token exists' : 'Token missing');
+        console.log('[Auth] ✓ Token verification:', storedToken ? 'Token exists' : 'Token missing');
+        console.log('[Auth] 🟢 Login successful - user is now logged in');
       } else {
         const errorData = await response.json();
+        console.error(`[Auth] ❌ Login failed with status: ${response.status}`, errorData);
         throw new Error(errorData.error || 'Login failed');
       }
     } catch (err) {
-      console.error('Login error:', err); // Debug log
+      console.error('[Auth] 💥 Login error:', err);
       setAuthState(prev => ({
         ...prev,
         error: err instanceof Error ? err.message : 'An error occurred',
       }));
+      console.log('[Auth] 🔴 Login failed - user is not logged in');
       throw err;
     }
   };
 
   const register = async (email: string, password: string, name: string) => {
+    console.log('[Auth] 🔄 Starting registration process');
     try {
       setAuthState(prev => ({ ...prev, error: null }));
+      console.log('[Auth] 📡 Sending registration request');
       const response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
         headers: API_HEADERS,
@@ -172,31 +189,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (response.ok) {
+        console.log('[Auth] ✅ Registration successful, proceeding to login');
         // After registration, log the user in
         await login(email, password, true); // Remember by default for new registrations
       } else {
         const errorData = await response.json();
+        console.error(`[Auth] ❌ Registration failed with status: ${response.status}`, errorData);
         throw new Error(errorData.message || 'Registration failed');
       }
     } catch (err) {
+      console.error('[Auth] 💥 Registration error:', err);
       setAuthState(prev => ({
         ...prev,
         error: err instanceof Error ? err.message : 'An error occurred',
       }));
+      console.log('[Auth] 🔴 Registration failed - user is not logged in');
       throw err;
     }
   };
 
   const logout = () => {
+    console.log('[Auth] 🔄 Logging out user');
     localStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REMEMBER_KEY);
+    console.log('[Auth] 🗑️ Cleared all authentication tokens');
     setAuthState({
       user: null,
       token: null,
       loading: false,
       error: null,
     });
+    console.log('[Auth] 🟢 Logout successful - user is now logged out');
   };
 
   return (
