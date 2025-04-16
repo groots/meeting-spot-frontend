@@ -21,26 +21,67 @@ describe('Contacts API', () => {
   describe('getContacts', () => {
     it('should fetch contacts successfully', async () => {
       const mockResponse = [mockContact];
+      // First, mock successful response for the direct URL without trailing slash
+      const url = API_ENDPOINTS.contacts.endsWith('/') 
+        ? API_ENDPOINTS.contacts.slice(0, -1) 
+        : API_ENDPOINTS.contacts;
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: jest.fn().mockResolvedValueOnce(mockResponse)
       });
 
       const result = await getContacts(mockToken);
       
-      expect(fetch).toHaveBeenCalledWith(API_ENDPOINTS.contacts, {
+      // We now call fetch with the potentially modified URL and redirect: manual
+      expect(fetch).toHaveBeenCalledWith(url, {
         method: 'GET',
         headers: expect.objectContaining({
           'Authorization': `Bearer ${mockToken}`
-        })
+        }),
+        redirect: 'manual'
       });
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle 308 redirects', async () => {
+      const mockResponse = [mockContact];
+      // First request returns a 308 redirect
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 308,
+        type: 'opaqueredirect',
+        json: jest.fn().mockRejectedValueOnce(new Error('Cannot parse JSON from redirect'))
+      });
+
+      // Second request (with trailing slash) succeeds
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValueOnce(mockResponse)
+      });
+
+      const result = await getContacts(mockToken);
+      
+      // Check that we made two fetch calls (one original, one with trailing slash)
+      expect(fetch).toHaveBeenCalledTimes(2);
       expect(result).toEqual(mockResponse);
     });
 
     it('should handle errors', async () => {
       const errorMessage = 'Failed to fetch contacts';
+      // First request fails with an error
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
+        status: 500,
+        json: jest.fn().mockResolvedValueOnce({ message: errorMessage })
+      });
+
+      // Fallback request also fails
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
         json: jest.fn().mockResolvedValueOnce({ message: errorMessage })
       });
 
