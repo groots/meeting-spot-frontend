@@ -14,6 +14,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login, error, user, token } = useAuth();
+  const [sessionError, setSessionError] = useState<string | null>(null);
+
+  // Capture URL parameters on initial load
+  useEffect(() => {
+    // Check for session_expired parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('session_expired') === 'true') {
+      setSessionError('Session expired. Please login again.');
+    }
+  }, []);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -59,9 +69,11 @@ export default function LoginPage() {
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="text-sm text-red-700">{error}</div>
+            <input type="hidden" name="remember" value={rememberMe ? 'true' : 'false'} />
+
+            {(sessionError || error) && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{sessionError || error}</p>
               </div>
             )}
             <div className="rounded-md shadow-sm -space-y-px">
@@ -139,12 +151,6 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
-
-            {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
 
             <div className="mt-6">
               <p className="text-center text-sm text-gray-600">
