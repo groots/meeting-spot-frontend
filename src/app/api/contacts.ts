@@ -39,23 +39,82 @@ export interface CreateContactParams {
  * Get all contacts for the current user
  */
 export const getContacts = async (token: string): Promise<Contact[]> => {
-  const response = await fetch(API_ENDPOINTS.contacts, {
-    method: 'GET',
-    headers: {
-      ...API_HEADERS,
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+  // Try with direct URL without trailing slash first
+  const url = API_ENDPOINTS.contacts.endsWith('/') 
+    ? API_ENDPOINTS.contacts.slice(0, -1) 
+    : API_ENDPOINTS.contacts;
 
-  if (!response.ok) {
-    const error = await response.json();
-    if (response.status === 402) {
-      throw new Error(error.message || 'This feature requires a premium subscription');
+  try {
+    console.log(`Trying to fetch contacts from: ${url}`);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        ...API_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      // Disable redirect following to prevent CORS issues with 308 redirects
+      redirect: 'manual',
+    });
+
+    // If we got a redirect, try the URL with a trailing slash explicitly
+    if (response.status === 308 || response.type === 'opaqueredirect') {
+      console.log('Got redirect, trying with trailing slash');
+      const urlWithSlash = url.endsWith('/') ? url : `${url}/`;
+      const redirectResponse = await fetch(urlWithSlash, {
+        method: 'GET',
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!redirectResponse.ok) {
+        const error = await redirectResponse.json().catch(() => ({}));
+        if (redirectResponse.status === 402) {
+          throw new Error(error.message || 'This feature requires a premium subscription');
+        }
+        throw new Error(error.message || `Failed to fetch contacts (${redirectResponse.status})`);
+      }
+
+      return redirectResponse.json();
     }
-    throw new Error(error.message || 'Failed to fetch contacts');
-  }
 
-  return response.json();
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      if (response.status === 402) {
+        throw new Error(error.message || 'This feature requires a premium subscription');
+      }
+      throw new Error(error.message || `Failed to fetch contacts (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    
+    // If the first attempt failed with redirect handling, try the standard way as fallback
+    if ((error as Error).message.includes('redirect') || (error as Error).message.includes('manual')) {
+      console.log('Trying standard fetch as fallback');
+      const fallbackResponse = await fetch(API_ENDPOINTS.contacts, {
+        method: 'GET',
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!fallbackResponse.ok) {
+        const errorData = await fallbackResponse.json().catch(() => ({}));
+        if (fallbackResponse.status === 402) {
+          throw new Error(errorData.message || 'This feature requires a premium subscription');
+        }
+        throw new Error(errorData.message || 'Failed to fetch contacts');
+      }
+
+      return fallbackResponse.json();
+    }
+    
+    throw error;
+  }
 };
 
 /**
