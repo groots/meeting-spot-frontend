@@ -76,6 +76,16 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
         throw new Error(error.message || `Failed to fetch contacts (${redirectResponse.status})`);
       }
 
+      // Check if premium required from headers
+      const isPremiumRequired = redirectResponse.headers.get('X-Premium-Required') === 'true';
+      if (isPremiumRequired) {
+        console.log('Premium subscription required for contacts');
+        // Return empty array but set a custom property to indicate premium required
+        const result: Contact[] = [];
+        Object.defineProperty(result, 'premiumRequired', { value: true });
+        return result;
+      }
+
       return redirectResponse.json();
     }
 
@@ -85,6 +95,16 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
         throw new Error(error.message || 'This feature requires a premium subscription');
       }
       throw new Error(error.message || `Failed to fetch contacts (${response.status})`);
+    }
+
+    // Check if premium required from headers
+    const isPremiumRequired = response.headers.get('X-Premium-Required') === 'true';
+    if (isPremiumRequired) {
+      console.log('Premium subscription required for contacts');
+      // Return empty array but set a custom property to indicate premium required
+      const result: Contact[] = [];
+      Object.defineProperty(result, 'premiumRequired', { value: true });
+      return result;
     }
 
     return response.json();
@@ -108,6 +128,16 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
           throw new Error(errorData.message || 'This feature requires a premium subscription');
         }
         throw new Error(errorData.message || 'Failed to fetch contacts');
+      }
+
+      // Check if premium required from headers
+      const isPremiumRequired = fallbackResponse.headers.get('X-Premium-Required') === 'true';
+      if (isPremiumRequired) {
+        console.log('Premium subscription required for contacts');
+        // Return empty array but set a custom property to indicate premium required
+        const result: Contact[] = [];
+        Object.defineProperty(result, 'premiumRequired', { value: true });
+        return result;
       }
 
       return fallbackResponse.json();
