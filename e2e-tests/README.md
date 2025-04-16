@@ -58,6 +58,22 @@ For testing against different environments:
 BASE_URL=https://staging.findameetingspot.com npm run e2e
 ```
 
+## Special Test Suites
+
+### Critical Path Tests
+
+We have dedicated tests that validate the entire user journey from registration to viewing meeting results.
+
+**Documentation:** See [CRITICAL-PATH-TESTS.md](./CRITICAL-PATH-TESTS.md) for detailed information.
+
+```bash
+# Run critical path tests
+npm run e2e:critical-path
+
+# Run with UI for debugging
+npm run e2e:critical-path:debug
+```
+
 ## CI/CD Integration
 
 These tests automatically run on GitHub Actions on pull requests and pushes to main branch.
