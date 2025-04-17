@@ -181,7 +181,7 @@ async function login(page: Page, email: string, password: string) {
   await page.getByLabel(/password/i).fill(password);
   
   // Submit the form
-  const loginButton = page.getByRole('button', { name: /sign in|log in|login/i });
+  const loginButton = page.getByRole('button', { name: 'Sign in', exact: true }).first();
   await loginButton.click();
   
   // Wait for login to complete
