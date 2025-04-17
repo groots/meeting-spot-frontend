@@ -1,0 +1,19 @@
+{
+  "output": "../CHANGELOG.md",
+  "template": "keepachangelog",
+  "unreleased": true,
+  "commitLimit": false,
+  "breakingPattern": "BREAKING CHANGE:",
+  "issuePattern": "#(\\d+)",
+  "issueUrl": "https://github.com/yourusername/find_a_meeting_spot/issues/{id}",
+  "replaceText": {
+    "^feat": "### Added",
+    "^fix": "### Fixed",
+    "^docs": "### Documentation",
+    "^perf": "### Performance",
+    "^refactor": "### Changed",
+    "^style": "### Changed",
+    "^test": "### Testing",
+    "^chore": "### Maintenance"
+  }
+} 
