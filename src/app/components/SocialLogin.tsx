@@ -93,27 +93,39 @@ export default function SocialLogin() {
   };
 
   const handleFacebookLogin = () => {
-    window.FB?.login(async (response) => {
+    window.FB?.login(function(response) {
       if (response.authResponse) {
-        try {
-          const res = await fetch(API_ENDPOINTS.facebookCallback, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-              access_token: response.authResponse.accessToken 
-            }),
-          });
-
+        // Get the access token
+        const accessToken = response.authResponse.accessToken;
+        
+        // Make the API call
+        fetch(API_ENDPOINTS.facebookCallback, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            access_token: accessToken 
+          }),
+        })
+        .then(res => {
           if (res.ok) {
             window.location.href = '/create';
           } else {
             console.error('Facebook authentication failed');
+            return res.json();
           }
-        } catch (error) {
+        })
+        .then(data => {
+          if (data && data.message) {
+            console.error('Facebook error:', data.message);
+          }
+        })
+        .catch(error => {
           console.error('Error during Facebook authentication:', error);
-        }
+        });
+      } else {
+        console.log('User cancelled login or did not fully authorize.');
       }
     }, { scope: 'email,public_profile' });
   };
