@@ -6,7 +6,7 @@ import { API_ENDPOINTS } from './config';
 export default function TestLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -44,8 +44,8 @@ export default function TestLogin() {
       try {
         const regularData = await regularResponse.json();
         console.log('Regular login response:', regularData);
-        setResult(prev => ({ 
-          ...prev, 
+        setResult((prev: any) => ({ 
+          ...(prev || {}), 
           regular_login: {
             status: regularResponse.status,
             ok: regularResponse.ok,
@@ -54,15 +54,18 @@ export default function TestLogin() {
         }));
       } catch (err) {
         console.error('Error parsing regular login response:', err);
-        setResult(prev => ({ 
-          ...prev, 
-          regular_login: {
-            status: regularResponse.status,
-            ok: regularResponse.ok,
-            error: 'Failed to parse response',
-            text: await regularResponse.text()
-          }
-        }));
+        setResult(async (prev: any) => { 
+          const responseText = await regularResponse.text();
+          return {
+            ...(prev || {}), 
+            regular_login: {
+              status: regularResponse.status,
+              ok: regularResponse.ok,
+              error: 'Failed to parse response',
+              text: responseText
+            }
+          };
+        });
       }
     } catch (err) {
       console.error('Error testing login:', err);
