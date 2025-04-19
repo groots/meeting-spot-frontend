@@ -21,6 +21,9 @@ export default function Footer() {
             <Link href="/terms-of-service" className="text-sm hover:text-white transition">
               Terms of Service
             </Link>
+            <Link href="/data-deletion" className="text-sm hover:text-white transition">
+              Data Deletion
+            </Link>
             <Link href="/contact" className="text-sm hover:text-white transition">
               Contact Us
             </Link>

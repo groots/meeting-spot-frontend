@@ -19,7 +19,7 @@ export default function Home() {
     }
   };
 
-  return (
+    return (
     <>
       {/* Header/Nav */}
       <header className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
@@ -62,7 +62,7 @@ export default function Home() {
               </Link>
             </>
           )}
-        </div>
+      </div>
       </header>
 
       {/* Hero Section */}
@@ -88,7 +88,7 @@ export default function Home() {
               </button>
             </div>
           </div>
-          
+
           {/* Right Column - Visual */}
           <div className="relative">
             <div className="relative z-10 transform translate-y-8 float-animation">
