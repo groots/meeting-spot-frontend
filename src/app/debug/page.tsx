@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { API_ENDPOINTS } from '@/app/config';
+import TestLogin from '../test-login';
 
 interface DbStatus {
   status: string;
@@ -50,7 +51,8 @@ export default function DebugPage() {
   
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">API Configuration Debug</h1>
+      <h1 className="text-3xl font-bold mb-8">Debug Tools</h1>
+      <TestLogin />
       
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h2 className="text-xl font-semibold mb-2">Environment Variables</h2>
