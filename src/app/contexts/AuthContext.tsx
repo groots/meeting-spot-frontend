@@ -80,7 +80,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json();
-        console.log('[Auth] ✅ Profile fetched successfully:', userData.email);
+        console.log('[Auth] ✅ Profile fetched successfully:', userData.email || 'User (email unavailable)');
+        
+        // Make sure user has email property, add fallback if missing
+        if (!userData.email) {
+          console.log('[Auth] ⚠️ User email missing in profile data, adding placeholder');
+          userData.email = 'User';
+        }
         
         // Update auth state with user data
         console.log('[Auth] 📝 Updating authentication state with user data');

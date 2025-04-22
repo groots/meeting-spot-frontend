@@ -42,16 +42,35 @@ export default function LocationButton({
           const data = await response.json();
           
           if (data.status === 'OK' && data.results.length > 0) {
-            const address = data.results[0].formatted_address;
+            // Find the most appropriate address result
+            let address = data.results[0].formatted_address;
+            
+            // Look for a result that contains a street address if available
+            for (const result of data.results) {
+              const addressTypes = result.types || [];
+              if (
+                addressTypes.includes('street_address') || 
+                addressTypes.includes('route') ||
+                addressTypes.includes('premise')
+              ) {
+                address = result.formatted_address;
+                break;
+              }
+            }
+            
+            console.log(`Converted coordinates (${latitude}, ${longitude}) to address: ${address}`);
             onLocationSuccess(address, latitude, longitude);
           } else {
-            // If geocoding fails, just use the coordinates
-            onLocationSuccess(`${latitude}, ${longitude}`, latitude, longitude);
+            // If geocoding fails, use coordinates but format them nicely
+            console.warn(`Geocoding failed with status: ${data.status}`, data);
+            const formattedCoords = `Location (${latitude.toFixed(6)}, ${longitude.toFixed(6)})`;
+            onLocationSuccess(formattedCoords, latitude, longitude);
           }
         } catch (error) {
           console.error('Error getting address:', error);
-          // If geocoding fails, just use the coordinates
-          onLocationSuccess(`${latitude}, ${longitude}`, latitude, longitude);
+          // If geocoding fails, use coordinates but format them nicely
+          const formattedCoords = `Location (${latitude.toFixed(6)}, ${longitude.toFixed(6)})`;
+          onLocationSuccess(formattedCoords, latitude, longitude);
         } finally {
           setIsGettingLocation(false);
         }
