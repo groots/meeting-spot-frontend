@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LocationButton from './LocationButton';
 import ContactSelector from './ContactSelector';
+import LocationTypeSelector from './LocationTypeSelector';
+import { geocodeAddress } from '@/utils/geocoding';
 
 // Define categories matching backend
 export const PLACE_CATEGORIES = {
@@ -55,6 +57,7 @@ export interface CreateRequestFormProps {
 export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) {
   // Form state
   const [address, setAddress] = useState('');
+  const [addressInput, setAddressInput] = useState('');
   const [category, setCategory] = useState(Object.keys(PLACE_CATEGORIES)[0]);
   const [subcategory, setSubcategory] = useState(FOOD_SUBCATEGORIES[0]);
   const [contactMethod, setContactMethod] = useState('EMAIL');
@@ -62,6 +65,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [coords, setCoords] = useState<{ lat?: number; lon?: number }>({});
+  const [geocodingInProgress, setGeocodingInProgress] = useState(false);
   
   // Step state
   const [currentStep, setCurrentStep] = useState(1);
@@ -103,6 +107,14 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
       return;
     }
 
+    // Ensure coordinates are present
+    if (!coords.lat || !coords.lon) {
+      setError('Location coordinates are missing. Please use the "Get Current Location" button or enter a valid address.');
+      setIsLoading(false);
+      setCurrentStep(1);
+      return;
+    }
+
     try {
       const locationType = category === 'Food & Drink' ? subcategory : category;
       
@@ -111,10 +123,8 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         location_type: locationType,
         contact_method: contactMethod,
         contact_info: contactInfo,
-        ...(coords.lat && coords.lon ? { 
-          address_a_lat: coords.lat, 
-          address_a_lon: coords.lon 
-        } : {})
+        address_a_lat: coords.lat, 
+        address_a_lon: coords.lon
       });
     } catch (err: any) {
       setError(err?.message || 'Failed to create meeting request');
@@ -125,6 +135,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
 
   const handleLocationSuccess = (address: string, lat: number, lng: number) => {
     setAddress(address);
+    setAddressInput(address);
     setCoords({ lat, lon: lng });
   };
 
@@ -137,43 +148,50 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
     setContactMethod(method);
   };
 
+  // Debounced geocoding when address changes
+  useEffect(() => {
+    // Skip empty addresses and avoid geocoding when already in progress
+    if (!addressInput || geocodingInProgress) return;
+    
+    // Set a timeout to avoid too many API calls
+    const timeoutId = setTimeout(async () => {
+      setGeocodingInProgress(true);
+      try {
+        const result = await geocodeAddress(addressInput);
+        if (result) {
+          setAddress(addressInput);
+          setCoords({ lat: result.lat, lon: result.lng });
+          setError(''); // Clear any previous error
+        }
+      } catch (err) {
+        console.error("Geocoding error:", err);
+      } finally {
+        setGeocodingInProgress(false);
+      }
+    }, 1000); // 1 second debounce
+    
+    return () => clearTimeout(timeoutId);
+  }, [addressInput]);
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddressInput(e.target.value);
+  };
+
   // Form progress bar
   const ProgressBar = () => (
     <div className="mb-8">
-      <div className="flex mb-2">
-        {[1, 2, 3].map((step) => (
-          <div key={step} className="flex items-center">
-            <div 
-              className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium border-2 ${
-                currentStep === step 
-                  ? 'bg-lime-500 text-white border-lime-500' 
-                  : currentStep > step 
-                    ? 'bg-lime-100 text-lime-700 border-lime-200' 
-                    : 'bg-gray-100 text-gray-500 border-gray-300'
-              }`}
-            >
-              {step}
-            </div>
-            {step < totalSteps && (
-              <div 
-                className={`h-1 w-12 sm:w-20 md:w-32 ${
-                  currentStep > step ? 'bg-lime-500' : 'bg-gray-300'
-                }`}
-              />
-            )}
-          </div>
-        ))}
+      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-blue-500 to-teal-500 transition-all duration-300 ease-in-out"
+          style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+        />
       </div>
-      <div className="flex justify-between text-sm text-gray-600">
-        <div className="w-16">Location</div>
-        <div className="w-16 text-center">Preferences</div>
-        <div className="w-16 text-right">Contact</div>
-      </div>
+      <p className="text-sm text-gray-500 mt-2 text-right">{`Step ${currentStep} of ${totalSteps}`}</p>
     </div>
   );
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className="w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
       <h1 className="text-2xl font-bold mb-2 text-center">Create Meeting Request</h1>
       <p className="text-gray-600 text-center mb-6">Find the perfect middle ground between you and a contact</p>
       
@@ -187,20 +205,27 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
             <p className="text-gray-600 mb-4">Enter your starting location</p>
             
             <div className="space-y-2">
-              <Label htmlFor="address">Your Address</Label>
+              <Label htmlFor="address" className="text-gray-700">Your Address</Label>
               <div className="space-y-2">
                 <Input
                   id="address"
                   name="address"
                   placeholder="Enter your address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  value={addressInput}
+                  onChange={handleAddressChange}
                   disabled={isLoading}
+                  className="border-gray-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
                 />
+                {geocodingInProgress && (
+                  <p className="text-xs text-blue-600">Looking up location...</p>
+                )}
+                {coords.lat && coords.lon && (
+                  <p className="text-xs text-green-600">✓ Coordinates found</p>
+                )}
                 <LocationButton
                   onLocationSuccess={handleLocationSuccess}
                   onLocationError={handleLocationError}
-                  isLoading={isLoading}
+                  isLoading={isLoading || geocodingInProgress}
                 />
               </div>
             </div>
@@ -210,7 +235,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={nextStep}
                 disabled={!canAdvanceStep1}
-                className="bg-lime-500 hover:bg-lime-600"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:shadow-none"
               >
                 Next Step
               </Button>
@@ -224,30 +249,20 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
             <h2 className="text-xl font-semibold">Step 2: Meeting Preferences</h2>
             <p className="text-gray-600 mb-4">Select what type of place you'd like to meet at</p>
             
-            <div className="space-y-2">
-              <Label htmlFor="category">Place Category</Label>
-              <select
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                disabled={isLoading}
-              >
-                {Object.entries(PLACE_CATEGORIES).map(([key, description]) => (
-                  <option key={key} value={key}>{key}</option>
-                ))}
-              </select>
-              <p className="text-sm text-gray-500 mt-1">{PLACE_CATEGORIES[category as keyof typeof PLACE_CATEGORIES]}</p>
-            </div>
+            <LocationTypeSelector
+              selectedType={category}
+              onChange={setCategory}
+              disabled={isLoading}
+            />
 
             {category === 'Food & Drink' && (
               <div className="space-y-2 mt-4">
-                <Label htmlFor="subcategory">Specific Food Preference</Label>
+                <Label htmlFor="subcategory" className="text-gray-700">Specific Food Preference</Label>
                 <select
                   id="subcategory"
                   value={subcategory}
                   onChange={(e) => setSubcategory(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                   disabled={isLoading}
                 >
                   {FOOD_SUBCATEGORIES.map((subcat) => (
@@ -262,7 +277,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={prevStep}
                 variant="outline"
-                className="border-lime-500 text-lime-600"
+                className="border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors"
               >
                 Back
               </Button>
@@ -270,7 +285,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={nextStep}
                 disabled={!canAdvanceStep2}
-                className="bg-lime-500 hover:bg-lime-600"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:shadow-none"
               >
                 Next Step
               </Button>
@@ -295,14 +310,14 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={prevStep}
                 variant="outline"
-                className="border-lime-500 text-lime-600"
+                className="border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors"
               >
                 Back
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !canAdvanceStep3}
-                className="bg-lime-500 hover:bg-lime-600"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:shadow-none"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
