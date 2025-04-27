@@ -7,11 +7,20 @@ import ProtectedRoute from '@/app/components/ProtectedRoute';
 import { API_ENDPOINTS } from '@/app/config';
 import { formatDistanceToNow } from 'date-fns';
 
+// Define the MeetingRequest interface
+interface MeetingRequest {
+  id: string;
+  status: string;
+  user_b_contact: string;
+  location_type: string;
+  created_at: string;
+}
+
 export default function DashboardPage() {
   const { user, token } = useAuth();
-  const [meetingRequests, setMeetingRequests] = useState([]);
+  const [meetingRequests, setMeetingRequests] = useState<MeetingRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
