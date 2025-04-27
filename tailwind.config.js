@@ -10,21 +10,43 @@ module.exports = {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
-        primary: 'var(--primary)',
-        'primary-hover': 'var(--primary-hover)',
-        secondary: 'var(--secondary)',
-        accent: 'var(--accent)',
+        primary: {
+          DEFAULT: 'var(--primary)',
+          hover: 'var(--primary-hover)',
+        },
+        secondary: {
+          DEFAULT: 'var(--secondary)',
+          hover: 'var(--secondary-hover)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+        },
         error: 'var(--error)',
         success: 'var(--success)',
-        // Cash App inspired colors
-        lime: {
-          300: '#5aff8f',
-          400: '#2de26d',
-          500: '#1ed760', // Primary green
+        warning: 'var(--warning)',
+        info: 'var(--info)',
+        neutral: {
+          100: 'var(--neutral-100)',
+          200: 'var(--neutral-200)',
+          300: 'var(--neutral-300)',
+          400: 'var(--neutral-400)',
+          500: 'var(--neutral-500)',
+          600: 'var(--neutral-600)',
+          700: 'var(--neutral-700)',
+          800: 'var(--neutral-800)',
+          900: 'var(--neutral-900)',
         },
+        // Our professional yet fun palette
         purple: {
-          400: '#b777e0',
-          500: '#8e24aa',
+          light: '#b87ebb', // Secondary color (orchid)
+          DEFAULT: '#5a55a6', // Primary color
+          dark: '#4a4591',    // Primary hover
+        },
+        green: {
+          light: '#71e9a2',
+          DEFAULT: '#02de7a', // Accent color
+          dark: '#00c46c',    // Accent hover
         }
       },
       backgroundImage: {

@@ -30,6 +30,7 @@ interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   loading: boolean;
   error: string | null;
 }
@@ -43,12 +44,14 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = 'auth_token';
+const REFRESH_TOKEN_KEY = 'auth_refresh_token';
 const REMEMBER_KEY = 'auth_remember';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     token: null,
+    refreshToken: null,
     loading: true,
     error: null,
   });
@@ -57,15 +60,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is logged in on mount
     console.log('[Auth] 🔍 Initializing authentication context');
     const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     console.log('[Auth] 🔑 Initial auth check - token found:', !!token);
+    
     if (token) {
       console.log('[Auth] 🔄 Token found, fetching user profile');
       fetchProfile(token);
+    } else if (refreshToken) {
+      console.log('[Auth] 🔄 Access token not found but refresh token exists, attempting refresh');
+      refreshAccessToken(refreshToken);
     } else {
-      console.log('[Auth] ❌ No token found, user is not authenticated');
+      console.log('[Auth] ❌ No tokens found, user is not authenticated');
       setAuthState(prev => ({ ...prev, loading: false }));
     }
   }, []);
+
+  const refreshAccessToken = async (refreshToken: string) => {
+    console.log('[Auth] 🔄 Attempting to refresh access token');
+    try {
+      const response = await fetch(API_ENDPOINTS.refresh, {
+        method: 'POST',
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${refreshToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Auth] ✅ Token refresh successful');
+        const newToken = data.access_token;
+        
+        // Store the new access token in localStorage since we're using a refresh token
+        localStorage.setItem(TOKEN_KEY, newToken);
+        
+        // Fetch the user profile with the new token
+        fetchProfile(newToken);
+      } else {
+        console.error('[Auth] ❌ Token refresh failed, clearing auth state');
+        clearAuthStorage();
+        setAuthState({
+          user: null,
+          token: null,
+          refreshToken: null,
+          loading: false,
+          error: 'Session expired. Please login again.',
+        });
+      }
+    } catch (err) {
+      console.error('[Auth] 💥 Error refreshing token:', err);
+      clearAuthStorage();
+      setAuthState({
+        user: null,
+        token: null,
+        refreshToken: null,
+        loading: false,
+        error: 'Session expired. Please login again.',
+      });
+    }
+  };
 
   const fetchProfile = async (token: string) => {
     console.log('[Auth] 🔄 Starting profile fetch');
@@ -88,48 +141,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           userData.email = 'User';
         }
         
+        // Get refresh token from storage
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        
         // Update auth state with user data
         console.log('[Auth] 📝 Updating authentication state with user data');
         setAuthState(prev => ({
           ...prev,
           user: userData,
           token: token,
+          refreshToken: refreshToken,
           loading: false,
           error: null,
         }));
         console.log('[Auth] 🟢 Authentication complete - user is logged in');
       } else {
         console.error(`[Auth] ❌ Profile fetch failed with status: ${response.status}`, await response.text());
-        // Clear tokens on profile fetch failure
-        console.log('[Auth] 🗑️ Clearing stored tokens due to profile fetch failure');
-        localStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(REMEMBER_KEY);
+        // Try to refresh token if we have a refresh token
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        if (refreshToken) {
+          console.log('[Auth] 🔄 Profile fetch failed but refresh token exists, attempting refresh');
+          refreshAccessToken(refreshToken);
+        } else {
+          console.log('[Auth] 🗑️ Clearing stored tokens due to profile fetch failure');
+          clearAuthStorage();
+          setAuthState(prev => ({
+            ...prev,
+            user: null,
+            token: null,
+            refreshToken: null,
+            loading: false,
+            error: 'Session expired. Please login again.',
+          }));
+          console.log('[Auth] 🔴 Authentication failed - user is not logged in');
+        }
+      }
+    } catch (err) {
+      console.error('[Auth] 💥 Error fetching profile:', err);
+      // Try to refresh token if we have a refresh token
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (refreshToken) {
+        console.log('[Auth] 🔄 Profile fetch failed but refresh token exists, attempting refresh');
+        refreshAccessToken(refreshToken);
+      } else {
+        console.log('[Auth] 🗑️ Clearing stored tokens due to fetch error');
+        clearAuthStorage();
         setAuthState(prev => ({
           ...prev,
           user: null,
           token: null,
+          refreshToken: null,
           loading: false,
           error: 'Session expired. Please login again.',
         }));
         console.log('[Auth] 🔴 Authentication failed - user is not logged in');
       }
-    } catch (err) {
-      console.error('[Auth] 💥 Error fetching profile:', err);
-      // Clear tokens on error
-      console.log('[Auth] 🗑️ Clearing stored tokens due to fetch error');
-      localStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(REMEMBER_KEY);
-      setAuthState(prev => ({
-        ...prev,
-        user: null,
-        token: null,
-        loading: false,
-        error: 'Session expired. Please login again.',
-      }));
-      console.log('[Auth] 🔴 Authentication failed - user is not logged in');
     }
+  };
+
+  const clearAuthStorage = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(REMEMBER_KEY);
   };
 
   const login = async (email: string, password: string, remember: boolean = false) => {
@@ -140,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: API_HEADERS,
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, remember_me: remember }),
       });
 
       if (response.ok) {
@@ -148,9 +222,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[Auth] ✅ Login successful');
         
         const token = data.access_token;
+        const refreshToken = data.refresh_token;
+        
+        // Store access token in appropriate storage
         const storage = remember ? localStorage : sessionStorage;
-        console.log(`[Auth] 💾 Storing token in ${remember ? 'localStorage' : 'sessionStorage'}`);
         storage.setItem(TOKEN_KEY, token);
+        
+        // Store refresh token in localStorage if provided (for "remember me")
+        if (refreshToken) {
+          console.log('[Auth] 💾 Storing refresh token in localStorage');
+          localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+        }
+        
         if (remember) {
           localStorage.setItem(REMEMBER_KEY, 'true');
         }
@@ -160,6 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           user: data.user,
           token: token,
+          refreshToken: refreshToken || null,
           error: null,
         }));
         
@@ -216,13 +300,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     console.log('[Auth] 🔄 Logging out user');
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REMEMBER_KEY);
+    clearAuthStorage();
     console.log('[Auth] 🗑️ Cleared all authentication tokens');
     setAuthState({
       user: null,
       token: null,
+      refreshToken: null,
       loading: false,
       error: null,
     });

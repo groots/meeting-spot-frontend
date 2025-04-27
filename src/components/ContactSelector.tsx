@@ -1,217 +1,296 @@
 import { useState, useEffect } from 'react';
 import { Contact, getContacts } from '@/app/api/contacts';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 
 // Simple inline spinner component
-const Spinner = () => (
+const SimpleSpinner = () => (
   <div className="flex justify-center p-4">
     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
   </div>
 );
 
-interface ContactSelectorProps {
-  onChange: (contactInfo: string, contactType: string) => void;
-  defaultContactType?: string;
+type ContactSelectorProps = {
   defaultContactInfo?: string;
-}
+  defaultContactType?: string;
+  onChange: (info: string, type: string) => void;
+  error?: string;
+  saveContact?: boolean;
+};
 
-export default function ContactSelector({ 
-  onChange, 
-  defaultContactType = 'EMAIL',
-  defaultContactInfo = ''
+export default function ContactSelector({
+  defaultContactInfo = '',
+  defaultContactType = 'email',
+  onChange,
+  error,
+  saveContact = false,
 }: ContactSelectorProps) {
   const { token, user } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
   const [useExistingContact, setUseExistingContact] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState<string>('');
   const [contactMethod, setContactMethod] = useState(defaultContactType);
   const [contactInfo, setContactInfo] = useState(defaultContactInfo);
-
-  // Check if user is authenticated
-  const isAuthenticated = !!user && !!token;
-
-  // Load contacts if user is authenticated
+  const [contactType, setContactType] = useState<"email" | "phone">(
+    (defaultContactType as "email" | "phone") === "phone" ? "phone" : "email"
+  );
+  const [contactName, setContactName] = useState('');
+  const [shouldSaveContact, setShouldSaveContact] = useState(false);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  
+  // Initialize contactMethod and contactType once on component mount
   useEffect(() => {
-    const loadContacts = async () => {
-      if (!isAuthenticated || !token) return;
-      
-      try {
-        setLoading(true);
-        const fetchedContacts = await getContacts(token);
-        setContacts(fetchedContacts);
-        
-        // If contacts exist, default to using existing contacts
-        if (fetchedContacts.length > 0) {
-          setUseExistingContact(true);
-        }
-      } catch (err: any) {
-        console.error('Error loading contacts:', err);
-        
-        // Check if this is a premium feature error (402 status)
-        if (err.message && err.message.includes('premium subscription')) {
-          setError('Contacts management requires a premium subscription. You can still enter contact information manually.');
-        } else {
-          setError('Could not load contacts. You can still enter contact information manually.');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadContacts();
-  }, [token, isAuthenticated]);
-
-  // Handle contact selection
-  const handleContactSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const contactId = e.target.value;
-    setSelectedContactId(contactId);
+    setContactMethod(defaultContactType);
+    setContactType((defaultContactType as "email" | "phone") === "phone" ? "phone" : "email");
     
-    if (contactId) {
-      const selectedContact = contacts.find(c => c.id === contactId);
-      if (selectedContact) {
-        // Determine which contact method to use based on available data
-        if (selectedContact.email) {
-          setContactMethod('EMAIL');
-          setContactInfo(selectedContact.email);
-          onChange(selectedContact.email, 'EMAIL');
-        } else if (selectedContact.phone) {
-          setContactMethod('PHONE');
-          setContactInfo(selectedContact.phone);
-          onChange(selectedContact.phone, 'PHONE');
-        }
-      }
-    }
-  };
-
-  // Handle manual contact info changes
-  const handleContactInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContactInfo(e.target.value);
-    onChange(e.target.value, contactMethod);
-  };
-
-  // Handle contact method changes
-  const handleContactMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setContactMethod(e.target.value);
-    onChange(contactInfo, e.target.value);
-  };
-
-  // Toggle between existing contact and manual entry
-  const handleToggleContactMode = (useExisting: boolean) => {
-    setUseExistingContact(useExisting);
-    
-    // Reset values when switching modes
-    if (useExisting) {
-      if (selectedContactId) {
-        const selectedContact = contacts.find(c => c.id === selectedContactId);
-        if (selectedContact) {
-          if (selectedContact.email) {
-            setContactMethod('EMAIL');
-            setContactInfo(selectedContact.email);
-            onChange(selectedContact.email, 'EMAIL');
-          } else if (selectedContact.phone) {
-            setContactMethod('PHONE');
-            setContactInfo(selectedContact.phone);
-            onChange(selectedContact.phone, 'PHONE');
-          }
-        }
-      }
-    } else {
-      setContactInfo(defaultContactInfo);
-      setContactMethod(defaultContactType);
+    // Call onChange with initial values if defaultContactInfo is provided
+    if (defaultContactInfo) {
       onChange(defaultContactInfo, defaultContactType);
     }
+  }, []);
+  
+  // Handle contact type changes
+  const handleContactTypeChange = (newType: "email" | "phone") => {
+    setContactType(newType);
+    setContactMethod(newType);
+    onChange(contactInfo, newType);
   };
+  
+  // Handle contact info changes
+  const handleContactInfoChange = (newInfo: string) => {
+    setContactInfo(newInfo);
+    onChange(newInfo, contactType);
+  };
+  
+  // Initialize useExistingContact based on contacts outside the effect
+  useEffect(() => {
+    if (Array.isArray(contacts) && contacts.length > 0 && defaultContactInfo) {
+      // Find default contact after contacts are loaded
+      const foundContact = contacts.find(
+        (c) => 
+          (contactType === 'email' && c.email === defaultContactInfo) || 
+          (contactType === 'phone' && c.phone === defaultContactInfo)
+      );
+      if (foundContact) {
+        setUseExistingContact(true);
+      }
+    }
+  }, [contacts, defaultContactInfo, contactType]);
+
+  useEffect(() => {
+    // Only load contacts if the user is logged in
+    if (token && user?.id) {
+      setLoadingContacts(true);
+      getContacts(token)
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setContacts(data);
+          } else {
+            console.error("Contacts data is not an array:", data);
+            setContacts([]);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load contacts:", err);
+          setLoadingError("Failed to load contacts");
+          setContacts([]); // Ensure contacts is always an array
+        })
+        .finally(() => {
+          setLoadingContacts(false);
+        });
+    } else {
+      // If not logged in, ensure contacts is set to empty array
+      setContacts([]);
+    }
+  }, [token, user?.id]);
+
+  // Extend the Contact type to include the properties we need
+  interface EnhancedContact extends Contact {
+    type: "email" | "phone";
+  }
+
+  // Safe lookup for defaultContact - ensure contacts is an array first
+  const defaultContact = Array.isArray(contacts) ? contacts.find(
+    (c) => 
+      (contactType === 'email' && c.email === defaultContactInfo) || 
+      (contactType === 'phone' && c.phone === defaultContactInfo)
+  ) : undefined;
 
   if (loading) {
-    return <Spinner />;
+    return <SimpleSpinner />;
   }
 
   return (
     <div className="space-y-4">
-      {isAuthenticated && contacts.length > 0 && (
-        <div className="flex space-x-4">
-          <button
-            type="button"
-            onClick={() => handleToggleContactMode(true)}
-            className={`px-3 py-2 text-sm rounded-md ${
-              useExistingContact 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Use Existing Contact
-          </button>
-          <button
-            type="button"
-            onClick={() => handleToggleContactMode(false)}
-            className={`px-3 py-2 text-sm rounded-md ${
-              !useExistingContact 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Enter New Contact
-          </button>
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <div className="flex gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="radio"
+                id="existing"
+                name="contactMode"
+                value="existing"
+                checked={useExistingContact}
+                onChange={() => setUseExistingContact(true)}
+                className="border-gray-300 text-blue-500 focus:ring-blue-500"
+              />
+              <Label htmlFor="existing" className="text-gray-700 font-medium cursor-pointer">
+                Use existing contact
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="radio"
+                id="new"
+                name="contactMode"
+                value="new"
+                checked={!useExistingContact}
+                onChange={() => setUseExistingContact(false)}
+                className="border-gray-300 text-blue-500 focus:ring-blue-500"
+              />
+              <Label htmlFor="new" className="text-gray-700 font-medium cursor-pointer">
+                Enter new contact
+              </Label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {useExistingContact ? (
+        <div>
+          {Array.isArray(contacts) && contacts.length > 0 ? (
+            <select
+              onChange={(e) => {
+                if (!Array.isArray(contacts)) return;
+                const contact = contacts.find((c) => c.id === e.target.value) as EnhancedContact | undefined;
+                if (contact) {
+                  onChange(contact.email || contact.phone || "", contact.email ? "email" : "phone");
+                }
+              }}
+              defaultValue=""
+              className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
+            >
+              <option value="" disabled>Select a contact</option>
+              {contacts.map((contact) => {
+                // Determine contact type based on whether email or phone is present
+                const contactType = contact.email ? "email" : "phone";
+                return (
+                  <option key={contact.id} value={contact.id}>
+                    {contact.name || (contactType === "email" ? contact.email : contact.phone)} 
+                    {contactType === "email" ? " (Email)" : " (Phone)"}
+                  </option>
+                );
+              })}
+            </select>
+          ) : (
+            <div className="text-sm text-gray-500 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              {loadingContacts ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-500 mr-2" />
+                  <span>Loading your contacts...</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-2 space-y-2">
+                  <span>You don't have any saved contacts yet.</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setUseExistingContact(false)}
+                    className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                  >
+                    Enter a new contact instead
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="contactType" className="text-gray-600 text-sm">
+                Contact Type
+              </Label>
+              <select
+                id="contactType"
+                value={contactType}
+                onChange={(e) => {
+                  handleContactTypeChange(e.target.value as "email" | "phone");
+                }}
+                className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
+              >
+                <option value="email">Email</option>
+                <option value="phone">Phone</option>
+              </select>
+            </div>
+
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="contactInfo" className="text-gray-600 text-sm">
+                {contactType === "email" ? "Email Address" : "Phone Number"}
+              </Label>
+              <Input
+                id="contactInfo"
+                type={contactType === "email" ? "email" : "tel"}
+                placeholder={
+                  contactType === "email" ? "email@example.com" : "+1 (555) 555-5555"
+                }
+                value={contactInfo}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleContactInfoChange(e.target.value);
+                }}
+                className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="contactName" className="text-gray-600 text-sm">
+              Contact Name (Optional)
+            </Label>
+            <Input
+              id="contactName"
+              type="text"
+              placeholder="John Doe"
+              value={contactName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContactName(e.target.value)}
+              className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
+            />
+          </div>
+
+          {saveContact && (
+            <div className="flex items-center mt-3">
+              <input
+                type="checkbox"
+                id="saveContact"
+                checked={shouldSaveContact}
+                onChange={(e) => setShouldSaveContact(e.target.checked)}
+                className="border-gray-300 text-blue-500 focus:ring-blue-500 mr-2"
+              />
+              <Label htmlFor="saveContact" className="text-gray-600 text-sm cursor-pointer">
+                Save this contact for future use
+              </Label>
+            </div>
+          )}
         </div>
       )}
 
       {error && (
-        <div className="text-sm text-red-600">{error}</div>
+        <div className="mt-2 text-red-500 text-sm bg-red-50 p-2 rounded-md border border-red-100">
+          {error}
+        </div>
       )}
 
-      {isAuthenticated && useExistingContact && contacts.length > 0 ? (
-        <div className="space-y-2">
-          <label htmlFor="contactSelect" className="block text-sm font-medium text-gray-700">
-            Select Contact
-          </label>
-          <select
-            id="contactSelect"
-            value={selectedContactId}
-            onChange={handleContactSelect}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          >
-            <option value="">Select a contact</option>
-            {contacts.map(contact => (
-              <option key={contact.id} value={contact.id}>
-                {contact.name} {contact.email ? `(${contact.email})` : contact.phone ? `(${contact.phone})` : ''}
-              </option>
-            ))}
-          </select>
+      {loadingError && (
+        <div className="mt-2 text-red-500 text-sm bg-red-50 p-2 rounded-md border border-red-100">
+          {loadingError}
         </div>
-      ) : (
-        <>
-          <div className="space-y-2">
-            <label htmlFor="contactMethod" className="block text-sm font-medium text-gray-700">
-              Contact Method
-            </label>
-            <select
-              id="contactMethod"
-              value={contactMethod}
-              onChange={handleContactMethodChange}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            >
-              <option value="EMAIL">Email</option>
-              <option value="PHONE">Phone</option>
-              <option value="SMS">SMS</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="contactInfo" className="block text-sm font-medium text-gray-700">
-              Contact Information
-            </label>
-            <input
-              type={contactMethod === 'EMAIL' ? 'email' : 'tel'}
-              id="contactInfo"
-              value={contactInfo}
-              onChange={handleContactInfoChange}
-              placeholder={contactMethod === 'EMAIL' ? 'Enter email address' : 'Enter phone number'}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            />
-          </div>
-        </>
       )}
     </div>
   );

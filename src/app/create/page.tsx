@@ -36,7 +36,7 @@ export default function CreatePage() {
     const requestData = {
       address_a: data.address_a,
       location_type: data.location_type,
-      user_b_contact_type: data.contact_method,
+      user_b_contact_type: data.contact_method.toLowerCase(),
       user_b_contact: data.contact_info,
     };
     
@@ -55,6 +55,7 @@ export default function CreatePage() {
         method: 'POST',
         headers,
         body: JSON.stringify(requestData),
+        mode: 'cors',
         credentials: 'same-origin',
       });
 
@@ -69,7 +70,12 @@ export default function CreatePage() {
         try {
           error = JSON.parse(responseText);
         } catch {
-          error = { message: responseText };
+          error = { 
+            message: responseText || 
+              (response.status === 500 ? 
+                'Server error. This might be due to missing required fields or incorrect data format.' : 
+                'Failed to create meeting request')
+          };
         }
         console.error('Request failed:', error);
         throw new Error(error.message || error.error || 'Failed to create meeting request');

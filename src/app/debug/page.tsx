@@ -1,109 +1,163 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { getContacts } from '@/app/api/contacts';
+import { Button } from '@/components/ui/button';
 import { API_ENDPOINTS } from '@/app/config';
-import TestLogin from '../test-login';
-
-interface DbStatus {
-  status: string;
-  message: string;
-  db_version?: string;
-  database_url?: string;
-  flask_env?: string;
-  debug_mode?: boolean;
-  encryption_key_set?: boolean;
-  google_maps_api_key_set?: boolean;
-  error?: string;
-}
 
 export default function DebugPage() {
-  const [apiBaseUrl, setApiBaseUrl] = useState<string>('');
-  const [dbStatus, setDbStatus] = useState<DbStatus | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const { token, user } = useAuth();
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    // Get the API base URL from the config
-    const url = API_ENDPOINTS.meetingRequests;
-    setApiBaseUrl(url);
-  }, []);
-  
-  const checkDatabaseConnection = async () => {
+  const [apiResponse, setApiResponse] = useState<string>('');
+
+  const handleFetchContacts = async () => {
+    if (!token) {
+      setError('No authentication token found');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(API_ENDPOINTS.dbCheck);
+      console.log('Fetching contacts...');
+      const data = await getContacts(token);
+      console.log('Contacts response:', data);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (Array.isArray(data)) {
+        setContacts(data);
+        setApiResponse(JSON.stringify(data, null, 2));
+      } else {
+        console.error('Response is not an array:', data);
+        setContacts([]);
+        setApiResponse(JSON.stringify(data, null, 2));
+        setError('Response is not in expected format');
       }
-      
-      const data = await response.json();
-      setDbStatus(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      console.error('Error checking database:', err);
+    } catch (err: any) {
+      console.error('Error fetching contacts:', err);
+      setError(err.message || 'Failed to fetch contacts');
+      setApiResponse(`Error: ${err.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
-  
+
+  const handleDirectFetch = async () => {
+    if (!token) {
+      setError('No authentication token found');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Direct fetch to contacts API...');
+      const url = API_ENDPOINTS.contacts;
+      console.log('URL:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const contentType = response.headers.get('content-type');
+      console.log('Response status:', response.status);
+      console.log('Content-Type:', contentType);
+      
+      let result;
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        result = await response.text();
+      }
+      
+      console.log('Direct API response:', result);
+      setApiResponse(JSON.stringify(result, null, 2));
+      
+      if (Array.isArray(result)) {
+        setContacts(result);
+      } else {
+        setContacts([]);
+        setError('Response is not in expected format');
+      }
+    } catch (err: any) {
+      console.error('Error with direct fetch:', err);
+      setError(err.message || 'Failed to fetch contacts directly');
+      setApiResponse(`Error: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-8">Debug Tools</h1>
-      <TestLogin />
+      <h1 className="text-xl font-bold mb-4">API Debug Page</h1>
       
-      <div className="bg-gray-100 p-4 rounded mb-4">
-        <h2 className="text-xl font-semibold mb-2">Environment Variables</h2>
-        <p><strong>NEXT_PUBLIC_API_URL:</strong> {process.env.NEXT_PUBLIC_API_URL || 'Not set'}</p>
-        <p><strong>NODE_ENV:</strong> {process.env.NODE_ENV || 'Not set'}</p>
-      </div>
-      
-      <div className="bg-gray-100 p-4 rounded mb-4">
-        <h2 className="text-xl font-semibold mb-2">API Endpoints</h2>
-        <p><strong>Meeting Requests Endpoint:</strong> {apiBaseUrl}</p>
-        <p><strong>DB Check Endpoint:</strong> {API_ENDPOINTS.dbCheck}</p>
-      </div>
-      
-      <div className="bg-gray-100 p-4 rounded mb-4">
-        <h2 className="text-xl font-semibold mb-2">Database Connectivity</h2>
-        <button 
-          onClick={checkDatabaseConnection}
-          disabled={loading}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 disabled:bg-gray-400"
-        >
-          {loading ? 'Checking...' : 'Check Database Connection'}
-        </button>
+      <div className="mb-4">
+        <p className="text-sm text-gray-700 mb-2">
+          User status: {user ? `Logged in as ${user.email}` : 'Not logged in'}
+        </p>
+        <p className="text-sm text-gray-700 mb-4">
+          Token: {token ? `${token.substring(0, 10)}...` : 'No token'}
+        </p>
         
-        {error && (
-          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
-            <p><strong>Error:</strong> {error}</p>
-          </div>
-        )}
-        
-        {dbStatus && (
-          <div className="mt-4">
-            <p><strong>Status:</strong> 
-              <span className={dbStatus.status === 'success' ? 'text-green-600' : 'text-red-600'}>
-                {dbStatus.status}
-              </span>
-            </p>
-            <p><strong>Message:</strong> {dbStatus.message}</p>
-            {dbStatus.db_version && <p><strong>DB Version:</strong> {dbStatus.db_version}</p>}
-            {dbStatus.database_url && <p><strong>Database URL:</strong> {dbStatus.database_url}</p>}
-            {dbStatus.flask_env && <p><strong>Flask Environment:</strong> {dbStatus.flask_env}</p>}
-            <p><strong>Debug Mode:</strong> {dbStatus.debug_mode ? 'Enabled' : 'Disabled'}</p>
-            <p><strong>Encryption Key Set:</strong> {dbStatus.encryption_key_set ? 'Yes' : 'No'}</p>
-            <p><strong>Google Maps API Key Set:</strong> {dbStatus.google_maps_api_key_set ? 'Yes' : 'No'}</p>
-            {dbStatus.error && <p><strong>Error Details:</strong> {dbStatus.error}</p>}
-          </div>
-        )}
+        <div className="flex gap-4 mb-6">
+          <Button 
+            onClick={handleFetchContacts} 
+            disabled={loading || !token}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {loading ? 'Loading...' : 'Test Contacts API (helper)'}
+          </Button>
+          
+          <Button 
+            onClick={handleDirectFetch} 
+            disabled={loading || !token}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {loading ? 'Loading...' : 'Test Direct API Call'}
+          </Button>
+        </div>
       </div>
       
-      <div className="bg-gray-100 p-4 rounded">
-        <h2 className="text-xl font-semibold mb-2">Build Information</h2>
-        <p><strong>Build Time:</strong> {new Date().toISOString()}</p>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Contacts List ({contacts.length})</h2>
+          {contacts.length > 0 ? (
+            <ul className="border rounded-md divide-y">
+              {contacts.map((contact) => (
+                <li key={contact.id} className="p-3">
+                  <p className="font-medium">{contact.name || 'Unnamed Contact'}</p>
+                  {contact.email && <p className="text-sm text-gray-600">{contact.email}</p>}
+                  {contact.phone && <p className="text-sm text-gray-600">{contact.phone}</p>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 italic">No contacts found</p>
+          )}
+        </div>
+        
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Raw API Response</h2>
+          <pre className="bg-gray-100 p-3 rounded-md text-xs overflow-auto max-h-96">
+            {apiResponse || 'No response yet'}
+          </pre>
+        </div>
       </div>
     </div>
   );

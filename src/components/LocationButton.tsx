@@ -21,6 +21,9 @@ export default function LocationButton({
   const handleGetLocation = () => {
     setIsGettingLocation(true);
 
+    // Debug log to check API key
+    console.log('Using Google Maps API Key:', GOOGLE_MAPS_API_KEY);
+
     // Check if geolocation is available in the browser
     if (!navigator.geolocation) {
       setIsGettingLocation(false);

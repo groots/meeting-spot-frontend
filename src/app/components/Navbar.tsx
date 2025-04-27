@@ -5,6 +5,26 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  
+  // Extract first name from email
+  const getFirstName = () => {
+    if (!user || !user.email) return 'User';
+    
+    // If email contains a plus sign, take the part before it
+    const emailParts = user.email.split('@')[0].split('+');
+    const username = emailParts[0];
+    
+    // If username contains dots or underscores, replace with spaces
+    const nameWithSpaces = username.replace(/[._]/g, ' ');
+    
+    // Capitalize first letter of each word
+    const words = nameWithSpaces.split(' ');
+    const capitalizedWords = words.map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    );
+    
+    return capitalizedWords.join(' ');
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -42,7 +62,7 @@ export default function Navbar() {
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-gray-700">Welcome, {user.email || 'User'}</span>
+                <span className="text-gray-700">Welcome, {getFirstName()}</span>
                 <button
                   onClick={logout}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

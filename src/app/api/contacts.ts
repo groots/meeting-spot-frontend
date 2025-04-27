@@ -86,7 +86,22 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
         return result;
       }
 
-      return redirectResponse.json();
+      const responseData = await redirectResponse.json();
+      // Ensure we always return an array - handle different response types
+      if (Array.isArray(responseData)) {
+        return responseData;
+      } else if (responseData && typeof responseData === 'object') {
+        // If it's a single contact object with actual data
+        if (responseData.id) {
+          return [responseData];
+        }
+        // If it's a placeholder object or empty response
+        console.error("API returned non-array data:", responseData);
+        return [];
+      } else {
+        console.error("API returned unexpected data format:", responseData);
+        return [];
+      }
     }
 
     if (!response.ok) {
@@ -107,7 +122,22 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
       return result;
     }
 
-    return response.json();
+    const responseData = await response.json();
+    // Ensure we always return an array - handle different response types
+    if (Array.isArray(responseData)) {
+      return responseData;
+    } else if (responseData && typeof responseData === 'object') {
+      // If it's a single contact object with actual data
+      if (responseData.id) {
+        return [responseData];
+      }
+      // If it's a placeholder object or empty response
+      console.error("API returned non-array data:", responseData);
+      return [];
+    } else {
+      console.error("API returned unexpected data format:", responseData);
+      return [];
+    }
   } catch (error) {
     console.error('Error fetching contacts:', error);
     
@@ -140,10 +170,26 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
         return result;
       }
 
-      return fallbackResponse.json();
+      const responseData = await fallbackResponse.json();
+      // Ensure we always return an array - handle different response types
+      if (Array.isArray(responseData)) {
+        return responseData;
+      } else if (responseData && typeof responseData === 'object') {
+        // If it's a single contact object with actual data
+        if (responseData.id) {
+          return [responseData];
+        }
+        // If it's a placeholder object or empty response
+        console.error("API returned non-array data:", responseData);
+        return [];
+      } else {
+        console.error("API returned unexpected data format:", responseData);
+        return [];
+      }
     }
     
-    throw error;
+    // Return empty array on error to prevent UI breaking
+    return [];
   }
 };
 

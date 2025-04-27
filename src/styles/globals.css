@@ -3,14 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --foreground: #000000;
+  /* New professional yet fun color scheme */
+  --foreground: #333333;
   --background: #ffffff;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --secondary: #64748b;
-  --accent: #f59e0b;
-  --error: #ef4444;
-  --success: #22c55e;
+
+  /* Primary colors */
+  --primary: #5a55a6; /* Rich purple - professional base */
+  --primary-hover: #4a4591;
+
+  /* Secondary colors */
+  --secondary: #b87ebb; /* Orchid - fun accent */
+  --secondary-hover: #a76eaa;
+
+  /* Accent colors */
+  --accent: #02de7a; /* Vibrant green - energetic */
+  --accent-hover: #00c46c;
+
+  /* Utility colors */
+  --error: #e74c3c;
+  --success: #27ae60;
+  --warning: #f39c12;
+  --info: #3498db;
+
+  /* Neutral shades */
+  --neutral-100: #f8f9fa;
+  --neutral-200: #e9ecef;
+  --neutral-300: #dee2e6;
+  --neutral-400: #ced4da;
+  --neutral-500: #adb5bd;
+  --neutral-600: #6c757d;
+  --neutral-700: #495057;
+  --neutral-800: #343a40;
+  --neutral-900: #212529;
 }
 
 @layer base {

@@ -26,7 +26,40 @@
 
 /* Gradient backgrounds */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #1ed760 0%, #13aa4b 100%);
+  background: linear-gradient(135deg, #5a55a6 0%, #4a4591 100%);
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, #b87ebb 0%, #a76eaa 100%);
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #02de7a 0%, #00c46c 100%);
+}
+
+/* Fancy gradient text */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-white px-4 py-2 rounded-md hover:bg-secondary-hover transition-colors;
+}
+
+.btn-accent {
+  @apply bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-hover transition-colors;
+}
+
+.btn-outline {
+  @apply border border-primary text-primary px-4 py-2 rounded-md hover:bg-primary hover:text-white transition-colors;
 }
 
 /* Custom scrollbar */
@@ -35,21 +68,26 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--neutral-100);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--primary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--primary-hover);
 }
 
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-xl shadow-md p-6 transition-shadow hover:shadow-lg;
 }
 
 /* Mobile optimization */
@@ -59,7 +97,7 @@ html {
   }
 
   h1 {
-    font-size: 3rem !important;
+    font-size: 2.5rem !important;
   }
 
   .mobile-py {
