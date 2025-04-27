@@ -125,6 +125,9 @@ export default function ContactSelector({
     return <SimpleSpinner />;
   }
 
+  // Ensure contacts is treated as an array for rendering
+  const contactsArray = Array.isArray(contacts) ? contacts : [];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -164,20 +167,23 @@ export default function ContactSelector({
 
       {useExistingContact ? (
         <div>
-          {Array.isArray(contacts) && contacts.length > 0 ? (
+          {contactsArray.length > 0 ? (
             <select
               onChange={(e) => {
-                if (!Array.isArray(contacts)) return;
-                const contact = contacts.find((c) => c.id === e.target.value) as EnhancedContact | undefined;
+                const contactId = e.target.value;
+                const contact = contactsArray.find((c) => c.id === contactId) as EnhancedContact | undefined;
                 if (contact) {
-                  onChange(contact.email || contact.phone || "", contact.email ? "email" : "phone");
+                  const contactValue = contact.email || contact.phone || "";
+                  const contactType = contact.email ? "email" : "phone";
+                  onChange(contactValue, contactType);
+                  setSelectedContactId(contactId);
                 }
               }}
-              defaultValue=""
+              value={selectedContactId || ""}
               className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
             >
               <option value="" disabled>Select a contact</option>
-              {contacts.map((contact) => {
+              {contactsArray.map((contact) => {
                 // Determine contact type based on whether email or phone is present
                 const contactType = contact.email ? "email" : "phone";
                 return (

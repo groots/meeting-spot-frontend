@@ -2,6 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Color System - CSS Variables */
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+
+  /* Primary Colors */
+  --primary: #5a55a6;
+  --primary-hover: #4a4591;
+
+  /* Secondary Colors */
+  --secondary: #b87ebb;
+  --secondary-hover: #a76eaa;
+
+  /* Accent Colors */
+  --accent: #02de7a;
+  --accent-hover: #00c46c;
+
+  /* Status Colors */
+  --error: #e11d48;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  /* Neutrals */
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #171717;
+}
+
 /* Add the following custom styles at the end of the file */
 
 /* Font setup - if you're already using Inter, you can skip this import */

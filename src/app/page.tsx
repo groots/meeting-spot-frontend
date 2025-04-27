@@ -34,7 +34,7 @@ export default function Home() {
           {user && token ? (
             <>
               <Link 
-                href="/create" 
+                href="/dashboard" 
                 className="btn-accent"
               >
                 Dashboard →

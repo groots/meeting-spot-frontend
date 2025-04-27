@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_ENDPOINTS, API_HEADERS } from '../config';
+import { useRouter } from 'next/navigation';
 
 interface Subscription {
   id: string;
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading: true,
     error: null,
   });
+  const router = useRouter();
 
   useEffect(() => {
     // Check if user is logged in on mount
@@ -251,6 +253,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedToken = storage.getItem(TOKEN_KEY);
         console.log('[Auth] ✓ Token verification:', storedToken ? 'Token exists' : 'Token missing');
         console.log('[Auth] 🟢 Login successful - user is now logged in');
+        
+        // Redirect to dashboard instead of home page
+        router.push('/dashboard');
       } else {
         const errorData = await response.json();
         console.error(`[Auth] ❌ Login failed with status: ${response.status}`, errorData);
