@@ -78,7 +78,7 @@ describe('Contacts API', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    it('should handle errors', async () => {
+    it('should return empty array on error', async () => {
       const errorMessage = 'Failed to fetch contacts';
       // First request fails with an error
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -100,7 +100,9 @@ describe('Contacts API', () => {
         json: jest.fn().mockResolvedValueOnce({ message: errorMessage })
       });
 
-      await expect(getContacts(mockToken)).rejects.toThrow(errorMessage);
+      // The function now returns an empty array instead of throwing
+      const result = await getContacts(mockToken);
+      expect(result).toEqual([]);
     });
   });
 
