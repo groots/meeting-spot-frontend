@@ -306,22 +306,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         username
       };
 
-      const response = await fetch(API_ENDPOINTS.register, {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify(registrationData),
+      console.log('[Auth] 📦 Registration payload:', {
+        ...registrationData,
+        password: '[REDACTED]'
       });
+      console.log('[Auth] 🔗 Sending to endpoint:', API_ENDPOINTS.register);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('[Auth] ✅ Registration successful');
+      try {
+        const response = await fetch(API_ENDPOINTS.register, {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify(registrationData),
+        });
 
-        // After registration, log the user in
-        await login(email, password, true); // Remember by default for new registrations
-      } else {
-        const errorData = await response.json();
-        console.error(`[Auth] ❌ Registration failed with status: ${response.status}`, errorData);
-        throw new Error(errorData.message || 'Registration failed');
+        // Log the response status
+        console.log(`[Auth] 📥 Registration response status: ${response.status}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[Auth] ✅ Registration successful');
+
+          // After registration, log the user in
+          await login(email, password, true); // Remember by default for new registrations
+        } else {
+          // Handle different error status codes
+          console.error(`[Auth] ❌ Registration failed with status: ${response.status}`);
+          
+          try {
+            const errorData = await response.json();
+            console.error(`[Auth] 📋 Error response:`, errorData);
+            throw new Error(errorData.message || 'Registration failed');
+          } catch (parseError) {
+            // Handle error if response is not JSON
+            console.error('[Auth] 🔄 Failed to parse error response:', parseError);
+            
+            // Try to get the raw text
+            const rawText = await response.text();
+            console.error('[Auth] 📄 Raw error response:', rawText);
+            
+            throw new Error(`Registration failed with status ${response.status}`);
+          }
+        }
+      } catch (fetchError) {
+        console.error('[Auth] 🔌 Network or fetch error:', fetchError);
+        throw fetchError;
       }
     } catch (err) {
       console.error('[Auth] 💥 Registration error:', err);
