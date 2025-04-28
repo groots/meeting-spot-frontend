@@ -306,14 +306,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log(`[Auth] 🔠 Generated username: ${usernameToUse}`);
       }
 
-      // Format the data to match exactly what the backend expects
+      // Try with a simplified payload to avoid potential issues with the backend
+      // Some backends might have strict validation on fields
       const registrationData = {
         email: email.trim(),
         password,
-        name: name.trim(),  // Keep for backward compatibility
-        first_name: firstName ? firstName.trim() : undefined,
-        last_name: lastName ? lastName.trim() : undefined,
-        username: usernameToUse.trim()
+        name: name.trim()  // Keep for backward compatibility
+        // Omit other fields that might be causing issues
       };
 
       console.log('[Auth] 📦 Registration payload:', {
@@ -323,10 +322,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[Auth] 🔗 Sending to endpoint:', API_ENDPOINTS.register);
 
       try {
+        console.log('[Auth] 🔧 Setting special headers');
+        const headers = {
+          ...API_HEADERS,
+          'Cache-Control': 'no-cache'
+        };
+
         const response = await fetch(API_ENDPOINTS.register, {
           method: 'POST',
-          headers: API_HEADERS,
+          headers,
           body: JSON.stringify(registrationData),
+          // Add credentials to handle any CORS issues
+          credentials: 'include'
         });
 
         // Log the response status
