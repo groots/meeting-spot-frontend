@@ -46,4 +46,4 @@ export const mockRequestData = {
   requestId: '123456',
   addressA: '123 Main St, City, State',
   addressB: '456 Oak St, City, State',
-}; 
+};

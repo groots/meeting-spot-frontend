@@ -109,4 +109,4 @@ export const cancelSubscription = async (id: string, token: string): Promise<Sub
   });
 
   return handleResponse(response);
-}; 
+};

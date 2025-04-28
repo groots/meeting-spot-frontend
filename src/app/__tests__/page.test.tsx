@@ -20,4 +20,4 @@ describe('Home UI', () => {
     const { container } = render(<HomeUI />);
     expect(container).toHaveTextContent('Easily find the perfect meeting location between two addresses');
   });
-}); 
+});

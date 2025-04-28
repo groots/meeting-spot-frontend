@@ -79,7 +79,7 @@ export default function SocialLogin() {
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
         window.location.href = '/create';
       } else {
@@ -97,15 +97,15 @@ export default function SocialLogin() {
       if (response.authResponse) {
         // Get the access token
         const accessToken = response.authResponse.accessToken;
-        
+
         // Make the API call
         fetch(API_ENDPOINTS.facebookCallback, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ 
-            access_token: accessToken 
+          body: JSON.stringify({
+            access_token: accessToken
           }),
         })
         .then(res => {
@@ -162,7 +162,7 @@ export default function SocialLogin() {
 
         <div className="mt-6 grid grid-cols-2 gap-3">
           <div ref={googleButtonRef} className="w-full" />
-          
+
           <button
             onClick={handleFacebookLogin}
             className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
@@ -182,4 +182,4 @@ export default function SocialLogin() {
       </div>
     </>
   );
-} 
+}

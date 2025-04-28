@@ -12,7 +12,7 @@ export default function RequestPage() {
   const searchParams = useSearchParams();
   const requestId = params?.id as string;
   const token = searchParams?.get('token');
-  
+
   const [status, setStatus] = useState<string | null>(null);
   const [meetingSpots, setMeetingSpots] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -23,7 +23,7 @@ export default function RequestPage() {
   useEffect(() => {
     const fetchStatus = async () => {
       if (!requestId) return;
-      
+
       try {
         setIsLoading(true);
         const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId));
@@ -32,9 +32,9 @@ export default function RequestPage() {
         }
         const data = await response.json();
         console.log('Status response:', data);
-        
+
         setStatus(data.status);
-        
+
         if (data.status === 'completed') {
           setShowResults(true);
           // Fetch results when status is completed
@@ -60,10 +60,10 @@ export default function RequestPage() {
   // Poll for status updates
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
-    
+
     const pollStatus = async () => {
       if (!requestId) return;
-      
+
       try {
         const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId));
         if (!response.ok) {
@@ -71,9 +71,9 @@ export default function RequestPage() {
         }
         const data = await response.json();
         console.log('Status response:', data);
-        
+
         setStatus(data.status);
-        
+
         if (data.status === 'completed') {
           setShowResults(true);
           // Fetch results when status is completed
@@ -103,8 +103,8 @@ export default function RequestPage() {
     };
   }, [requestId, showResults]);
 
-  const handleRespondToRequest = async (data: { 
-    address_b: string; 
+  const handleRespondToRequest = async (data: {
+    address_b: string;
     address_b_lat?: number;
     address_b_lon?: number;
   }) => {
@@ -134,7 +134,7 @@ export default function RequestPage() {
 
       const result = await response.json();
       console.log('Response from backend:', result);
-      
+
       // Update status to show calculating
       setStatus('calculating');
     } catch (error) {
@@ -194,8 +194,8 @@ export default function RequestPage() {
             Meeting Request
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
-            {status === 'completed' 
-              ? 'Here are the suggested meeting spots!' 
+            {status === 'completed'
+              ? 'Here are the suggested meeting spots!'
               : 'Enter your address to find a meeting spot.'}
           </p>
         </div>
@@ -236,4 +236,4 @@ export default function RequestPage() {
       </div>
     </main>
   );
-} 
+}

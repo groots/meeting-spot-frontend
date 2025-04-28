@@ -22,8 +22,8 @@ describe('Contacts API', () => {
     it('should fetch contacts successfully', async () => {
       const mockResponse = [mockContact];
       // First, mock successful response for the direct URL without trailing slash
-      const url = API_ENDPOINTS.contacts.endsWith('/') 
-        ? API_ENDPOINTS.contacts.slice(0, -1) 
+      const url = API_ENDPOINTS.contacts.endsWith('/')
+        ? API_ENDPOINTS.contacts.slice(0, -1)
         : API_ENDPOINTS.contacts;
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -36,7 +36,7 @@ describe('Contacts API', () => {
       });
 
       const result = await getContacts(mockToken);
-      
+
       // We now call fetch with the potentially modified URL and redirect: manual
       expect(fetch).toHaveBeenCalledWith(url, {
         method: 'GET',
@@ -72,7 +72,7 @@ describe('Contacts API', () => {
       });
 
       const result = await getContacts(mockToken);
-      
+
       // Check that we made two fetch calls (one original, one with trailing slash)
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(result).toEqual(mockResponse);
@@ -119,7 +119,7 @@ describe('Contacts API', () => {
       });
 
       const result = await getContact(contactId, mockToken);
-      
+
       expect(fetch).toHaveBeenCalledWith(`${API_ENDPOINTS.contacts}/${contactId}`, {
         method: 'GET',
         headers: expect.objectContaining({
@@ -136,7 +136,7 @@ describe('Contacts API', () => {
         name: 'Test Contact',
         email: 'test@example.com'
       };
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 201,
@@ -147,7 +147,7 @@ describe('Contacts API', () => {
       });
 
       const result = await createContact(contactData, mockToken);
-      
+
       expect(fetch).toHaveBeenCalledWith(API_ENDPOINTS.contacts, {
         method: 'POST',
         headers: expect.objectContaining({
@@ -164,7 +164,7 @@ describe('Contacts API', () => {
       const contactId = '123';
       const updateData = { name: 'Updated Name' };
       const updatedContact = {...mockContact, name: 'Updated Name'};
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -175,7 +175,7 @@ describe('Contacts API', () => {
       });
 
       const result = await updateContact(contactId, updateData, mockToken);
-      
+
       expect(fetch).toHaveBeenCalledWith(`${API_ENDPOINTS.contacts}/${contactId}`, {
         method: 'PUT',
         headers: expect.objectContaining({
@@ -190,7 +190,7 @@ describe('Contacts API', () => {
   describe('deleteContact', () => {
     it.skip('should delete a contact successfully', async () => {
       const contactId = '123';
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -201,7 +201,7 @@ describe('Contacts API', () => {
       });
 
       await deleteContact(contactId, mockToken);
-      
+
       expect(fetch).toHaveBeenCalledWith(`${API_ENDPOINTS.contacts}/${contactId}`, {
         method: 'DELETE',
         headers: expect.objectContaining({
@@ -218,7 +218,7 @@ describe('Contacts API', () => {
         name: 'Meeting Contact',
         phone: '123-456-7890'
       };
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 201,
@@ -229,7 +229,7 @@ describe('Contacts API', () => {
       });
 
       const result = await createContactFromMeeting(meetingId, contactData, mockToken);
-      
+
       expect(fetch).toHaveBeenCalledWith(`${API_ENDPOINTS.contacts}/from-meeting/${meetingId}`, {
         method: 'POST',
         headers: expect.objectContaining({
@@ -240,4 +240,4 @@ describe('Contacts API', () => {
       expect(result).toEqual(mockContact);
     });
   });
-}); 
+});

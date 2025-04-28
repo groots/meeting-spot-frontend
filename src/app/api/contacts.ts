@@ -40,8 +40,8 @@ export interface CreateContactParams {
  */
 export const getContacts = async (token: string): Promise<Contact[]> => {
   // Try with direct URL without trailing slash first
-  const url = API_ENDPOINTS.contacts.endsWith('/') 
-    ? API_ENDPOINTS.contacts.slice(0, -1) 
+  const url = API_ENDPOINTS.contacts.endsWith('/')
+    ? API_ENDPOINTS.contacts.slice(0, -1)
     : API_ENDPOINTS.contacts;
 
   try {
@@ -140,7 +140,7 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
     }
   } catch (error) {
     console.error('Error fetching contacts:', error);
-    
+
     // If the first attempt failed with redirect handling, try the standard way as fallback
     if ((error as Error).message.includes('redirect') || (error as Error).message.includes('manual')) {
       console.log('Trying standard fetch as fallback');
@@ -187,7 +187,7 @@ export const getContacts = async (token: string): Promise<Contact[]> => {
         return [];
       }
     }
-    
+
     // Return empty array on error to prevent UI breaking
     return [];
   }
@@ -277,8 +277,8 @@ export const deleteContact = async (id: string, token: string): Promise<void> =>
  * Create a contact from a meeting participant
  */
 export const createContactFromMeeting = async (
-  meetingId: string, 
-  data: CreateContactParams, 
+  meetingId: string,
+  data: CreateContactParams,
   token: string
 ): Promise<Contact> => {
   const response = await fetch(`${API_ENDPOINTS.contacts}/from-meeting/${meetingId}`, {
@@ -296,4 +296,4 @@ export const createContactFromMeeting = async (
   }
 
   return response.json();
-}; 
+};

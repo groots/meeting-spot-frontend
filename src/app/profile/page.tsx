@@ -16,15 +16,15 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     setDeleteError(null);
-    
+
     try {
       // Get the token from storage
       const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-      
+
       if (!token) {
         throw new Error('Authentication token not found');
       }
-      
+
       const response = await fetch(API_ENDPOINTS.profile, {
         method: 'DELETE',
         headers: {
@@ -32,7 +32,7 @@ export default function ProfilePage() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         // Logout the user and redirect to home page
         logout();
@@ -56,14 +56,14 @@ export default function ProfilePage() {
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Profile</h2>
-            
+
             {user && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Email</label>
                   <div className="mt-1 text-gray-900">{user.email}</div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
                   <div className="mt-1 text-gray-900">
@@ -78,14 +78,14 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Created</label>
                   <div className="mt-1 text-gray-900">
                     {new Date(user.created_at).toLocaleDateString()}
                   </div>
                 </div>
-                
+
                 {user.subscription && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Subscription</label>
@@ -100,10 +100,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="pt-6 border-t border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900">Account Actions</h3>
-                  
+
                   <div className="mt-4 space-y-3">
                     <button
                       onClick={() => router.push('/change-password')}
@@ -111,7 +111,7 @@ export default function ProfilePage() {
                     >
                       Change Password
                     </button>
-                    
+
                     <button
                       onClick={() => setShowDeleteModal(true)}
                       className="w-full inline-flex justify-center py-2 px-4 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -124,7 +124,7 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
-        
+
         {/* Delete Account Confirmation Modal */}
         {showDeleteModal && (
           <div className="fixed z-10 inset-0 overflow-y-auto">
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                           Are you sure you want to delete your account? All of your data will be permanently removed.
                           This action cannot be undone.
                         </p>
-                        
+
                         {deleteError && (
                           <div className="mt-3 p-2 bg-red-50 text-red-700 text-sm rounded">
                             {deleteError}
@@ -195,4 +195,4 @@ export default function ProfilePage() {
       </div>
     </ProtectedRoute>
   );
-} 
+}

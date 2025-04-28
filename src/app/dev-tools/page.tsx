@@ -73,7 +73,7 @@ export default function DevToolsPage() {
       <h1 className="text-2xl font-bold mb-4">Developer Tools</h1>
       <div className="bg-white shadow rounded-lg p-4">
         <h2 className="text-xl font-semibold mb-3">Meeting Requests</h2>
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -101,8 +101,8 @@ export default function DevToolsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(request.created_at).toLocaleString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex items-center space-x-2">
-                        <Link 
-                          href={getRespondUrl(request.id)} 
+                        <Link
+                          href={getRespondUrl(request.id)}
                           target="_blank"
                           className="text-blue-600 hover:text-blue-800"
                         >
@@ -125,4 +125,4 @@ export default function DevToolsPage() {
       </div>
     </div>
   );
-} 
+}

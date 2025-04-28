@@ -9,11 +9,21 @@ import { validatePassword } from '../../utils/validation';
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const router = useRouter();
   const { register, error } = useAuth();
+
+  // Auto-generate username from email
+  useEffect(() => {
+    if (email && !username) {
+      const emailUsername = email.split('@')[0];
+      setUsername(emailUsername);
+    }
+  }, [email, username]);
 
   useEffect(() => {
     if (password) {
@@ -26,16 +36,18 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const { isValid, errors } = validatePassword(password);
     if (!isValid) {
       setPasswordErrors(errors);
       return;
     }
-    
+
     setIsLoading(true);
     try {
-      await register(email, password, name);
+      // Combine name fields to maintain backward compatibility
+      const fullName = `${firstName} ${lastName}`.trim();
+      await register(email, password, fullName, firstName, lastName, username);
       router.push('/');
     } catch (err) {
       // Error is handled by AuthContext
@@ -65,19 +77,49 @@ export default function RegisterPage() {
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
+            <div className="flex -space-x-px">
+              <div className="w-1/2 min-w-0">
+                <label htmlFor="first-name" className="sr-only">
+                  First name
+                </label>
+                <input
+                  id="first-name"
+                  name="firstName"
+                  type="text"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-tl-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div className="w-1/2 min-w-0">
+                <label htmlFor="last-name" className="sr-only">
+                  Last name
+                </label>
+                <input
+                  id="last-name"
+                  name="lastName"
+                  type="text"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-tr-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
+            </div>
             <div>
-              <label htmlFor="name" className="sr-only">
-                Name
+              <label htmlFor="username" className="sr-only">
+                Username
               </label>
               <input
-                id="name"
-                name="name"
+                id="username"
+                name="username"
                 type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Username (optional)"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div>
@@ -139,4 +181,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}

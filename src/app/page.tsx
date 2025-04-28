@@ -29,18 +29,18 @@ export default function Home() {
           </div>
           <span className="ml-2 font-bold text-xl">Find A Meeting Spot</span>
         </div>
-        
+
         <div className="flex gap-4">
           {user && token ? (
             <>
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className="btn-accent"
               >
                 Dashboard →
               </Link>
-              <Link 
-                href="/profile" 
+              <Link
+                href="/profile"
                 className="bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-hover transition-all"
               >
                 Profile
@@ -48,14 +48,14 @@ export default function Home() {
             </>
           ) : (
             <>
-              <Link 
-                href="/auth/register" 
+              <Link
+                href="/auth/register"
                 className="btn-accent"
               >
                 Sign up →
               </Link>
-              <Link 
-                href="/auth/login" 
+              <Link
+                href="/auth/login"
                 className="bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-hover transition-all"
               >
                 Log in
@@ -77,10 +77,10 @@ export default function Home() {
             <p className="text-xl md:text-2xl text-neutral-700 mb-8">
               Find middlegrounds without all the hassle—send, meet, and connect the way you want.
             </p>
-            
+
             <div className="bg-white p-6 rounded-xl shadow-sm inline-block">
               <h3 className="font-bold mb-4">Start Meeting</h3>
-              <button 
+              <button
                 onClick={handleCreateClick}
                 className="btn-accent"
               >
@@ -101,7 +101,7 @@ export default function Home() {
                       <div className="absolute inset-0 z-0 opacity-10">
                         <div className="w-full h-full bg-[url('/map-bg.svg')] bg-cover"></div>
                       </div>
-                      
+
                       {/* Connection interaction */}
                       <div className="mb-4 bg-neutral-100 p-3 rounded-lg">
                         <div className="flex items-center mb-2">
@@ -121,7 +121,7 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Map visualization */}
                       <div className="relative bg-white/80 rounded-xl p-4 shadow-sm backdrop-blur-sm mb-4">
                         <div className="h-32 bg-neutral-100 rounded-lg relative mb-2">
@@ -132,10 +132,10 @@ export default function Home() {
                           <div className="absolute bottom-4 right-4 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
                             B
                           </div>
-                          
+
                           {/* Connection line */}
                           <div className="absolute top-7 left-7 w-[calc(100%-56px)] h-[1px] bg-neutral-400 rotate-45"></div>
-                          
+
                           {/* Midpoint */}
                           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border-2 border-secondary flex items-center justify-center text-xs font-bold text-secondary">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -145,7 +145,7 @@ export default function Home() {
                         </div>
                         <h3 className="font-medium text-center">Perfect Middleground Found!</h3>
                       </div>
-                      
+
                       {/* Suggested options */}
                       <div className="bg-white/80 rounded-xl p-4 shadow-sm">
                         <h4 className="font-medium text-sm mb-2">Suggested Meeting Places:</h4>
@@ -183,14 +183,14 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             {/* Decorative elements */}
             <div className="absolute top-1/4 -left-8 z-0 h-12 w-12 rounded-full bg-secondary opacity-80"></div>
             <div className="absolute bottom-1/3 right-0 z-0 h-16 w-16 rounded-full bg-green-light opacity-80"></div>
             <div className="absolute top-1/2 right-1/4 z-0 h-8 w-8 rounded-full bg-accent opacity-60"></div>
           </div>
         </div>
-        
+
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center">
           <p className="text-sm uppercase tracking-widest mb-2">SCROLL DOWN</p>
@@ -202,7 +202,7 @@ export default function Home() {
       <section className="bg-neutral-100 py-20 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-16 text-gradient">Why Choose Us?</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="card">
@@ -215,7 +215,7 @@ export default function Home() {
               <h3 className="text-xl font-bold mb-2">Perfect Middlegrounds</h3>
               <p className="text-neutral-600">Our algorithm finds the ideal meeting spot between multiple locations, saving everyone time and travel.</p>
             </div>
-            
+
             {/* Feature 2 */}
             <div className="card">
               <div className="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center mb-4">
@@ -226,7 +226,7 @@ export default function Home() {
               <h3 className="text-xl font-bold mb-2">Privacy First</h3>
               <p className="text-neutral-600">Share your location without revealing your exact address. You control how much information others can see.</p>
             </div>
-            
+
             {/* Feature 3 */}
             <div className="card">
               <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center mb-4">
@@ -238,7 +238,7 @@ export default function Home() {
               <p className="text-neutral-600">Get recommendations for great meeting spots based on your preferences, ratings, and availability.</p>
             </div>
           </div>
-          
+
           <div className="mt-16 text-center">
             <Link href="/colors" className="btn-outline">
               View Our Color System
@@ -259,7 +259,7 @@ export default function Home() {
             </div>
             <p className="text-sm opacity-80">Finding the perfect meeting location has never been easier.</p>
           </div>
-          
+
           <div>
             <h4 className="font-bold mb-4">Product</h4>
             <ul className="space-y-2 text-sm opacity-80">
@@ -268,7 +268,7 @@ export default function Home() {
               <li><a href="#" className="hover:opacity-100">API</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-bold mb-4">Company</h4>
             <ul className="space-y-2 text-sm opacity-80">
@@ -277,7 +277,7 @@ export default function Home() {
               <li><a href="#" className="hover:opacity-100">Blog</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm opacity-80">
@@ -287,7 +287,7 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/20 text-sm opacity-70 text-center">
           © {new Date().getFullYear()} Find A Meeting Spot. All rights reserved.
         </div>

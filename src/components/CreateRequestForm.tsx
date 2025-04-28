@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import LocationButton from './LocationButton';
 import ContactSelector from './ContactSelector';
 import LocationTypeSelector from './LocationTypeSelector';
-import { geocodeAddress } from '@/utils/geocoding';
+import { geocodeAddress, fallbackGeocodeAddress } from '@/utils/geocoding';
 
 // Define categories matching backend
 export const PLACE_CATEGORIES = {
@@ -66,22 +66,22 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
   const [error, setError] = useState('');
   const [coords, setCoords] = useState<{ lat?: number; lon?: number }>({});
   const [geocodingInProgress, setGeocodingInProgress] = useState(false);
-  
+
   // Step state
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
-  
+
   // Step validation
   const canAdvanceStep1 = !!address;
   const canAdvanceStep2 = true; // Category always has a default value
   const canAdvanceStep3 = !!contactInfo;
-  
+
   const nextStep = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
-  
+
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -117,13 +117,13 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
 
     try {
       const locationType = category === 'Food & Drink' ? subcategory : category;
-      
+
       await onSubmit({
         address_a: address,
         location_type: locationType,
         contact_method: contactMethod,
         contact_info: contactInfo,
-        address_a_lat: coords.lat, 
+        address_a_lat: coords.lat,
         address_a_lon: coords.lon
       });
     } catch (err: any) {
@@ -152,24 +152,35 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
   useEffect(() => {
     // Skip empty addresses and avoid geocoding when already in progress
     if (!addressInput || geocodingInProgress) return;
-    
+
     // Set a timeout to avoid too many API calls
     const timeoutId = setTimeout(async () => {
       setGeocodingInProgress(true);
       try {
-        const result = await geocodeAddress(addressInput);
+        // Try to use our backend geocoding service first
+        let result = await geocodeAddress(addressInput);
+
+        // If backend geocoding fails, try fallback to direct Google Maps API
+        if (!result) {
+          console.log("Backend geocoding failed, trying fallback...");
+          result = await fallbackGeocodeAddress(addressInput);
+        }
+
         if (result) {
           setAddress(addressInput);
           setCoords({ lat: result.lat, lon: result.lng });
           setError(''); // Clear any previous error
+        } else {
+          setError('Unable to find coordinates for this address. Please try a different address or use the "Get Current Location" button.');
         }
       } catch (err) {
         console.error("Geocoding error:", err);
+        setError('Error looking up address. Please try again or use the "Get Current Location" button.');
       } finally {
         setGeocodingInProgress(false);
       }
     }, 1000); // 1 second debounce
-    
+
     return () => clearTimeout(timeoutId);
   }, [addressInput]);
 
@@ -181,7 +192,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
   const ProgressBar = () => (
     <div className="mb-8">
       <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-        <div 
+        <div
           className="h-full bg-gradient-to-r from-blue-500 to-teal-500 transition-all duration-300 ease-in-out"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         />
@@ -194,16 +205,16 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
     <div className="w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
       <h1 className="text-2xl font-bold mb-2 text-center">Create Meeting Request</h1>
       <p className="text-gray-600 text-center mb-6">Find the perfect middle ground between you and a contact</p>
-      
+
       <ProgressBar />
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step 1: Location */}
         {currentStep === 1 && (
           <div className="space-y-4 min-h-[240px]">
             <h2 className="text-xl font-semibold">Step 1: Your Location</h2>
             <p className="text-gray-600 mb-4">Enter your starting location</p>
-            
+
             <div className="space-y-2">
               <Label htmlFor="address" className="text-gray-700">Your Address</Label>
               <div className="space-y-2">
@@ -229,7 +240,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <Button
                 type="button"
@@ -242,13 +253,13 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
             </div>
           </div>
         )}
-        
+
         {/* Step 2: Preferences */}
         {currentStep === 2 && (
           <div className="space-y-4 min-h-[240px]">
             <h2 className="text-xl font-semibold">Step 2: Meeting Preferences</h2>
             <p className="text-gray-600 mb-4">Select what type of place you'd like to meet at</p>
-            
+
             <LocationTypeSelector
               selectedType={category}
               onChange={setCategory}
@@ -271,7 +282,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 </select>
               </div>
             )}
-            
+
             <div className="flex justify-between mt-6">
               <Button
                 type="button"
@@ -292,19 +303,19 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
             </div>
           </div>
         )}
-        
+
         {/* Step 3: Contact Information */}
         {currentStep === 3 && (
           <div className="space-y-4 min-h-[240px]">
             <h2 className="text-xl font-semibold">Step 3: Contact Information</h2>
             <p className="text-gray-600 mb-4">How should your contact reach you?</p>
-            
+
             <ContactSelector
               onChange={handleContactChange}
               defaultContactType={contactMethod}
               defaultContactInfo={contactInfo}
             />
-            
+
             <div className="flex justify-between mt-6">
               <Button
                 type="button"
@@ -340,4 +351,4 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
       </form>
     </div>
   );
-} 
+}

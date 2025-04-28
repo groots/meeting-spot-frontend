@@ -5,25 +5,33 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  
-  // Extract first name from email
+
+  // Get user's first name
   const getFirstName = () => {
-    if (!user || !user.email) return 'User';
-    
-    // If email contains a plus sign, take the part before it
-    const emailParts = user.email.split('@')[0].split('+');
-    const username = emailParts[0];
-    
-    // If username contains dots or underscores, replace with spaces
-    const nameWithSpaces = username.replace(/[._]/g, ' ');
-    
-    // Capitalize first letter of each word
-    const words = nameWithSpaces.split(' ');
-    const capitalizedWords = words.map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    );
-    
-    return capitalizedWords.join(' ');
+    if (!user) return 'User';
+
+    // If first_name is available from the updated user object
+    if (user.first_name) return user.first_name;
+
+    // Fallback to extracting from email
+    if (user.email) {
+      // If email contains a plus sign, take the part before it
+      const emailParts = user.email.split('@')[0].split('+');
+      const username = emailParts[0];
+
+      // If username contains dots or underscores, replace with spaces
+      const nameWithSpaces = username.replace(/[._]/g, ' ');
+
+      // Capitalize first letter of each word
+      const words = nameWithSpaces.split(' ');
+      const capitalizedWords = words.map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      );
+
+      return capitalizedWords.join(' ');
+    }
+
+    return 'User';
   };
 
   return (
@@ -38,20 +46,20 @@ export default function Navbar() {
             </div>
             {user && (
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link 
+                <Link
                   href="/create"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Create Meeting
                 </Link>
-                <Link 
-                  href="/contacts" 
+                <Link
+                  href="/contacts"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Contacts
                 </Link>
-                <Link 
-                  href="/subscription" 
+                <Link
+                  href="/subscription"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Subscription
@@ -91,4 +99,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-} 
+}

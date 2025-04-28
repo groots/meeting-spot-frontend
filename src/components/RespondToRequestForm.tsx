@@ -8,8 +8,8 @@ import LocationButton from './LocationButton';
 
 interface RespondToRequestFormProps {
   token: string;
-  onSubmit: (data: { 
-    address_b: string; 
+  onSubmit: (data: {
+    address_b: string;
     address_b_lat?: number;
     address_b_lon?: number;
   }) => Promise<void>;
@@ -32,15 +32,15 @@ export default function RespondToRequestForm({ token, onSubmit }: RespondToReque
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const submitData: any = { address_b: address.trim() };
-      
+
       // If we have coordinates (from geolocation), add them
       if (latitude !== undefined && longitude !== undefined) {
         submitData.address_b_lat = latitude;
         submitData.address_b_lon = longitude;
       }
-      
+
       await onSubmit(submitData);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -83,7 +83,7 @@ export default function RespondToRequestForm({ token, onSubmit }: RespondToReque
             placeholder="Enter your address"
             disabled={isLoading}
           />
-          
+
           <div className="mt-2">
             <LocationButton
               onLocationSuccess={handleLocationSuccess}
@@ -91,7 +91,7 @@ export default function RespondToRequestForm({ token, onSubmit }: RespondToReque
               isLoading={isLoading}
             />
           </div>
-          
+
           {error && (
             <p className="text-sm text-destructive">
               {error}
@@ -116,4 +116,4 @@ export default function RespondToRequestForm({ token, onSubmit }: RespondToReque
       </form>
     </div>
   );
-} 
+}

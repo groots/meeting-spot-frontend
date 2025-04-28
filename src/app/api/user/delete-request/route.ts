@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     if (response.status === 404) {
       // Log for backend implementation
       console.log('Backend deletion endpoint not implemented yet - simulation mode');
-      
+
       // For now, just return a success response
       return NextResponse.json(
         { message: 'Deletion request received and will be processed' },
@@ -40,17 +40,17 @@ export async function POST(request: NextRequest) {
 
     // Forward the response from the backend
     const data = await response.json();
-    
+
     return NextResponse.json(
       data,
       { status: response.status }
     );
   } catch (error) {
     console.error('Error processing deletion request:', error);
-    
+
     return NextResponse.json(
       { message: 'An error occurred while processing your request' },
       { status: 500 }
     );
   }
-} 
+}

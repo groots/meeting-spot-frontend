@@ -39,7 +39,7 @@ export default function CreatePage() {
       user_b_contact_type: data.contact_method.toLowerCase(),
       user_b_contact: data.contact_info,
     };
-    
+
     // Add coordinates if available
     if (data.address_a_lat !== undefined && data.address_a_lon !== undefined) {
       Object.assign(requestData, {
@@ -70,10 +70,10 @@ export default function CreatePage() {
         try {
           error = JSON.parse(responseText);
         } catch {
-          error = { 
-            message: responseText || 
-              (response.status === 500 ? 
-                'Server error. This might be due to missing required fields or incorrect data format.' : 
+          error = {
+            message: responseText ||
+              (response.status === 500 ?
+                'Server error. This might be due to missing required fields or incorrect data format.' :
                 'Failed to create meeting request')
           };
         }
@@ -97,4 +97,4 @@ export default function CreatePage() {
       </div>
     </ProtectedRoute>
   );
-} 
+}

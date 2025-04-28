@@ -42,38 +42,38 @@ export default function ContactSelector({
   const [contactName, setContactName] = useState('');
   const [shouldSaveContact, setShouldSaveContact] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(false);
-  
+
   // Initialize contactMethod and contactType once on component mount
   useEffect(() => {
     setContactMethod(defaultContactType);
     setContactType((defaultContactType as "email" | "phone") === "phone" ? "phone" : "email");
-    
+
     // Call onChange with initial values if defaultContactInfo is provided
     if (defaultContactInfo) {
       onChange(defaultContactInfo, defaultContactType);
     }
   }, []);
-  
+
   // Handle contact type changes
   const handleContactTypeChange = (newType: "email" | "phone") => {
     setContactType(newType);
     setContactMethod(newType);
     onChange(contactInfo, newType);
   };
-  
+
   // Handle contact info changes
   const handleContactInfoChange = (newInfo: string) => {
     setContactInfo(newInfo);
     onChange(newInfo, contactType);
   };
-  
+
   // Initialize useExistingContact based on contacts outside the effect
   useEffect(() => {
     if (Array.isArray(contacts) && contacts.length > 0 && defaultContactInfo) {
       // Find default contact after contacts are loaded
       const foundContact = contacts.find(
-        (c) => 
-          (contactType === 'email' && c.email === defaultContactInfo) || 
+        (c) =>
+          (contactType === 'email' && c.email === defaultContactInfo) ||
           (contactType === 'phone' && c.phone === defaultContactInfo)
       );
       if (foundContact) {
@@ -116,8 +116,8 @@ export default function ContactSelector({
 
   // Safe lookup for defaultContact - ensure contacts is an array first
   const defaultContact = Array.isArray(contacts) ? contacts.find(
-    (c) => 
-      (contactType === 'email' && c.email === defaultContactInfo) || 
+    (c) =>
+      (contactType === 'email' && c.email === defaultContactInfo) ||
       (contactType === 'phone' && c.phone === defaultContactInfo)
   ) : undefined;
 
@@ -188,7 +188,7 @@ export default function ContactSelector({
                 const contactType = contact.email ? "email" : "phone";
                 return (
                   <option key={contact.id} value={contact.id}>
-                    {contact.name || (contactType === "email" ? contact.email : contact.phone)} 
+                    {contact.name || (contactType === "email" ? contact.email : contact.phone)}
                     {contactType === "email" ? " (Email)" : " (Phone)"}
                   </option>
                 );
@@ -300,4 +300,4 @@ export default function ContactSelector({
       )}
     </div>
   );
-} 
+}

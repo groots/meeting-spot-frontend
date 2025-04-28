@@ -35,24 +35,24 @@ export default function LocationButton({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        
+
         try {
           // Use Google Maps Geocoding API to get address
           const response = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`
           );
-          
+
           const data = await response.json();
-          
+
           if (data.status === 'OK' && data.results.length > 0) {
             // Find the most appropriate address result
             let address = data.results[0].formatted_address;
-            
+
             // Look for a result that contains a street address if available
             for (const result of data.results) {
               const addressTypes = result.types || [];
               if (
-                addressTypes.includes('street_address') || 
+                addressTypes.includes('street_address') ||
                 addressTypes.includes('route') ||
                 addressTypes.includes('premise')
               ) {
@@ -60,7 +60,7 @@ export default function LocationButton({
                 break;
               }
             }
-            
+
             console.log(`Converted coordinates (${latitude}, ${longitude}) to address: ${address}`);
             onLocationSuccess(address, latitude, longitude);
           } else {
@@ -111,4 +111,4 @@ export default function LocationButton({
       {isGettingLocation ? 'Getting location...' : 'Use my current location'}
     </Button>
   );
-} 
+}

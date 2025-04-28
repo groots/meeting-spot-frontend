@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  getContacts, 
-  getContact, 
-  createContact, 
-  updateContact, 
+import {
+  getContacts,
+  getContact,
+  createContact,
+  updateContact,
   deleteContact,
-  Contact, 
-  ContactWithMeetings 
+  Contact,
+  ContactWithMeetings
 } from '../api/contacts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,7 @@ const ContactsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'recent'>('all');
   const [premiumRequired, setPremiumRequired] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -51,12 +51,12 @@ const ContactsPage = () => {
   useEffect(() => {
     const loadContacts = async () => {
       if (!token) return;
-      
+
       try {
         setLoading(true);
         const data = await getContacts(token);
         setContacts(data);
-        
+
         // Check if the user needs premium subscription for contacts
         if ('premiumRequired' in data) {
           setError(null); // Clear any existing errors
@@ -103,7 +103,7 @@ const ContactsPage = () => {
 
   const handleViewContact = async (id: string) => {
     if (!token) return;
-    
+
     try {
       setLoading(true);
       const contact = await getContact(id, token);
@@ -120,7 +120,7 @@ const ContactsPage = () => {
 
   const handleDeleteContact = async (id: string) => {
     if (!token || !window.confirm('Are you sure you want to delete this contact?')) return;
-    
+
     try {
       setLoading(true);
       await deleteContact(id, token);
@@ -139,11 +139,11 @@ const ContactsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       if (isCreateMode) {
         // Create new contact
         const newContact = await createContact(formData, token);
@@ -155,12 +155,12 @@ const ContactsPage = () => {
         setContacts(contacts.map(c => c.id === updated.id ? updated : c));
         setSuccessMessage('Contact updated successfully');
       }
-      
+
       setIsModalOpen(false);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
       console.error('Error saving contact:', err);
-      
+
       // Check if it's a premium feature error
       if (err.message && err.message.includes('premium subscription')) {
         setError('This feature requires a premium subscription. Please upgrade your plan.');
@@ -170,7 +170,7 @@ const ContactsPage = () => {
       } else {
         setError('Failed to save contact. Please try again.');
       }
-      
+
       setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
@@ -234,13 +234,13 @@ const ContactsPage = () => {
           Add Contact
         </Button>
       </div>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      
+
       {successMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
           <span className="block sm:inline">{successMessage}</span>
@@ -260,7 +260,7 @@ const ContactsPage = () => {
               disabled={loading || premiumRequired}
             />
           </div>
-          
+
           {/* Tabs */}
           <div className="flex border rounded-md">
             <button
@@ -280,7 +280,7 @@ const ContactsPage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Premium required message */}
       {premiumRequired && (
         <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-lg shadow-sm mb-6">
@@ -292,7 +292,7 @@ const ContactsPage = () => {
               <li>Organize your contacts</li>
               <li>Quick access to previous meeting participants</li>
             </ul>
-            <Button 
+            <Button
               className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white"
               onClick={() => router.push('/subscription')}
             >
@@ -305,12 +305,12 @@ const ContactsPage = () => {
       {displayedContacts.length === 0 ? (
         <div className="bg-white shadow-md rounded-lg p-6 text-center">
           <p className="text-gray-600">
-            {activeTab === 'all' 
-              ? (searchQuery 
-                ? 'No contacts match your search.' 
+            {activeTab === 'all'
+              ? (searchQuery
+                ? 'No contacts match your search.'
                 : "You don't have any contacts yet.")
-              : (searchQuery 
-                ? 'No recent contacts match your search.' 
+              : (searchQuery
+                ? 'No recent contacts match your search.'
                 : "You don't have any recent contacts.")
             }
           </p>
@@ -385,7 +385,7 @@ const ContactsPage = () => {
               <h2 className="text-xl font-semibold mb-4">
                 {isCreateMode ? 'Add New Contact' : (selectedContact ? 'Contact Details' : '')}
               </h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Name*</Label>
@@ -400,7 +400,7 @@ const ContactsPage = () => {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -413,7 +413,7 @@ const ContactsPage = () => {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="phone">Phone</Label>
                   <Input
@@ -426,7 +426,7 @@ const ContactsPage = () => {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="company">Company</Label>
                   <Input
@@ -439,7 +439,7 @@ const ContactsPage = () => {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -452,7 +452,7 @@ const ContactsPage = () => {
                     rows={3}
                   />
                 </div>
-                
+
                 {/* Contact Meetings (when viewing details) */}
                 {!isCreateMode && selectedContact?.meetings && selectedContact.meetings.length > 0 && (
                   <div className="mt-4">
@@ -483,7 +483,7 @@ const ContactsPage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Premium required message */}
                 {selectedContact?.premium_required && (
                   <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
@@ -497,7 +497,7 @@ const ContactsPage = () => {
                     </Button>
                   </div>
                 )}
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <Button
                     type="button"
@@ -523,4 +523,4 @@ const ContactsPage = () => {
   );
 };
 
-export default ContactsPage; 
+export default ContactsPage;

@@ -4,7 +4,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // Hard-code the production API URL for deployed environments
 // Use environment variables or localhost for development/testing
-export const API_URL = isProduction 
+export const API_URL = isProduction
   ? 'https://api.findameetingspot.com'
   : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081');
 
@@ -34,4 +34,4 @@ export const API_HEADERS = {
 export const GOOGLE_CLIENT_ID = '270814322595-hueraif6brli58po5gishfvcmocv6n04.apps.googleusercontent.com';
 
 // Facebook App ID
-export const FACEBOOK_APP_ID = '1484265795195128'; 
+export const FACEBOOK_APP_ID = '1484265795195128';

@@ -31,7 +31,7 @@ export default function MeetingSpotResults({ spots }: MeetingSpotResultsProps) {
               {spot.name}
             </h3>
             <p className="text-muted-foreground mb-4">{spot.address}</p>
-            
+
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">Distance from you</p>
@@ -73,4 +73,4 @@ export default function MeetingSpotResults({ spots }: MeetingSpotResultsProps) {
       </div>
     </div>
   );
-} 
+}

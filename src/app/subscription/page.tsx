@@ -3,12 +3,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  getUserSubscriptions, 
-  createSubscription, 
-  cancelSubscription, 
+import {
+  getUserSubscriptions,
+  createSubscription,
+  cancelSubscription,
   createCheckoutSession,
-  Subscription 
+  Subscription
 } from '../api/subscriptions';
 
 // Map plans to Stripe price IDs
@@ -32,10 +32,10 @@ function SubscriptionContent() {
   // Check URL params for success/cancel from Stripe redirect
   useEffect(() => {
     if (!searchParams) return;
-    
+
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
-    
+
     if (success === 'true') {
       setSuccessMessage('Payment successful! Your subscription is now active.');
       // Refresh subscriptions to show the new one
@@ -62,12 +62,12 @@ function SubscriptionContent() {
   useEffect(() => {
     const loadSubscriptions = async () => {
       if (!token) return;
-      
+
       try {
         setLoading(true);
         const data = await getUserSubscriptions(token);
         setSubscriptions(data);
-        
+
         // Find active subscription if any
         const active = data.find(sub => sub.status === 'active');
         setActiveSubscription(active || null);
@@ -88,21 +88,21 @@ function SubscriptionContent() {
 
   const handleSubscribe = async () => {
     if (!token) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       if (selectedPlan === 'free') {
         // For free plan, just create the subscription directly
         const newSubscription = await createSubscription(
           {
             plan_id: 'free',
             payment_provider: 'none'
-          }, 
+          },
           token
         );
-        
+
         // Add the new subscription to our list and set it as active
         setSubscriptions([...subscriptions, newSubscription]);
         setActiveSubscription(newSubscription);
@@ -113,7 +113,7 @@ function SubscriptionContent() {
         if (!priceId) {
           throw new Error(`No price ID found for plan: ${selectedPlan}`);
         }
-        
+
         // Create a checkout session
         const { checkout_url } = await createCheckoutSession(
           {
@@ -123,7 +123,7 @@ function SubscriptionContent() {
           },
           token
         );
-        
+
         // Redirect to Stripe checkout
         window.location.href = checkout_url;
       }
@@ -137,26 +137,26 @@ function SubscriptionContent() {
 
   const handleCancelSubscription = async () => {
     if (!activeSubscription || !token) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const updated = await cancelSubscription(activeSubscription.id, token);
-      
+
       // Update the subscription in our list
       setSubscriptions(
-        subscriptions.map(sub => 
+        subscriptions.map(sub =>
           sub.id === updated.id ? updated : sub
         )
       );
-      
+
       // If successfully marked for cancellation, update the active subscription
       if (updated.cancel_at_period_end) {
         setActiveSubscription(updated);
         setSuccessMessage('Your subscription has been canceled and will end at the current billing period.');
       }
-      
+
     } catch (err) {
       console.error('Error canceling subscription:', err);
       setError('Failed to cancel subscription. Please try again.');
@@ -181,7 +181,7 @@ function SubscriptionContent() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Subscription Management</h1>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
           <span className="block sm:inline">{error}</span>
@@ -197,7 +197,7 @@ function SubscriptionContent() {
       {/* Current Subscription Status */}
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Current Subscription</h2>
-        
+
         {activeSubscription ? (
           <div>
             <p><span className="font-medium">Plan:</span> {activeSubscription.plan_id.charAt(0).toUpperCase() + activeSubscription.plan_id.slice(1)}</p>
@@ -220,15 +220,15 @@ function SubscriptionContent() {
           <p>You currently don't have an active subscription.</p>
         )}
       </div>
-      
+
       {/* Subscription Plans */}
       {(!activeSubscription || activeSubscription.cancel_at_period_end) && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Available Plans</h2>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {/* Free Plan */}
-            <div 
+            <div
               className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'free' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
               onClick={() => handleSelectPlan('free')}
             >
@@ -249,9 +249,9 @@ function SubscriptionContent() {
                 </li>
               </ul>
             </div>
-            
+
             {/* Basic Plan */}
-            <div 
+            <div
               className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
               onClick={() => handleSelectPlan('basic')}
             >
@@ -272,9 +272,9 @@ function SubscriptionContent() {
                 </li>
               </ul>
             </div>
-            
+
             {/* Premium Plan */}
-            <div 
+            <div
               className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'premium' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
               onClick={() => handleSelectPlan('premium')}
             >
@@ -302,7 +302,7 @@ function SubscriptionContent() {
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-6">
             <button
               onClick={handleSubscribe}
@@ -314,7 +314,7 @@ function SubscriptionContent() {
           </div>
         </div>
       )}
-      
+
       {/* Subscription History */}
       {subscriptions.length > 0 && (
         <div>
@@ -358,4 +358,4 @@ export default function SubscriptionPage() {
       <SubscriptionContent />
     </Suspense>
   );
-} 
+}

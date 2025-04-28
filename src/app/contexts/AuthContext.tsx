@@ -21,6 +21,10 @@ interface Subscription {
 interface User {
   id: string;
   email: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   created_at: string;
   updated_at: string;
   is_oauth_user: boolean;
@@ -38,7 +42,14 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name: string,
+    firstName?: string,
+    lastName?: string,
+    username?: string
+  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -64,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     console.log('[Auth] 🔑 Initial auth check - token found:', !!token);
-    
+
     if (token) {
       console.log('[Auth] 🔄 Token found, fetching user profile');
       fetchProfile(token);
@@ -92,10 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         console.log('[Auth] ✅ Token refresh successful');
         const newToken = data.access_token;
-        
+
         // Store the new access token in localStorage since we're using a refresh token
         localStorage.setItem(TOKEN_KEY, newToken);
-        
+
         // Fetch the user profile with the new token
         fetchProfile(newToken);
       } else {
@@ -136,16 +147,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const userData = await response.json();
         console.log('[Auth] ✅ Profile fetched successfully:', userData.email || 'User (email unavailable)');
-        
+
         // Make sure user has email property, add fallback if missing
         if (!userData.email) {
           console.log('[Auth] ⚠️ User email missing in profile data, adding placeholder');
           userData.email = 'User';
         }
-        
+
         // Get refresh token from storage
         const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-        
+
         // Update auth state with user data
         console.log('[Auth] 📝 Updating authentication state with user data');
         setAuthState(prev => ({
@@ -222,24 +233,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         console.log('[Auth] ✅ Login successful');
-        
+
         const token = data.access_token;
         const refreshToken = data.refresh_token;
-        
+
         // Store access token in appropriate storage
         const storage = remember ? localStorage : sessionStorage;
         storage.setItem(TOKEN_KEY, token);
-        
+
         // Store refresh token in localStorage if provided (for "remember me")
         if (refreshToken) {
           console.log('[Auth] 💾 Storing refresh token in localStorage');
           localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
         }
-        
+
         if (remember) {
           localStorage.setItem(REMEMBER_KEY, 'true');
         }
-        
+
         console.log('[Auth] 📝 Updating authentication state');
         setAuthState(prev => ({
           ...prev,
@@ -248,12 +259,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           refreshToken: refreshToken || null,
           error: null,
         }));
-        
+
         // Verify token is stored correctly
         const storedToken = storage.getItem(TOKEN_KEY);
         console.log('[Auth] ✓ Token verification:', storedToken ? 'Token exists' : 'Token missing');
         console.log('[Auth] 🟢 Login successful - user is now logged in');
-        
+
         // Redirect to dashboard instead of home page
         router.push('/dashboard');
       } else {
@@ -272,19 +283,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+    firstName?: string,
+    lastName?: string,
+    username?: string
+  ) => {
     console.log('[Auth] 🔄 Starting registration process');
     try {
       setAuthState(prev => ({ ...prev, error: null }));
       console.log('[Auth] 📡 Sending registration request');
+
+      // Prepare registration data
+      const registrationData = {
+        email,
+        password,
+        name, // Keep for backward compatibility
+        first_name: firstName,
+        last_name: lastName,
+        username
+      };
+
       const response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
         headers: API_HEADERS,
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify(registrationData),
       });
 
       if (response.ok) {
-        console.log('[Auth] ✅ Registration successful, proceeding to login');
+        const data = await response.json();
+        console.log('[Auth] ✅ Registration successful');
+
         // After registration, log the user in
         await login(email, password, true); // Remember by default for new registrations
       } else {
@@ -330,4 +361,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}

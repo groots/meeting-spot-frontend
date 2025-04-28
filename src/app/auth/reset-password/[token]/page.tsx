@@ -167,4 +167,4 @@ export default function ResetPasswordConfirmPage({
       </div>
     </div>
   );
-} 
+}

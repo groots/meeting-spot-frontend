@@ -33,7 +33,7 @@ export default function AddContactModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!token) {
       setError('You must be logged in to add contacts');
       return;
@@ -58,12 +58,12 @@ export default function AddContactModal({
         },
         token
       );
-      
+
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error('Error adding contact:', err);
-      
+
       // Check if it's a premium feature error
       if (err.message && err.message.includes('premium subscription')) {
         setError('This feature requires a premium subscription. Please upgrade your plan.');
@@ -80,7 +80,7 @@ export default function AddContactModal({
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-4">Add to Contacts</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
@@ -92,7 +92,7 @@ export default function AddContactModal({
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="name">Name*</Label>
               <Input
@@ -105,7 +105,7 @@ export default function AddContactModal({
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="phone">Phone Number</Label>
               <Input
@@ -117,7 +117,7 @@ export default function AddContactModal({
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="company">Company</Label>
               <Input
@@ -129,7 +129,7 @@ export default function AddContactModal({
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="notes">Notes</Label>
               <Textarea
@@ -147,7 +147,7 @@ export default function AddContactModal({
                 {error}
               </div>
             )}
-            
+
             <div className="flex justify-end space-x-3 mt-6">
               <Button
                 type="button"
@@ -169,4 +169,4 @@ export default function AddContactModal({
       </div>
     </div>
   );
-} 
+}

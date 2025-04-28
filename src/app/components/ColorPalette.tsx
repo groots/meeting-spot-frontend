@@ -9,8 +9,8 @@ interface ColorSampleProps {
 const ColorSample: React.FC<ColorSampleProps> = ({ color, name, hex }) => {
   return (
     <div className="flex flex-col items-center">
-      <div 
-        className={`w-16 h-16 rounded-full mb-2 shadow-md`} 
+      <div
+        className={`w-16 h-16 rounded-full mb-2 shadow-md`}
         style={{ backgroundColor: hex }}
       />
       <p className="text-sm font-medium">{name}</p>
@@ -23,7 +23,7 @@ const ColorPalette: React.FC = () => {
   return (
     <div className="card my-8 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-gradient">Color Palette</h2>
-      
+
       <div className="space-y-8">
         <div>
           <h3 className="text-lg font-semibold mb-4">Primary Colors</h3>
@@ -34,7 +34,7 @@ const ColorPalette: React.FC = () => {
             <ColorSample color="bg-secondary-hover" name="Secondary Hover" hex="#a76eaa" />
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-4">Accent Colors</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center">
@@ -44,7 +44,7 @@ const ColorPalette: React.FC = () => {
             <ColorSample color="bg-green-light" name="Green Light" hex="#71e9a2" />
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-4">Utility Colors</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center">
@@ -54,7 +54,7 @@ const ColorPalette: React.FC = () => {
             <ColorSample color="bg-info" name="Info" hex="#3498db" />
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-4">Neutral Colors</h3>
           <div className="grid grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
@@ -65,7 +65,7 @@ const ColorPalette: React.FC = () => {
             <ColorSample color="bg-neutral-900" name="Neutral 900" hex="#212529" />
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-4">Gradient Examples</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -80,7 +80,7 @@ const ColorPalette: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-4">Button Examples</h3>
           <div className="flex flex-wrap gap-4">
@@ -95,4 +95,4 @@ const ColorPalette: React.FC = () => {
   );
 };
 
-export default ColorPalette; 
+export default ColorPalette;

@@ -21,12 +21,12 @@ export default function DebugPage() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('Fetching contacts...');
       const data = await getContacts(token);
       console.log('Contacts response:', data);
-      
+
       if (Array.isArray(data)) {
         setContacts(data);
         setApiResponse(JSON.stringify(data, null, 2));
@@ -53,12 +53,12 @@ export default function DebugPage() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('Direct fetch to contacts API...');
       const url = API_ENDPOINTS.contacts;
       console.log('URL:', url);
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -71,17 +71,17 @@ export default function DebugPage() {
       const contentType = response.headers.get('content-type');
       console.log('Response status:', response.status);
       console.log('Content-Type:', contentType);
-      
+
       let result;
       if (contentType && contentType.includes('application/json')) {
         result = await response.json();
       } else {
         result = await response.text();
       }
-      
+
       console.log('Direct API response:', result);
       setApiResponse(JSON.stringify(result, null, 2));
-      
+
       if (Array.isArray(result)) {
         setContacts(result);
       } else {
@@ -100,7 +100,7 @@ export default function DebugPage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-xl font-bold mb-4">API Debug Page</h1>
-      
+
       <div className="mb-4">
         <p className="text-sm text-gray-700 mb-2">
           User status: {user ? `Logged in as ${user.email}` : 'Not logged in'}
@@ -108,18 +108,18 @@ export default function DebugPage() {
         <p className="text-sm text-gray-700 mb-4">
           Token: {token ? `${token.substring(0, 10)}...` : 'No token'}
         </p>
-        
+
         <div className="flex gap-4 mb-6">
-          <Button 
-            onClick={handleFetchContacts} 
+          <Button
+            onClick={handleFetchContacts}
             disabled={loading || !token}
             className="bg-blue-600 hover:bg-blue-700"
           >
             {loading ? 'Loading...' : 'Test Contacts API (helper)'}
           </Button>
-          
-          <Button 
-            onClick={handleDirectFetch} 
+
+          <Button
+            onClick={handleDirectFetch}
             disabled={loading || !token}
             className="bg-green-600 hover:bg-green-700"
           >
@@ -127,13 +127,13 @@ export default function DebugPage() {
           </Button>
         </div>
       </div>
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md mb-4">
           {error}
         </div>
       )}
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h2 className="text-lg font-semibold mb-2">Contacts List ({contacts.length})</h2>
@@ -151,7 +151,7 @@ export default function DebugPage() {
             <p className="text-gray-500 italic">No contacts found</p>
           )}
         </div>
-        
+
         <div>
           <h2 className="text-lg font-semibold mb-2">Raw API Response</h2>
           <pre className="bg-gray-100 p-3 rounded-md text-xs overflow-auto max-h-96">
@@ -161,4 +161,4 @@ export default function DebugPage() {
       </div>
     </div>
   );
-} 
+}

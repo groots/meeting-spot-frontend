@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  UtensilsCrossedIcon, 
-  CoffeeIcon, 
-  BeerIcon, 
-  BuildingIcon, 
-  LandmarkIcon, 
-  TreesIcon, 
-  BookIcon, 
-  MoreHorizontalIcon 
+import {
+  UtensilsCrossedIcon,
+  CoffeeIcon,
+  BeerIcon,
+  BuildingIcon,
+  LandmarkIcon,
+  TreesIcon,
+  BookIcon,
+  MoreHorizontalIcon
 } from 'lucide-react';
 
 // Define location types with icons and descriptions
@@ -70,19 +70,19 @@ interface LocationTypeSelectorProps {
   disabled?: boolean;
 }
 
-export default function LocationTypeSelector({ 
-  selectedType, 
-  onChange, 
-  disabled = false 
+export default function LocationTypeSelector({
+  selectedType,
+  onChange,
+  disabled = false
 }: LocationTypeSelectorProps) {
-  
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {locationTypes.map((type) => {
           const Icon = type.icon;
           const isSelected = type.key === selectedType;
-          
+
           return (
             <button
               key={type.key}
@@ -91,8 +91,8 @@ export default function LocationTypeSelector({
               disabled={disabled}
               className={`
                 flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-colors
-                ${isSelected 
-                  ? 'border-lime-500 bg-lime-50 text-lime-700' 
+                ${isSelected
+                  ? 'border-lime-500 bg-lime-50 text-lime-700'
                   : 'border-gray-200 bg-white hover:border-gray-300'
                 }
                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -104,7 +104,7 @@ export default function LocationTypeSelector({
           );
         })}
       </div>
-      
+
       {/* Description of selected type */}
       {selectedType && (
         <p className="text-sm text-gray-500 mt-2">
@@ -113,4 +113,4 @@ export default function LocationTypeSelector({
       )}
     </div>
   );
-} 
+}

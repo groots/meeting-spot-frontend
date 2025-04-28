@@ -92,7 +92,7 @@ export default function DashboardPage() {
 
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-2xl font-bold mb-6">Your Meeting Requests</h2>
-          
+
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto"></div>
@@ -155,8 +155,8 @@ export default function DashboardPage() {
                         {formatDistanceToNow(new Date(request.created_at), { addSuffix: true })}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <Link 
-                          href={`/meetings/${request.id}`} 
+                        <Link
+                          href={`/meetings/${request.id}`}
                           className="text-primary hover:underline"
                         >
                           View Details
@@ -172,4 +172,4 @@ export default function DashboardPage() {
       </div>
     </ProtectedRoute>
   );
-} 
+}

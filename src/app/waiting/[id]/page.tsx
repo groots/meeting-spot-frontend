@@ -88,9 +88,9 @@ export default function WaitingPage() {
       }
     };
     // Rerun if requestId changes
-  }, [requestId, checkStatus]); 
+  }, [requestId, checkStatus]);
 
-  // --- UI Rendering --- 
+  // --- UI Rendering ---
   if (isLoading && status === null) { // Show initial loading state only
     return (
       <div className="min-h-screen bg-background py-12">
@@ -144,17 +144,17 @@ export default function WaitingPage() {
             <div className="max-w-md mx-auto">
               <div className="p-6 bg-card rounded-lg shadow-lg">
                 <div className="flex flex-col items-center space-y-4">
-                  {/* Spinner only if actively polling */} 
+                  {/* Spinner only if actively polling */}
                   {isPolling && (
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                   )}
-                   {/* Paused icon if polling stopped (and not loading a manual check) */} 
+                   {/* Paused icon if polling stopped (and not loading a manual check) */}
                    {pollingStopped && !isLoading && !error && (
                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                        </svg>
                    )}
-                   {/* Loading indicator specifically for manual check */} 
+                   {/* Loading indicator specifically for manual check */}
                    {isLoading && pollingStopped && (
                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                    )}
@@ -167,7 +167,7 @@ export default function WaitingPage() {
                   <p className="text-sm text-muted-foreground">
                     Request ID: {requestId}
                   </p>
-                  {/* Rate Limit Message */} 
+                  {/* Rate Limit Message */}
                   {rateLimited && (
                     <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-md w-full">
                       <p className="text-sm text-center">
@@ -175,13 +175,13 @@ export default function WaitingPage() {
                       </p>
                     </div>
                   )}
-                  {/* Manual Refresh Section */} 
+                  {/* Manual Refresh Section */}
                    {pollingStopped && !error && (
                      <div className="mt-4 p-3 bg-blue-100 text-blue-800 rounded-md w-full">
                        <p className="text-sm text-center">
                          Automatic status checks have stopped. You can check manually.
                        </p>
-                       <Button 
+                       <Button
                          onClick={checkStatus} // Manual trigger
                          className="mt-2 w-full"
                          variant="outline"
@@ -199,4 +199,4 @@ export default function WaitingPage() {
       </div>
     </ProtectedRoute>
   );
-} 
+}

@@ -44,7 +44,7 @@ export default function DataDeletionPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Data Deletion Instructions</h1>
-      
+
       {deleted ? (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           Your account and all associated data have been successfully deleted. Thank you for using Find A Meeting Spot.
@@ -53,8 +53,8 @@ export default function DataDeletionPage() {
         <>
           <section className="mb-8">
             <p className="mb-5 text-gray-700">
-              At Find A Meeting Spot, we value your privacy and understand the importance of having control over your personal data. 
-              We've made the process of deleting your data straightforward and comprehensive, ensuring all your information is 
+              At Find A Meeting Spot, we value your privacy and understand the importance of having control over your personal data.
+              We've made the process of deleting your data straightforward and comprehensive, ensuring all your information is
               properly removed from our systems when requested.
             </p>
           </section>
@@ -66,12 +66,12 @@ export default function DataDeletionPage() {
             </p>
             <ol className="list-decimal ml-6 mb-4 space-y-2">
               <li>
-                <strong>Delete through Facebook:</strong> Visit your Facebook settings, go to "Apps and Websites," 
+                <strong>Delete through Facebook:</strong> Visit your Facebook settings, go to "Apps and Websites,"
                 find Find A Meeting Spot, and remove access. This will disconnect your Facebook account from our service,
                 though some data may remain in our systems.
               </li>
               <li>
-                <strong>Delete directly from our platform:</strong> If you're logged in, you can delete your account 
+                <strong>Delete directly from our platform:</strong> If you're logged in, you can delete your account
                 using the button below, which will remove all your data from our servers. This is the most comprehensive
                 option and ensures complete removal of your information.
               </li>
@@ -125,7 +125,7 @@ export default function DataDeletionPage() {
           )}
 
           {user ? (
-            <button 
+            <button
               onClick={handleDeleteAccount}
               disabled={loading}
               className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
@@ -151,4 +151,4 @@ export default function DataDeletionPage() {
       </section>
     </div>
   );
-} 
+}

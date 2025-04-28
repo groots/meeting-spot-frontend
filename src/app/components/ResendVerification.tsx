@@ -55,4 +55,4 @@ export default function ResendVerification({ email }: { email: string }) {
       {error && <div className="mt-2 text-sm text-red-600">{error}</div>}
     </div>
   );
-} 
+}

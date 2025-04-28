@@ -36,7 +36,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       await login(email, password, rememberMe);
       console.log('Login successful, redirecting to dashboard');
@@ -167,4 +167,4 @@ export default function LoginPage() {
       </div>
     </>
   );
-} 
+}

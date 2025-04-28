@@ -50,7 +50,7 @@ interface ResultsData {
 // Helper function to display price level
 const getPriceLevel = (level?: number) => {
   if (level === undefined) return 'Price not available';
-  
+
   const symbols = ['$', '$$', '$$$', '$$$$'];
   return level >= 0 && level < symbols.length ? symbols[level] : 'Price not available';
 };
@@ -66,7 +66,7 @@ export default function ResultsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
   const [contactAddedSuccessMessage, setContactAddedSuccessMessage] = useState<string | null>(null);
-  
+
   // Get the contact email from the meeting request if available
   const contactEmail = resultsData?.meeting_contact_info?.email || '';
 
@@ -177,10 +177,10 @@ export default function ResultsPage() {
   }
 
   // Get category and subcategory info
-  const categoryInfo = meetingSpots.length > 0 ? 
-    (meetingSpots[0].subcategory ? 
-      `${meetingSpots[0].category}: ${meetingSpots[0].subcategory}` : 
-      meetingSpots[0].category) : 
+  const categoryInfo = meetingSpots.length > 0 ?
+    (meetingSpots[0].subcategory ?
+      `${meetingSpots[0].category}: ${meetingSpots[0].subcategory}` :
+      meetingSpots[0].category) :
     null;
 
   return (
@@ -205,7 +205,7 @@ export default function ResultsPage() {
 
           <div className="flex justify-center gap-4 mb-8">
             {resultsData?.midpoint && (
-              <Button 
+              <Button
                 onClick={openMidpointMap}
                 className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
@@ -215,9 +215,9 @@ export default function ResultsPage() {
                 View Midpoint on Map
               </Button>
             )}
-            
+
             {contactEmail && (
-              <Button 
+              <Button
                 onClick={handleAddContact}
                 className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
@@ -300,4 +300,4 @@ export default function ResultsPage() {
       )}
     </div>
   );
-} 
+}

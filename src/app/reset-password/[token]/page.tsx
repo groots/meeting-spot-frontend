@@ -26,27 +26,27 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
       setError("Password is required");
       return false;
     }
-    
+
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       return false;
     }
-    
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return false;
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
     setError("");
 
@@ -56,7 +56,7 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           token,
           password
         }),
@@ -69,12 +69,12 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
       }
 
       setSuccess(true);
-      
+
       // Redirect to login after 3 seconds
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-      
+
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -158,4 +158,4 @@ const ResetPasswordPage = ({ params }: ResetPasswordProps) => {
   );
 };
 
-export default ResetPasswordPage; 
+export default ResetPasswordPage;

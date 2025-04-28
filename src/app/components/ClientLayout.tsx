@@ -10,18 +10,18 @@ import Footer from '../../components/Footer';
 function AuthStateWrapper({ children }: { children: React.ReactNode }) {
   const { loading } = useAuth();
   const [showContent, setShowContent] = useState(false);
-  
+
   useEffect(() => {
     // If not loading or after 2 seconds max, show content regardless
     if (!loading) {
       setShowContent(true);
     }
-    
+
     // Safety timeout to ensure content is shown even if loading gets stuck
     const timer = setTimeout(() => setShowContent(true), 2000);
     return () => clearTimeout(timer);
   }, [loading]);
-  
+
   if (!showContent) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
@@ -30,7 +30,7 @@ function AuthStateWrapper({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  
+
   return <>{children}</>;
 }
 
@@ -55,4 +55,4 @@ export default function ClientLayout({
       </AuthStateWrapper>
     </AuthProvider>
   );
-} 
+}

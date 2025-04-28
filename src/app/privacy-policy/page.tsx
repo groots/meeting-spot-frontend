@@ -4,7 +4,7 @@ export default function PrivacyPolicy() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-      
+
       <div className="prose max-w-none">
         <p className="mb-4">
           <strong>Last Updated:</strong> {new Date().toLocaleDateString()}
@@ -12,8 +12,8 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-semibold mt-6 mb-3">1. Introduction</h2>
         <p>
-          Welcome to Find a Meeting Spot. We respect your privacy and are committed to protecting your personal data. 
-          This privacy policy will inform you about how we look after your personal data when you visit our website and 
+          Welcome to Find a Meeting Spot. We respect your privacy and are committed to protecting your personal data.
+          This privacy policy will inform you about how we look after your personal data when you visit our website and
           tell you about your privacy rights and how the law protects you.
         </p>
 
@@ -41,14 +41,14 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-semibold mt-6 mb-3">4. Data Security</h2>
         <p>
-          We have implemented appropriate security measures to prevent your personal data from being accidentally lost, 
-          used, or accessed in an unauthorized way. We limit access to your personal data to those employees, agents, 
+          We have implemented appropriate security measures to prevent your personal data from being accidentally lost,
+          used, or accessed in an unauthorized way. We limit access to your personal data to those employees, agents,
           contractors, and other third parties who have a business need to know.
         </p>
 
         <h2 className="text-2xl font-semibold mt-6 mb-3">5. Data Retention</h2>
         <p>
-          We will only retain your personal data for as long as necessary to fulfill the purposes we collected it for, 
+          We will only retain your personal data for as long as necessary to fulfill the purposes we collected it for,
           including for the purposes of satisfying any legal, accounting, or reporting requirements.
         </p>
 
@@ -68,7 +68,7 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-2xl font-semibold mt-6 mb-3">7. Changes to This Privacy Policy</h2>
         <p>
-          We may update our privacy policy from time to time. We will notify you of any changes by posting the new 
+          We may update our privacy policy from time to time. We will notify you of any changes by posting the new
           privacy policy on this page and updating the "Last Updated" date at the top of this privacy policy.
         </p>
 
@@ -83,4 +83,4 @@ export default function PrivacyPolicy() {
       </div>
     </div>
   );
-} 
+}
