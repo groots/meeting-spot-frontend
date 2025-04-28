@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Contact, getContacts } from '@/app/api/contacts';
-import { useAuth } from '@/app/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { getContacts, createContact } from "@/app/api/contacts";
+import { useAuth } from "@/app/contexts/AuthContext";
+import type { Contact } from '@/app/api/contacts';
 
 // Simple inline spinner component
 const SimpleSpinner = () => (
@@ -90,7 +91,8 @@ export default function ContactSelector({
       setLoadingContacts(true);
       getContacts(token)
         .then((data) => {
-          if (data && Array.isArray(data)) {
+          // Always ensure contacts is set to an array
+          if (Array.isArray(data)) {
             setContacts(data);
           } else {
             console.error("Contacts data is not an array:", data);
@@ -117,15 +119,19 @@ export default function ContactSelector({
   }
 
   // Safe lookup for defaultContact - ensure contacts is an array first
-  const defaultContact = contacts && Array.isArray(contacts) 
-    ? contacts.find((c) =>
-        (contactType === 'email' && c.email === defaultContactInfo) ||
-        (contactType === 'phone' && c.phone === defaultContactInfo)
-      ) 
-    : undefined;
+  const defaultContact = useMemo(() => {
+    if (!Array.isArray(contacts) || !contacts.length || !defaultContactInfo) return undefined;
+    
+    return contacts.find((c) =>
+      (contactType === 'email' && c.email === defaultContactInfo) ||
+      (contactType === 'phone' && c.phone === defaultContactInfo)
+    );
+  }, [contacts, contactType, defaultContactInfo]);
 
-  // Ensure contacts is treated as an array for rendering before component renders
-  const contactsArray = contacts && Array.isArray(contacts) ? contacts : [];
+  // Ensure contacts is treated as an array for rendering
+  const contactsArray = useMemo(() => {
+    return Array.isArray(contacts) ? contacts : [];
+  }, [contacts]);
 
   if (loading) {
     return <SimpleSpinner />;
@@ -174,7 +180,10 @@ export default function ContactSelector({
             <select
               onChange={(e) => {
                 const contactId = e.target.value;
-                const contact = contactsArray.find((c) => c.id === contactId) as EnhancedContact | undefined;
+                if (!contactId) return;
+                
+                // Find the selected contact safely
+                const contact = contactsArray.find((c) => c.id === contactId);
                 if (contact) {
                   const contactValue = contact.email || contact.phone || "";
                   const contactType = contact.email ? "email" : "phone";
