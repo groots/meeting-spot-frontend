@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 import { validatePassword } from '../../utils/validation';
 import PasswordStrengthMeter from '../../../components/PasswordStrengthMeter';
+import PasswordRequirements from '../../../components/PasswordRequirements';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -158,18 +159,10 @@ export default function RegisterPage() {
           </div>
 
           <PasswordStrengthMeter password={password} />
-
-          {passwordErrors.length > 0 && (
-            <div className="rounded-md bg-yellow-50 p-4">
-              <div className="text-sm text-yellow-700">
-                <ul className="list-disc pl-5 space-y-1">
-                  {passwordErrors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
+          
+          <div className="mt-2">
+            <PasswordRequirements password={password} />
+          </div>
 
           <div>
             <button

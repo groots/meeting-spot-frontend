@@ -296,14 +296,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthState(prev => ({ ...prev, error: null }));
       console.log('[Auth] 📡 Sending registration request');
 
-      // Prepare registration data
+      // Generate a username if not provided
+      let usernameToUse = username;
+      if (!usernameToUse || usernameToUse.trim() === '') {
+        // Extract username from email (before the @)
+        usernameToUse = email.split('@')[0];
+        // Append random digits to make it more unique
+        usernameToUse += Math.floor(Math.random() * 1000);
+        console.log(`[Auth] 🔠 Generated username: ${usernameToUse}`);
+      }
+
+      // Format the data to match exactly what the backend expects
       const registrationData = {
-        email,
+        email: email.trim(),
         password,
-        name, // Keep for backward compatibility
-        first_name: firstName,
-        last_name: lastName,
-        username
+        name: name.trim(),  // Keep for backward compatibility
+        first_name: firstName ? firstName.trim() : undefined,
+        last_name: lastName ? lastName.trim() : undefined,
+        username: usernameToUse.trim()
       };
 
       console.log('[Auth] 📦 Registration payload:', {
