@@ -69,7 +69,8 @@ export default function ContactSelector({
 
   // Initialize useExistingContact based on contacts outside the effect
   useEffect(() => {
-    if (Array.isArray(contacts) && contacts.length > 0 && defaultContactInfo) {
+    // Ensure contacts is an array before using find
+    if (contacts && Array.isArray(contacts) && contacts.length > 0 && defaultContactInfo) {
       // Find default contact after contacts are loaded
       const foundContact = contacts.find(
         (c) =>
@@ -78,6 +79,7 @@ export default function ContactSelector({
       );
       if (foundContact) {
         setUseExistingContact(true);
+        setSelectedContactId(foundContact.id);
       }
     }
   }, [contacts, defaultContactInfo, contactType]);
@@ -88,7 +90,7 @@ export default function ContactSelector({
       setLoadingContacts(true);
       getContacts(token)
         .then((data) => {
-          if (Array.isArray(data)) {
+          if (data && Array.isArray(data)) {
             setContacts(data);
           } else {
             console.error("Contacts data is not an array:", data);
@@ -115,18 +117,19 @@ export default function ContactSelector({
   }
 
   // Safe lookup for defaultContact - ensure contacts is an array first
-  const defaultContact = Array.isArray(contacts) ? contacts.find(
-    (c) =>
-      (contactType === 'email' && c.email === defaultContactInfo) ||
-      (contactType === 'phone' && c.phone === defaultContactInfo)
-  ) : undefined;
+  const defaultContact = contacts && Array.isArray(contacts) 
+    ? contacts.find((c) =>
+        (contactType === 'email' && c.email === defaultContactInfo) ||
+        (contactType === 'phone' && c.phone === defaultContactInfo)
+      ) 
+    : undefined;
+
+  // Ensure contacts is treated as an array for rendering before component renders
+  const contactsArray = contacts && Array.isArray(contacts) ? contacts : [];
 
   if (loading) {
     return <SimpleSpinner />;
   }
-
-  // Ensure contacts is treated as an array for rendering
-  const contactsArray = Array.isArray(contacts) ? contacts : [];
 
   return (
     <div className="space-y-4">
