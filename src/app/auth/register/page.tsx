@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 import { validatePassword } from '../../utils/validation';
+import PasswordStrengthMeter from '../../../components/PasswordStrengthMeter';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -155,6 +156,8 @@ export default function RegisterPage() {
               />
             </div>
           </div>
+
+          <PasswordStrengthMeter password={password} />
 
           {passwordErrors.length > 0 && (
             <div className="rounded-md bg-yellow-50 p-4">

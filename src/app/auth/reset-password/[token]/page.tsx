@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { API_ENDPOINTS } from '../../../config';
 import { validatePassword } from '../../../utils/validation';
+import PasswordStrengthMeter from '../../../../components/PasswordStrengthMeter';
 
 export default function ResetPasswordConfirmPage({
   params,
@@ -101,10 +102,10 @@ export default function ResetPasswordConfirmPage({
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm -space-y-px mb-5">
             <div>
               <label htmlFor="password" className="sr-only">
-                New password
+                New Password
               </label>
               <input
                 id="password"
@@ -113,28 +114,30 @@ export default function ResetPasswordConfirmPage({
                 autoComplete="new-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="New password"
+                placeholder="New Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div>
               <label htmlFor="confirm-password" className="sr-only">
-                Confirm password
+                Confirm Password
               </label>
               <input
                 id="confirm-password"
-                name="confirm-password"
+                name="confirmPassword"
                 type="password"
                 autoComplete="new-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm password"
+                placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
+
+          <PasswordStrengthMeter password={password} />
 
           {passwordErrors.length > 0 && (
             <div className="rounded-md bg-yellow-50 p-4">
