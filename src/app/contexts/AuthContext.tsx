@@ -322,15 +322,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[Auth] 🔗 Sending to endpoint:', API_ENDPOINTS.register);
 
       try {
-        console.log('[Auth] 🔧 Setting special headers');
-        const headers = {
-          ...API_HEADERS,
-          'Cache-Control': 'no-cache'
-        };
-
+        // Remove special headers that cause CORS issues
         const response = await fetch(API_ENDPOINTS.register, {
           method: 'POST',
-          headers,
+          headers: API_HEADERS,
           body: JSON.stringify(registrationData),
           // Add credentials to handle any CORS issues
           credentials: 'include'
