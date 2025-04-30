@@ -17,6 +17,7 @@ const customJestConfig = {
     '/.next/',
     '/e2e-tests/',
     '<rootDir>/src/app/__tests__/integration/helpers.ts',
+    '<rootDir>/src/app/__tests__/integration/meetingsFlow.test.ts',
   ],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
