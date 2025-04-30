@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import MeetingDetailPage from '../../../meetings/[id]/page';
+import MeetingDetailPage from '@/app/meetings/[id]/page';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
 import { useParams } from 'next/navigation';
