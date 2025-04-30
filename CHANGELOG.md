@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Meetings feature with list view and detailed meeting information pages
+- Interface for users to view all meeting requests in a centralized dashboard
+- Detail view to display meeting status, participants, and location information
+- UI for showing suggested and selected meeting places
+- Comprehensive unit and integration tests for the meetings feature
 - Backend geocoding API endpoint at `/api/v1/geocoding` to securely handle address-to-coordinates conversion
 - Updated frontend geocoding utility to use the backend endpoint instead of directly calling Google Maps API
 - Fallback geocoding option when backend service is unavailable
