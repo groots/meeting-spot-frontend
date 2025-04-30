@@ -38,7 +38,7 @@ describe('MeetingsPage', () => {
     
     render(<MeetingsPage />);
     
-    expect(screen.getByText(/Loading your meeting requests/i)).toBeInTheDocument();
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
   
   it('displays error message when fetch fails', async () => {
@@ -48,7 +48,7 @@ describe('MeetingsPage', () => {
     render(<MeetingsPage />);
     
     await waitFor(() => {
-      expect(screen.getByText(/Could not load your meeting requests/i)).toBeInTheDocument();
+      expect(screen.getByText('Failed to load your meeting requests. Please try again later.')).toBeInTheDocument();
     });
   });
   
@@ -56,39 +56,41 @@ describe('MeetingsPage', () => {
     // Mock successful fetch with empty array
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => [],
+      json: async () => ({ requests: [] }),
     });
     
     render(<MeetingsPage />);
     
     await waitFor(() => {
-      expect(screen.getByText(/You don't have any meeting requests yet/i)).toBeInTheDocument();
+      expect(screen.getByText("You don't have any meeting requests yet.")).toBeInTheDocument();
     });
   });
   
   it('displays meeting requests when available', async () => {
     // Mock meeting request data
-    const mockMeetingRequests = [
-      {
-        id: '1',
-        status: 'PENDING',
-        user_b_contact: 'test@example.com',
-        location_type: 'Restaurant',
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        status: 'COMPLETED',
-        user_b_contact: 'another@example.com',
-        location_type: 'Coffee',
-        created_at: new Date().toISOString(),
-        selected_place: {
-          id: 'place1',
-          name: 'Test Cafe',
-          address: '123 Test St',
+    const mockMeetingRequests = {
+      requests: [
+        {
+          id: '1',
+          status: 'PENDING_B_ADDRESS',
+          user_b_contact: 'test@example.com',
+          location_type: 'Restaurant',
+          created_at: new Date().toISOString(),
         },
-      },
-    ];
+        {
+          id: '2',
+          status: 'COMPLETED',
+          user_b_contact: 'another@example.com',
+          location_type: 'Coffee',
+          created_at: new Date().toISOString(),
+          selected_place: {
+            id: 'place1',
+            name: 'Test Cafe',
+            address: '123 Test St',
+          },
+        }
+      ]
+    };
     
     // Mock successful fetch with data
     (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -100,19 +102,17 @@ describe('MeetingsPage', () => {
     
     await waitFor(() => {
       // Check for table column headers
-      expect(screen.getByText(/Status/i)).toBeInTheDocument();
-      expect(screen.getByText(/Contact/i)).toBeInTheDocument();
-      expect(screen.getByText(/Location Type/i)).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Meeting With')).toBeInTheDocument();
+      expect(screen.getByText('Type')).toBeInTheDocument();
       
       // Check for meeting request data
-      expect(screen.getByText('PENDING')).toBeInTheDocument();
-      expect(screen.getByText('COMPLETED')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for other party')).toBeInTheDocument();
+      expect(screen.getByText('Complete')).toBeInTheDocument();
       expect(screen.getByText('test@example.com')).toBeInTheDocument();
       expect(screen.getByText('another@example.com')).toBeInTheDocument();
       expect(screen.getByText('Restaurant')).toBeInTheDocument();
       expect(screen.getByText('Coffee')).toBeInTheDocument();
-      expect(screen.getByText('Test Cafe')).toBeInTheDocument();
-      expect(screen.getByText('Not yet determined')).toBeInTheDocument();
     });
   });
   

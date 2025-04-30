@@ -79,7 +79,7 @@ export default function MeetingsPage() {
         
         {loading ? (
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+            <div data-testid="loading-spinner" className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
           </div>
         ) : error ? (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
