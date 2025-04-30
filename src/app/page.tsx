@@ -36,7 +36,7 @@ export default function Home() {
             <Link href="/why-choose-us" className="text-neutral-700 hover:text-primary transition-colors">
               Why Choose Us
             </Link>
-            <Link href="/subscription" className="text-neutral-700 hover:text-primary transition-colors">
+            <Link href="/pricing" className="text-neutral-700 hover:text-primary transition-colors">
               Pricing
             </Link>
           </nav>
@@ -277,7 +277,7 @@ export default function Home() {
             <h4 className="font-bold mb-4">Product</h4>
             <ul className="space-y-2 text-sm opacity-80">
               <li><a href="#" className="hover:opacity-100">Features</a></li>
-              <li><a href="#" className="hover:opacity-100">Pricing</a></li>
+              <li><Link href="/pricing" className="hover:opacity-100">Pricing</Link></li>
               <li><a href="#" className="hover:opacity-100">API</a></li>
             </ul>
           </div>
@@ -285,7 +285,7 @@ export default function Home() {
           <div>
             <h4 className="font-bold mb-4">Company</h4>
             <ul className="space-y-2 text-sm opacity-80">
-              <li><a href="#" className="hover:opacity-100">About Us</a></li>
+              <li><Link href="/why-choose-us" className="hover:opacity-100">About Us</Link></li>
               <li><a href="#" className="hover:opacity-100">Careers</a></li>
               <li><a href="#" className="hover:opacity-100">Blog</a></li>
             </ul>
@@ -294,9 +294,9 @@ export default function Home() {
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm opacity-80">
-              <li><a href="#" className="hover:opacity-100">Privacy Policy</a></li>
-              <li><a href="#" className="hover:opacity-100">Terms of Service</a></li>
-              <li><a href="#" className="hover:opacity-100">Contact Us</a></li>
+              <li><Link href="/privacy-policy" className="hover:opacity-100">Privacy Policy</Link></li>
+              <li><Link href="/terms-of-service" className="hover:opacity-100">Terms of Service</Link></li>
+              <li><Link href="/contact" className="hover:opacity-100">Contact Us</Link></li>
             </ul>
           </div>
         </div>
