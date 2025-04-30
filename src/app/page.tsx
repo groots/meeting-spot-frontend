@@ -30,39 +30,52 @@ export default function Home() {
           <span className="ml-2 font-bold text-xl">Find A Meeting Spot</span>
         </div>
 
-        <div className="flex gap-4">
-          {user && token ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="btn-accent"
-              >
-                Dashboard →
-              </Link>
-              <Link
-                href="/profile"
-                className="bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-hover transition-all"
-              >
-                Profile
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/auth/register"
-                className="btn-accent"
-              >
-                Sign up →
-              </Link>
-              <Link
-                href="/auth/login"
-                className="bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-hover transition-all"
-              >
-                Log in
-              </Link>
-            </>
-          )}
-      </div>
+        <div className="flex items-center gap-6">
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="/why-choose-us" className="text-neutral-700 hover:text-primary transition-colors">
+              Why Choose Us
+            </Link>
+            <Link href="/subscription" className="text-neutral-700 hover:text-primary transition-colors">
+              Pricing
+            </Link>
+          </nav>
+          
+          {/* Auth Buttons */}
+          <div className="flex gap-4">
+            {user && token ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="btn-accent"
+                >
+                  Dashboard →
+                </Link>
+                <Link
+                  href="/profile"
+                  className="bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-hover transition-all"
+                >
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/register"
+                  className="btn-accent"
+                >
+                  Sign up →
+                </Link>
+                <Link
+                  href="/auth/login"
+                  className="bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-hover transition-all"
+                >
+                  Log in
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Hero Section */}
