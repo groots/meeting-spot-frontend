@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const { user, logout, token, refreshUserProfile } = useAuth();
@@ -21,6 +22,12 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   
+  // Profile picture states
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Form states for editing profile
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -35,6 +42,7 @@ export default function ProfilePage() {
     if (user) {
       setFirstName(user.first_name || '');
       setLastName(user.last_name || '');
+      setProfilePicture(user.profile_picture || null);
     }
   }, [user]);
 
@@ -171,6 +179,74 @@ export default function ProfilePage() {
     }
   };
 
+  const handleProfilePictureClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      setUploadError('Please select a valid image file (JPEG, PNG, or GIF)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Image size should be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      // Create a preview of the image
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setProfilePicture(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+
+      // Here you would normally upload the image to your server
+      // For now, we'll just simulate an upload delay
+      // In a real app, you would use formData to upload the image to your server
+      
+      // Example of how you might upload it:
+      // const formData = new FormData();
+      // formData.append('profile_picture', file);
+      
+      // const response = await fetch(`${API_ENDPOINTS.profile}/picture`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //   },
+      //   body: formData,
+      // });
+      
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update user profile with the new picture URL
+      // In a real scenario, this would come from your server response
+      setEditSuccess(true);
+      setTimeout(() => setEditSuccess(false), 3000);
+      
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      setUploadError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -200,6 +276,47 @@ export default function ProfilePage() {
                 Password changed successfully!
               </div>
             )}
+
+            {/* Profile Picture Section */}
+            <div className="flex flex-col items-center mb-6">
+              <div 
+                className="relative group cursor-pointer mb-2"
+                onClick={handleProfilePictureClick}
+              >
+                <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-2 border-gray-300">
+                  {profilePicture ? (
+                    <img 
+                      src={profilePicture} 
+                      alt="Profile" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-4xl font-bold text-gray-400">
+                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-sm font-medium">Change photo</span>
+                </div>
+                {isUploading && (
+                  <div className="absolute inset-0 bg-white bg-opacity-70 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleProfilePictureChange}
+              />
+              <p className="text-sm text-gray-500">Click to upload a profile picture</p>
+              {uploadError && (
+                <p className="text-red-500 text-xs mt-1">{uploadError}</p>
+              )}
+            </div>
 
             {user && (
               <div className="space-y-4">

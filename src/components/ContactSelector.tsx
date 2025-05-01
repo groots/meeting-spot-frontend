@@ -137,6 +137,21 @@ export default function ContactSelector({
     return <SimpleSpinner />;
   }
 
+  // Email icon SVG
+  const EmailIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+    </svg>
+  );
+
+  // Phone icon SVG
+  const PhoneIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+    </svg>
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -192,7 +207,7 @@ export default function ContactSelector({
                 }
               }}
               value={selectedContactId || ""}
-              className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
+              className="w-full border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
             >
               <option value="" disabled>Select a contact</option>
               {contactsArray.map((contact) => {
@@ -236,35 +251,45 @@ export default function ContactSelector({
               <Label htmlFor="contactType" className="text-gray-600 text-sm">
                 Contact Type
               </Label>
-              <select
-                id="contactType"
-                value={contactType}
-                onChange={(e) => {
-                  handleContactTypeChange(e.target.value as "email" | "phone");
-                }}
-                className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
-              >
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
-              </select>
+              <div className="relative">
+                <select
+                  id="contactType"
+                  value={contactType}
+                  onChange={(e) => {
+                    handleContactTypeChange(e.target.value as "email" | "phone");
+                  }}
+                  className="w-full border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2 pl-10"
+                >
+                  <option value="email">Email</option>
+                  <option value="phone">Phone</option>
+                </select>
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  {contactType === "email" ? <EmailIcon /> : <PhoneIcon />}
+                </div>
+              </div>
             </div>
 
             <div className="flex-1 space-y-1">
               <Label htmlFor="contactInfo" className="text-gray-600 text-sm">
                 {contactType === "email" ? "Email Address" : "Phone Number"}
               </Label>
-              <Input
-                id="contactInfo"
-                type={contactType === "email" ? "email" : "tel"}
-                placeholder={
-                  contactType === "email" ? "email@example.com" : "+1 (555) 555-5555"
-                }
-                value={contactInfo}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleContactInfoChange(e.target.value);
-                }}
-                className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
-              />
+              <div className="relative">
+                <Input
+                  id="contactInfo"
+                  type={contactType === "email" ? "email" : "tel"}
+                  placeholder={
+                    contactType === "email" ? "email@example.com" : "+1 (555) 555-5555"
+                  }
+                  value={contactInfo}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleContactInfoChange(e.target.value);
+                  }}
+                  className="w-full pl-10 border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  {contactType === "email" ? <EmailIcon /> : <PhoneIcon />}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -278,7 +303,7 @@ export default function ContactSelector({
               placeholder="John Doe"
               value={contactName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContactName(e.target.value)}
-              className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
+              className="w-full border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
             />
           </div>
 
