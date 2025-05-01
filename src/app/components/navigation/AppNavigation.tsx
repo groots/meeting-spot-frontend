@@ -75,9 +75,20 @@ export default function AppNavigation() {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
               >
-                <span className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-medium">
-                  {user.email?.charAt(0).toUpperCase() || 'U'}
-                </span>
+                <div className="h-8 w-8 rounded-full flex items-center justify-center overflow-hidden">
+                  {user.profile_picture ? (
+                    <img src={user.profile_picture} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-medium">
+                      {user.first_name && user.last_name 
+                        ? `${user.first_name[0]}${user.last_name[0]}`
+                        : user.first_name 
+                          ? user.first_name[0] 
+                          : user.email?.charAt(0).toUpperCase() || 'U'
+                      }
+                    </div>
+                  )}
+                </div>
                 <svg className="ml-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>

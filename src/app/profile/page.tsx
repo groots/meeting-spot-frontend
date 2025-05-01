@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const { user, logout, token, refreshUserProfile } = useAuth();
@@ -85,6 +86,19 @@ export default function ProfilePage() {
     setIsSaving(true);
     setEditError(null);
     setEditSuccess(false);
+
+    // Validate required fields
+    if (!firstName.trim()) {
+      setEditError('First name is required');
+      setIsSaving(false);
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setEditError('Last name is required');
+      setIsSaving(false);
+      return;
+    }
 
     try {
       if (!token) {
@@ -206,6 +220,31 @@ export default function ProfilePage() {
     setUploadError(null);
 
     try {
+      // Create a form data object to send the file to the server
+      const formData = new FormData();
+      formData.append('profile_picture', file);
+      
+      // Send the file to the server
+      const response = await fetch(`${API_ENDPOINTS.profile}/picture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload profile picture');
+      }
+      
+      // Get the picture URL from the response
+      const data = await response.json();
+      const pictureUrl = data.profile_picture_url;
+      
+      // Update the UI with the new picture
+      setProfilePicture(pictureUrl);
+      
       // Create a preview of the image
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -214,28 +253,11 @@ export default function ProfilePage() {
         }
       };
       reader.readAsDataURL(file);
-
-      // Here you would normally upload the image to your server
-      // For now, we'll just simulate an upload delay
-      // In a real app, you would use formData to upload the image to your server
       
-      // Example of how you might upload it:
-      // const formData = new FormData();
-      // formData.append('profile_picture', file);
+      // Refresh user profile to get updated user data
+      await refreshUserProfile();
       
-      // const response = await fetch(`${API_ENDPOINTS.profile}/picture`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //   },
-      //   body: formData,
-      // });
-      
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update user profile with the new picture URL
-      // In a real scenario, this would come from your server response
+      // Show success message
       setEditSuccess(true);
       setTimeout(() => setEditSuccess(false), 3000);
       
@@ -292,7 +314,11 @@ export default function ProfilePage() {
                     />
                   ) : (
                     <div className="text-4xl font-bold text-gray-400">
-                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      {user?.first_name && user?.last_name 
+                        ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
+                        : user?.first_name 
+                          ? user.first_name[0].toUpperCase()
+                          : user?.email?.charAt(0).toUpperCase() || 'U'}
                     </div>
                   )}
                 </div>
@@ -336,15 +362,23 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
-                  <div className="mt-1 text-gray-900">
+                  <div className="mt-1 text-gray-900 flex items-center">
                     {user.is_premium ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800">
                         Premium
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
-                        Free
-                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
+                          Free
+                        </span>
+                        <Link 
+                          href="/subscription" 
+                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Upgrade to Premium
+                        </Link>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -514,7 +548,7 @@ export default function ProfilePage() {
                       <form onSubmit={handleSaveProfile} className="mt-4">
                         <div className="mb-4">
                           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                            First Name
+                            First Name <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -523,12 +557,13 @@ export default function ProfilePage() {
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            required
                           />
                         </div>
                         
                         <div className="mb-4">
                           <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                            Last Name
+                            Last Name <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -537,6 +572,7 @@ export default function ProfilePage() {
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            required
                           />
                         </div>
 
