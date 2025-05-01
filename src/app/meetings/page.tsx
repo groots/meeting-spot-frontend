@@ -56,29 +56,45 @@ export default function MeetingsPage() {
       setLoading(true);
       setError(null);
 
-      const { data, error: apiError } = await getMeetingRequestsWithContacts();
-      
-      console.log('API Response with contacts:', data);
-      
-      if (apiError) {
-        console.error('Error fetching meeting requests:', apiError);
-        setError(apiError);
-        setLoading(false);
-        return;
-      }
-
-      if (data && Array.isArray(data)) {
-        // Log the first meeting request to examine its structure
-        if (data.length > 0) {
-          console.log('First meeting request:', data[0]);
+      try {
+        // Try to use the enhanced contact fetcher function
+        const { data, error: apiError } = await getMeetingRequestsWithContacts();
+        
+        console.log('API Response with contacts:', data);
+        
+        if (apiError) {
+          console.error('Error fetching meeting requests:', apiError);
+          setError(apiError);
+          setLoading(false);
+          return;
         }
-        setMeetingRequests(data);
-      } else {
-        // If data is not an array, set to empty array
-        setMeetingRequests([]);
+
+        if (data && Array.isArray(data)) {
+          setMeetingRequests(data);
+        } else {
+          // If data is not an array, set to empty array
+          setMeetingRequests([]);
+        }
+      } catch (err) {
+        console.error('Failed to use enhanced meeting request fetcher, falling back to basic fetch:', err);
+        
+        // Fallback to regular API call
+        const { data, error: fallbackError } = await apiGet<MeetingRequest[]>(API_ENDPOINTS.meetingRequests);
+        
+        if (fallbackError) {
+          setError(fallbackError);
+          setLoading(false);
+          return;
+        }
+
+        if (data && Array.isArray(data)) {
+          setMeetingRequests(data);
+        } else {
+          setMeetingRequests([]);
+        }
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     fetchMeetingRequests();
