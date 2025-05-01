@@ -322,37 +322,58 @@ export default function MeetingsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedRequests.map((meeting) => {
-                  const statusDisplay = getStatusDisplay(meeting.status);
+                  // Ensure we have a valid status
+                  const meetingStatus = meeting.status || 'unknown';
+                  const statusDisplay = getStatusDisplay(meetingStatus);
+                  
+                  // Get meeting ID safely
+                  const meetingId = meeting.id || meeting.request_id || '';
+                  
+                  // Get contact information safely
+                  const contactName = meeting.user_b_contact_details?.name || null;
+                  const contactEmail = meeting.user_b_contact_details?.email || meeting.user_b_contact || '';
+                  const contactPhone = meeting.user_b_contact_details?.phone || null;
+                  
                   return (
-                    <tr key={meeting.id || meeting.request_id}>
+                    <tr key={meetingId}>
+                      {/* Status Cell */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusDisplay.color}`}>
                           {statusDisplay.text}
                         </span>
                       </td>
+                      
+                      {/* Contact Cell */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {meeting.user_b_contact_details?.name || 
-                           (meeting.user_b_contact_details ? 
-                            (meeting.user_b_contact_details.email || meeting.user_b_contact_details.phone) : 
-                            meeting.user_b_contact || 'Unknown')}
+                          {contactName || contactEmail || 'Unknown'}
                         </div>
-                        {/* Show email/phone as secondary info if name is available */}
-                        {meeting.user_b_contact_details?.name && 
+                        {contactName && contactEmail && (
                           <div className="text-xs text-gray-500">
-                            {meeting.user_b_contact_details.email || meeting.user_b_contact_details.phone || meeting.user_b_contact}
+                            {contactEmail}
                           </div>
-                        }
+                        )}
+                        {contactPhone && (
+                          <div className="text-xs text-gray-500">
+                            {contactPhone}
+                          </div>
+                        )}
                       </td>
+                      
+                      {/* Location Type Cell */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{meeting.location_type}</div>
+                        <div className="text-sm text-gray-500">{meeting.location_type || 'Not specified'}</div>
                       </td>
+                      
+                      {/* Created Date Cell */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(meeting.created_at)}
+                        {meeting.created_at ? formatDate(meeting.created_at) : 'Unknown'}
                       </td>
+                      
+                      {/* Actions Cell */}
                       <td className="px-6 py-4 whitespace-nowrap flex space-x-4">
                         <Link
-                          href={`/meetings/${meeting.id || meeting.request_id}`}
+                          href={`/meetings/${meetingId}`}
                           className="text-blue-600 hover:text-blue-900 flex items-center"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -362,11 +383,11 @@ export default function MeetingsPage() {
                           View Details
                         </Link>
                         <button
-                          onClick={() => deleteMeetingRequest(meeting.id || meeting.request_id || '')}
+                          onClick={() => deleteMeetingRequest(meetingId)}
                           disabled={!!deleteLoading}
                           className="text-red-600 hover:text-red-900 flex items-center"
                         >
-                          {deleteLoading === (meeting.id || meeting.request_id) ? (
+                          {deleteLoading === meetingId ? (
                             <svg className="animate-spin h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
