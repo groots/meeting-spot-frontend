@@ -25,6 +25,9 @@ export default function WaitingPage() {
   const pollTimeoutRef = useRef<NodeJS.Timeout>();
   const pollCountRef = useRef(0); // Track number of polls
   const [pollingStopped, setPollingStopped] = useState(false); // State for manual refresh trigger
+  const [isResendingInvitation, setIsResendingInvitation] = useState(false);
+  const [resendCooldownMinutes, setResendCooldownMinutes] = useState(0);
+  const [lastResendTime, setLastResendTime] = useState<Date | null>(null);
 
   const checkStatus = useCallback(async () => {
     try {
@@ -75,6 +78,42 @@ export default function WaitingPage() {
     }
   }, [requestId, router, token]);
 
+  const resendInvitation = async () => {
+    try {
+      setIsResendingInvitation(true);
+      setError(null);
+      
+      const response = await fetch(API_ENDPOINTS.meetingRequestResendInvitation(requestId), {
+        method: 'POST',
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (response.status === 429) {
+        // Rate limited - set the cooldown timer
+        setResendCooldownMinutes(data.cooldown_remaining_minutes || 30);
+        setLastResendTime(new Date());
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to resend invitation');
+      }
+      
+      // Successfully resent invitation
+      setLastResendTime(new Date());
+      setResendCooldownMinutes(30); // Reset to full cooldown period
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resend invitation');
+    } finally {
+      setIsResendingInvitation(false);
+    }
+  };
+
   // Effect for initial fetch
   useEffect(() => {
     if (requestId) {
@@ -89,6 +128,24 @@ export default function WaitingPage() {
     };
     // Rerun if requestId changes
   }, [requestId, checkStatus]);
+  
+  // Effect to update the resend cooldown timer
+  useEffect(() => {
+    if (!lastResendTime || resendCooldownMinutes <= 0) return;
+    
+    const intervalId = setInterval(() => {
+      const elapsedMinutes = Math.floor((new Date().getTime() - lastResendTime.getTime()) / (60 * 1000));
+      const remainingMinutes = Math.max(0, resendCooldownMinutes - elapsedMinutes);
+      
+      setResendCooldownMinutes(remainingMinutes);
+      
+      if (remainingMinutes <= 0) {
+        clearInterval(intervalId);
+      }
+    }, 30000); // Update every 30 seconds
+    
+    return () => clearInterval(intervalId);
+  }, [lastResendTime, resendCooldownMinutes]);
 
   // --- UI Rendering ---
   if (isLoading && status === null) { // Show initial loading state only
@@ -167,6 +224,38 @@ export default function WaitingPage() {
                   <p className="text-sm text-muted-foreground">
                     Request ID: {requestId}
                   </p>
+                  
+                  {/* Resend Invitation Button - only show for pending_b_address status */}
+                  {status === 'pending_b_address' && (
+                    <div className="mt-4 w-full">
+                      <Button
+                        onClick={resendInvitation}
+                        className="w-full"
+                        variant="outline"
+                        disabled={isResendingInvitation || resendCooldownMinutes > 0}
+                      >
+                        {isResendingInvitation ? (
+                          <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                            Resending...
+                          </div>
+                        ) : resendCooldownMinutes > 0 ? (
+                          `Resend Available in ${resendCooldownMinutes} minutes`
+                        ) : (
+                          'Resend Invitation'
+                        )}
+                      </Button>
+                      {lastResendTime && resendCooldownMinutes === 0 && (
+                        <p className="text-xs text-green-600 mt-1">Invitation can be resent now</p>
+                      )}
+                      {lastResendTime && resendCooldownMinutes > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Last sent: {lastResendTime.toLocaleTimeString()}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
                   {/* Rate Limit Message */}
                   {rateLimited && (
                     <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-md w-full">
@@ -175,6 +264,7 @@ export default function WaitingPage() {
                       </p>
                     </div>
                   )}
+                  
                   {/* Manual Refresh Section */}
                    {pollingStopped && !error && (
                      <div className="mt-4 p-3 bg-blue-100 text-blue-800 rounded-md w-full">
