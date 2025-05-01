@@ -31,6 +31,7 @@ interface User {
   is_oauth_user: boolean;
   is_premium: boolean;
   subscription?: Subscription;
+  profile_picture?: string;
 }
 
 interface AuthState {
