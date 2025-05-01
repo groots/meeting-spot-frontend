@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
 import ProtectedRoute from '@/app/components/ProtectedRoute';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { apiGet } from '@/app/utils/api';
 
 interface MeetingRequest {
   id: string;
@@ -41,6 +42,7 @@ interface MeetingRequest {
 
 export default function MeetingDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const { token } = useAuth();
   const [meetingRequest, setMeetingRequest] = useState<MeetingRequest | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,26 +52,23 @@ export default function MeetingDetailPage() {
     const fetchMeetingRequest = async () => {
       if (!token || !params?.id) return;
 
-      try {
-        const response = await fetch(`${API_ENDPOINTS.meetingRequests}/${params.id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+      setLoading(true);
+      setError(null);
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch meeting request');
-        }
-
-        const data = await response.json();
-        setMeetingRequest(data);
+      const { data, error: apiError } = await apiGet<MeetingRequest>(`${API_ENDPOINTS.meetingRequests}/${params.id}`);
+      
+      if (apiError) {
+        console.error('Error fetching meeting request:', apiError);
+        setError(apiError);
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching meeting request:', err);
-        setError('Failed to load meeting details. Please try again later.');
-        setLoading(false);
+        return;
       }
+
+      if (data) {
+        setMeetingRequest(data);
+      }
+      
+      setLoading(false);
     };
 
     fetchMeetingRequest();

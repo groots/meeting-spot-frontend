@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_ENDPOINTS, API_HEADERS } from '../config';
 import { useRouter } from 'next/navigation';
+import { initApiHelpers } from '../utils/api';
 
 interface Subscription {
   id: string;
@@ -69,6 +70,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     error: null,
   });
   const router = useRouter();
+
+  // Initialize the API helpers with auth callbacks
+  useEffect(() => {
+    initApiHelpers({
+      onTokenExpired: () => {
+        console.log('[Auth] 🔑 Token expired callback triggered');
+        clearAuthStorage();
+        setAuthState(prev => ({
+          ...prev,
+          user: null,
+          token: null,
+          refreshToken: null,
+          loading: false,
+          error: 'Your session has expired. Please log in again.',
+        }));
+        router.push('/auth/login?expired=true');
+      },
+      onUnauthorized: () => {
+        console.log('[Auth] 🔒 Unauthorized callback triggered');
+        router.push('/auth/login?unauthorized=true');
+      },
+      getToken: () => authState.token,
+    });
+  }, [authState.token, router]);
 
   useEffect(() => {
     // Check if user is logged in on mount

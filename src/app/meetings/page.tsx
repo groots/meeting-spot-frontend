@@ -6,6 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import ProtectedRoute from '@/app/components/ProtectedRoute';
 import { API_ENDPOINTS } from '@/app/config';
 import { formatDistanceToNow } from 'date-fns';
+import { apiGet } from '@/app/utils/api';
 
 // Define the MeetingRequest interface
 interface MeetingRequest {
@@ -34,26 +35,25 @@ export default function MeetingsPage() {
     const fetchMeetingRequests = async () => {
       if (!token) return;
 
-      try {
-        const response = await fetch(`${API_ENDPOINTS.meetingRequests}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+      setLoading(true);
+      setError(null);
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch meeting requests');
-        }
-
-        const data = await response.json();
-        setMeetingRequests(data.requests || []);
+      const { data, error: apiError } = await apiGet<MeetingRequest[]>(API_ENDPOINTS.meetingRequests);
+      
+      if (apiError) {
+        console.error('Error fetching meeting requests:', apiError);
+        setError(apiError);
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching meeting requests:', err);
-        setError('Failed to load your meeting requests. Please try again later.');
-        setLoading(false);
+        return;
       }
+
+      if (data) {
+        setMeetingRequests(data);
+      } else {
+        setMeetingRequests([]);
+      }
+      
+      setLoading(false);
     };
 
     fetchMeetingRequests();
