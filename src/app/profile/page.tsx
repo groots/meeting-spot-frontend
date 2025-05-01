@@ -32,6 +32,7 @@ export default function ProfilePage() {
   // Form states for editing profile
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   
   // Form states for changing password
   const [currentPassword, setCurrentPassword] = useState('');
@@ -43,6 +44,7 @@ export default function ProfilePage() {
     if (user) {
       setFirstName(user.first_name || '');
       setLastName(user.last_name || '');
+      setPhone(user.phone || '');
       setProfilePicture(user.profile_picture || null);
     }
   }, [user]);
@@ -114,6 +116,7 @@ export default function ProfilePage() {
         body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,
+          phone: phone
         }),
       });
 
@@ -199,71 +202,41 @@ export default function ProfilePage() {
     }
   };
 
-  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
-      setUploadError('Please select a valid image file (JPEG, PNG, or GIF)');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image size should be less than 5MB');
-      return;
-    }
-
+  const handleProfilePictureUpload = async (file: File) => {
     setIsUploading(true);
     setUploadError(null);
-
+    
     try {
-      // Create a form data object to send the file to the server
       const formData = new FormData();
       formData.append('profile_picture', file);
       
-      // Send the file to the server
-      const response = await fetch(`${API_ENDPOINTS.profile}/picture`, {
+      // Important: Do NOT set Content-Type header with FormData
+      // The browser will set the appropriate multipart/form-data Content-Type with boundary
+      const response = await fetch(API_ENDPOINTS.profilePicture, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          // Let the browser set the Content-Type for FormData
         },
-        body: formData,
+        body: formData
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to upload profile picture');
+        const errorData = await response.json().catch(() => ({ message: 'Error uploading picture' }));
+        throw new Error(errorData.message || 'Failed to upload profile picture');
       }
       
-      // Get the picture URL from the response
       const data = await response.json();
-      const pictureUrl = data.profile_picture_url;
       
-      // Update the UI with the new picture
-      setProfilePicture(pictureUrl);
-      
-      // Create a preview of the image
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setProfilePicture(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-      
-      // Refresh user profile to get updated user data
+      // Update the profile picture URL
+      setProfilePicture(data.profile_picture_url);
+      // Refresh the user profile to get the updated picture URL
       await refreshUserProfile();
       
-      // Show success message
       setEditSuccess(true);
-      setTimeout(() => setEditSuccess(false), 3000);
-      
     } catch (error) {
       console.error('Error uploading profile picture:', error);
-      setUploadError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload profile picture');
     } finally {
       setIsUploading(false);
     }
@@ -331,12 +304,30 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
+              <input
+                ref={fileInputRef}
+                type="file"
                 className="hidden" 
                 accept="image/*" 
-                onChange={handleProfilePictureChange}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                      setUploadError('Please select a valid image file (JPEG, PNG, or GIF)');
+                      return;
+                    }
+                    
+                    // Validate file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                      setUploadError('Image size should be less than 5MB');
+                      return;
+                    }
+                    
+                    handleProfilePictureUpload(file);
+                  }
+                }}
               />
               <p className="text-sm text-gray-500">Click to upload a profile picture</p>
               {uploadError && (
@@ -573,6 +564,20 @@ export default function ProfilePage() {
                             onChange={(e) => setLastName(e.target.value)}
                             className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             required
+                          />
+                        </div>
+
+                        <div className="mb-4">
+                          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                            Phone
+                          </label>
+                          <input
+                            type="text"
+                            id="phone"
+                            name="phone"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                           />
                         </div>
 

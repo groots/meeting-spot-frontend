@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
@@ -49,7 +50,7 @@ export default function RegisterPage() {
     try {
       // Combine name fields to maintain backward compatibility
       const fullName = `${firstName} ${lastName}`.trim();
-      await register(email, password, fullName, firstName, lastName, username);
+      await register(email, password, fullName, firstName, lastName, username, phone);
       router.push('/');
     } catch (err) {
       // Error is handled by AuthContext
@@ -138,6 +139,21 @@ export default function RegisterPage() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="sr-only">
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Phone Number (optional)"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
             <div>

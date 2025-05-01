@@ -1,7 +1,7 @@
 /**
  * API utility functions for handling requests
  */
-import { API_HEADERS } from '@/app/config';
+import { API_HEADERS, API_ENDPOINTS } from '@/app/config';
 
 // Token expiration handling
 let authCallbacks = {
@@ -120,25 +120,16 @@ export async function apiGet<T>(url: string, options?: RequestInit): Promise<{ d
 
     // Handle other error responses
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-      console.log(`[API] Error response:`, errorData);
-      return { data: null, error: errorData.message || `Error: ${response.status}` };
+      const errorData = await response.json();
+      return { data: null, error: errorData.error || errorData.message || `Failed with status ${response.status}` };
     }
 
-    // Handle case where response is ok but empty
-    if (response.status === 204) {
-      console.log(`[API] Empty response (204)`);
-      return { data: null, error: null };
-    }
-
-    // Parse JSON response
-    const responseData = await response.json();
-    console.log(`[API] Response data:`, responseData);
-    
-    return { data: responseData as T, error: null };
-  } catch (error) {
-    console.error('[API] Error:', error);
-    return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+    // Parse successful response
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err) {
+    console.error('[API] Error in GET request:', err);
+    return { data: null, error: 'An unexpected error occurred while contacting the server.' };
   }
 }
 
@@ -237,4 +228,48 @@ export async function apiPut<T>(url: string, body: any, options: RequestInit = {
     },
     body: JSON.stringify(body),
   });
+}
+
+/**
+ * Get meeting requests with contact details
+ */
+export async function getMeetingRequestsWithContacts(): Promise<{ data: any[] | null; error: string | null }> {
+  const { data: meetingRequests, error } = await apiGet<any[]>(API_ENDPOINTS.meetingRequests);
+  
+  if (error || !meetingRequests) {
+    return { data: null, error: error || 'Failed to fetch meeting requests' };
+  }
+  
+  try {
+    // Get all contacts to look up associated contacts for each meeting
+    const { data: contacts, error: contactsError } = await apiGet<any[]>(API_ENDPOINTS.contacts);
+    
+    if (contactsError || !contacts) {
+      console.error('Failed to fetch contacts:', contactsError);
+      return { data: meetingRequests, error: null }; // Return meetings without contacts
+    }
+    
+    // Map meeting requests with contact details
+    const meetingsWithContacts = meetingRequests.map((meeting: any) => {
+      // Find matching contact by email
+      const matchingContact = contacts.find((contact: any) => 
+        contact.email === meeting.user_b_contact ||
+        contact.phone === meeting.user_b_contact
+      );
+      
+      if (matchingContact) {
+        return {
+          ...meeting,
+          user_b_contact_details: matchingContact
+        };
+      }
+      
+      return meeting;
+    });
+    
+    return { data: meetingsWithContacts, error: null };
+  } catch (err) {
+    console.error('Error processing meeting requests with contacts:', err);
+    return { data: meetingRequests, error: null }; // Return original meetings on error
+  }
 } 

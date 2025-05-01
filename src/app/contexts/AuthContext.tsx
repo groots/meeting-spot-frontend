@@ -32,6 +32,7 @@ interface User {
   is_premium: boolean;
   subscription?: Subscription;
   profile_picture?: string;
+  phone?: string;
 }
 
 interface AuthState {
@@ -50,7 +51,8 @@ interface AuthContextType extends AuthState {
     name: string,
     firstName?: string,
     lastName?: string,
-    username?: string
+    username?: string,
+    phone?: string
   ) => Promise<void>;
   logout: () => void;
   refreshUserProfile: () => Promise<void>;
@@ -316,82 +318,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     firstName?: string,
     lastName?: string,
-    username?: string
+    username?: string,
+    phone?: string
   ) => {
     console.log('[Auth] 🔄 Starting registration process');
     try {
-      setAuthState(prev => ({ ...prev, error: null }));
-      console.log('[Auth] 📡 Sending registration request');
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
 
-      // Generate a username if not provided
-      let usernameToUse = username;
-      if (!usernameToUse || usernameToUse.trim() === '') {
-        // Extract username from email (before the @)
-        usernameToUse = email.split('@')[0];
-        // Append random digits to make it more unique
-        usernameToUse += Math.floor(Math.random() * 1000);
-        console.log(`[Auth] 🔠 Generated username: ${usernameToUse}`);
-      }
+      // Clear any existing tokens
+      clearAuthStorage();
 
-      // Try with a simplified payload to avoid potential issues with the backend
-      // Some backends might have strict validation on fields
-      const registrationData = {
-        email: email.trim(),
-        password,
-        name: name.trim()  // Keep for backward compatibility
-        // Omit other fields that might be causing issues
-      };
+      // Prepare registration payload with optional fields
+      const payload: any = { email, password };
+      
+      // Only add fields that have values
+      if (name) payload.name = name;
+      if (firstName) payload.first_name = firstName;
+      if (lastName) payload.last_name = lastName;
+      if (username) payload.username = username;
+      if (phone) payload.phone = phone;
 
-      console.log('[Auth] 📦 Registration payload:', {
-        ...registrationData,
-        password: '[REDACTED]'
+      const response = await fetch(API_ENDPOINTS.register, {
+        method: 'POST',
+        headers: API_HEADERS,
+        body: JSON.stringify(payload),
       });
-      console.log('[Auth] 🔗 Sending to endpoint:', API_ENDPOINTS.register);
 
-      try {
-        // Remove special headers that cause CORS issues
-        const response = await fetch(API_ENDPOINTS.register, {
-          method: 'POST',
-          headers: API_HEADERS,
-          body: JSON.stringify(registrationData),
-          // Add credentials to handle any CORS issues
-          credentials: 'include'
-        });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Auth] ✅ Registration successful');
 
-        // Log the response status
-        console.log(`[Auth] 📥 Registration response status: ${response.status}`);
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('[Auth] ✅ Registration successful');
-
-          // After registration, log the user in
-          await login(email, password, true); // Remember by default for new registrations
-        } else {
-          // Handle different error status codes
-          console.error(`[Auth] ❌ Registration failed with status: ${response.status}`);
+        // After registration, log the user in
+        await login(email, password, true); // Remember by default for new registrations
+      } else {
+        // Handle different error status codes
+        console.error(`[Auth] ❌ Registration failed with status: ${response.status}`);
+        
+        try {
+          const errorData = await response.json();
+          console.error(`[Auth] 📋 Error response:`, errorData);
+          throw new Error(errorData.message || 'Registration failed');
+        } catch (parseError) {
+          // Handle error if response is not JSON
+          console.error('[Auth] 🔄 Failed to parse error response:', parseError);
           
-          try {
-            const errorData = await response.json();
-            console.error(`[Auth] 📋 Error response:`, errorData);
-            throw new Error(errorData.message || 'Registration failed');
-          } catch (parseError) {
-            // Handle error if response is not JSON
-            console.error('[Auth] 🔄 Failed to parse error response:', parseError);
-            
-            // Try to get the raw text
-            const rawText = await response.text();
-            console.error('[Auth] 📄 Raw error response:', rawText);
-            
-            throw new Error(`Registration failed with status ${response.status}`);
-          }
+          // Try to get the raw text
+          const rawText = await response.text();
+          console.error('[Auth] 📄 Raw error response:', rawText);
+          
+          throw new Error(`Registration failed with status ${response.status}`);
         }
-      } catch (fetchError) {
-        console.error('[Auth] 🔌 Network or fetch error:', fetchError);
-        throw fetchError;
       }
     } catch (err) {
-      console.error('[Auth] 💥 Registration error:', err);
+      console.error('[Auth] �� Registration error:', err);
       setAuthState(prev => ({
         ...prev,
         error: err instanceof Error ? err.message : 'An error occurred',

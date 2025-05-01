@@ -6,7 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import ProtectedRoute from '@/app/components/ProtectedRoute';
 import { API_ENDPOINTS } from '@/app/config';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { apiGet } from '@/app/utils/api';
+import { apiGet, getMeetingRequestsWithContacts } from '@/app/utils/api';
 
 // Define the MeetingRequest interface
 interface MeetingRequest {
@@ -56,10 +56,9 @@ export default function MeetingsPage() {
       setLoading(true);
       setError(null);
 
-      const { data, error: apiError } = await apiGet<MeetingRequest[]>(API_ENDPOINTS.meetingRequests);
+      const { data, error: apiError } = await getMeetingRequestsWithContacts();
       
-      // Log the actual API response for debugging
-      console.log('API Response:', data);
+      console.log('API Response with contacts:', data);
       
       if (apiError) {
         console.error('Error fetching meeting requests:', apiError);

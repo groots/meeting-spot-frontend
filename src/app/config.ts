@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
   login: `${API_BASE_URL}/v1/auth/login`,
   register: `${API_BASE_URL}/v1/auth/register`,
   profile: `${API_BASE_URL}/v1/auth/me`,
+  profilePicture: `${API_BASE_URL}/v1/auth/me/picture`,
   refresh: `${API_BASE_URL}/v1/auth/refresh`,
   resetPassword: `${API_BASE_URL}/v1/auth/reset-password`,
   resetPasswordConfirm: `${API_BASE_URL}/v1/auth/reset-password/confirm`,
