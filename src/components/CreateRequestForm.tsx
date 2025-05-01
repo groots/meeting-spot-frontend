@@ -109,7 +109,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
 
     // Ensure coordinates are present
     if (!coords.lat || !coords.lon) {
-      setError('Location coordinates are missing. Please use the "Get Current Location" button or enter a valid address.');
+      setError('Location information is incomplete. Please try using the "Use my current location" button again or enter a valid address that can be found on Google Maps.');
       setIsLoading(false);
       setCurrentStep(1);
       return;
