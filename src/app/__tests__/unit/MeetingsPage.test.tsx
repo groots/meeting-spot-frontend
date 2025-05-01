@@ -49,8 +49,7 @@ describe('MeetingsPage', () => {
     // Mock API to return an error
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: null,
-      error: 'Failed to fetch',
-      status: 500
+      error: 'Failed to fetch'
     });
     
     render(<MeetingsPage />);
@@ -64,8 +63,7 @@ describe('MeetingsPage', () => {
     // Mock successful API call with empty array
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: [],
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingsPage />);
@@ -102,8 +100,7 @@ describe('MeetingsPage', () => {
     // Mock successful API call with data
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: mockMeetingRequests,
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingsPage />);
@@ -111,11 +108,11 @@ describe('MeetingsPage', () => {
     await waitFor(() => {
       // Check for table column headers
       expect(screen.getByText('Status')).toBeInTheDocument();
-      expect(screen.getByText('Meeting With')).toBeInTheDocument();
-      expect(screen.getByText('Type')).toBeInTheDocument();
+      expect(screen.getByText('Contact')).toBeInTheDocument();
+      expect(screen.getByText('Location Type')).toBeInTheDocument();
       
       // Check for meeting request data
-      expect(screen.getByText('Waiting for other party')).toBeInTheDocument();
+      expect(screen.getByText('Awaiting Address')).toBeInTheDocument();
       expect(screen.getByText('Complete')).toBeInTheDocument();
       expect(screen.getByText('test@example.com')).toBeInTheDocument();
       expect(screen.getByText('another@example.com')).toBeInTheDocument();

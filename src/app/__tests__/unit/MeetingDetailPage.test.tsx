@@ -60,8 +60,7 @@ describe('MeetingDetailPage', () => {
     // Mock API to return an error
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: null,
-      error: 'Failed to fetch',
-      status: 500
+      error: 'Failed to fetch'
     });
     
     render(<MeetingDetailPage />);
@@ -75,8 +74,7 @@ describe('MeetingDetailPage', () => {
     // Mock successful API call with null data
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: null,
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingDetailPage />);
@@ -102,8 +100,7 @@ describe('MeetingDetailPage', () => {
     // Mock successful API call with data
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: mockMeetingRequest,
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingDetailPage />);
@@ -140,8 +137,7 @@ describe('MeetingDetailPage', () => {
     // Mock successful API call with data
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: mockMeetingRequest,
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingDetailPage />);
@@ -190,8 +186,7 @@ describe('MeetingDetailPage', () => {
     // Mock successful API call with data
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: mockMeetingRequest,
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingDetailPage />);
@@ -213,8 +208,7 @@ describe('MeetingDetailPage', () => {
     // Mock API to resolve with null data
     jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
       data: null,
-      error: null,
-      status: 200
+      error: null
     });
     
     render(<MeetingDetailPage />);
