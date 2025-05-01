@@ -58,6 +58,9 @@ export default function MeetingsPage() {
 
       const { data, error: apiError } = await apiGet<MeetingRequest[]>(API_ENDPOINTS.meetingRequests);
       
+      // Log the actual API response for debugging
+      console.log('API Response:', data);
+      
       if (apiError) {
         console.error('Error fetching meeting requests:', apiError);
         setError(apiError);
@@ -66,6 +69,10 @@ export default function MeetingsPage() {
       }
 
       if (data && Array.isArray(data)) {
+        // Log the first meeting request to examine its structure
+        if (data.length > 0) {
+          console.log('First meeting request:', data[0]);
+        }
         setMeetingRequests(data);
       } else {
         // If data is not an array, set to empty array
@@ -79,7 +86,10 @@ export default function MeetingsPage() {
   }, [token]);
 
   const getStatusDisplay = (status: string) => {
-    switch (status) {
+    // Convert status to uppercase for consistent handling
+    const normalizedStatus = status.toUpperCase();
+    
+    switch (normalizedStatus) {
       case 'PENDING_B_ADDRESS':
         return { text: 'Awaiting Address', color: 'bg-yellow-100 text-yellow-800' };
       case 'CALCULATING':
@@ -93,14 +103,37 @@ export default function MeetingsPage() {
       case 'FAILED':
         return { text: 'Failed', color: 'bg-red-100 text-red-800' };
       default:
-        return { text: status, color: 'bg-gray-100 text-gray-800' };
+        // Attempt to make raw status more readable
+        return { 
+          text: status.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase()), 
+          color: 'bg-gray-100 text-gray-800' 
+        };
     }
   };
 
   const formatDate = (dateString: string) => {
     try {
-      const date = parseISO(dateString);
+      // Log the raw date string for debugging
+      console.log('Raw date string:', dateString);
+      
+      // Try to parse the date with different methods
+      let date;
+      try {
+        date = parseISO(dateString);
+      } catch (e) {
+        // Fallback to regular Date parsing
+        date = new Date(dateString);
+      }
+      
+      // Log the parsed date
+      console.log('Parsed date:', date);
+      
       const now = new Date();
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if parsing failed
+      }
       
       // For dates in the future (for scheduled meetings)
       if (date > now) {
@@ -299,8 +332,17 @@ export default function MeetingsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {meeting.user_b_contact_details?.name || meeting.user_b_contact}
+                          {meeting.user_b_contact_details?.name || 
+                           (meeting.user_b_contact_details ? 
+                            (meeting.user_b_contact_details.email || meeting.user_b_contact_details.phone) : 
+                            meeting.user_b_contact || 'Unknown')}
                         </div>
+                        {/* Show email/phone as secondary info if name is available */}
+                        {meeting.user_b_contact_details?.name && 
+                          <div className="text-xs text-gray-500">
+                            {meeting.user_b_contact_details.email || meeting.user_b_contact_details.phone || meeting.user_b_contact}
+                          </div>
+                        }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">{meeting.location_type}</div>
