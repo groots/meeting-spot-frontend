@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import MeetingsPage from '@/app/meetings/page';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
+import * as apiUtils from '@/app/utils/api';
 
 // Mock the AuthContext
 jest.mock('@/app/contexts/AuthContext', () => ({
@@ -14,8 +15,11 @@ jest.mock('@/app/components/ProtectedRoute', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-// Mock the fetch function
-global.fetch = jest.fn();
+// Mock the API utilities
+jest.mock('@/app/utils/api', () => ({
+  apiGet: jest.fn(),
+  initApiHelpers: jest.fn(),
+}));
 
 describe('MeetingsPage', () => {
   const mockToken = 'mock-token';
@@ -28,13 +32,13 @@ describe('MeetingsPage', () => {
       user: mockUser,
     });
     
-    // Reset fetch mocks
-    (global.fetch as jest.Mock).mockReset();
+    // Reset API mocks
+    jest.spyOn(apiUtils, 'apiGet').mockClear();
   });
   
   it('displays loading state initially', () => {
-    // Mock fetch to never resolve during this test
-    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    // Mock API to never resolve during this test
+    jest.spyOn(apiUtils, 'apiGet').mockImplementation(() => new Promise(() => {}));
     
     render(<MeetingsPage />);
     
@@ -42,21 +46,26 @@ describe('MeetingsPage', () => {
   });
   
   it('displays error message when fetch fails', async () => {
-    // Mock fetch to reject
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to fetch'));
+    // Mock API to return an error
+    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
+      data: null,
+      error: 'Failed to fetch',
+      status: 500
+    });
     
     render(<MeetingsPage />);
     
     await waitFor(() => {
-      expect(screen.getByText('Failed to load your meeting requests. Please try again later.')).toBeInTheDocument();
+      expect(screen.getByText('Failed to fetch')).toBeInTheDocument();
     });
   });
   
   it('displays empty state when no meetings are returned', async () => {
-    // Mock successful fetch with empty array
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ requests: [] }),
+    // Mock successful API call with empty array
+    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
+      data: [],
+      error: null,
+      status: 200
     });
     
     render(<MeetingsPage />);
@@ -68,34 +77,33 @@ describe('MeetingsPage', () => {
   
   it('displays meeting requests when available', async () => {
     // Mock meeting request data
-    const mockMeetingRequests = {
-      requests: [
-        {
-          id: '1',
-          status: 'PENDING_B_ADDRESS',
-          user_b_contact: 'test@example.com',
-          location_type: 'Restaurant',
-          created_at: new Date().toISOString(),
+    const mockMeetingRequests = [
+      {
+        id: '1',
+        status: 'PENDING_B_ADDRESS',
+        user_b_contact: 'test@example.com',
+        location_type: 'Restaurant',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        status: 'COMPLETED',
+        user_b_contact: 'another@example.com',
+        location_type: 'Coffee',
+        created_at: new Date().toISOString(),
+        selected_place: {
+          id: 'place1',
+          name: 'Test Cafe',
+          address: '123 Test St',
         },
-        {
-          id: '2',
-          status: 'COMPLETED',
-          user_b_contact: 'another@example.com',
-          location_type: 'Coffee',
-          created_at: new Date().toISOString(),
-          selected_place: {
-            id: 'place1',
-            name: 'Test Cafe',
-            address: '123 Test St',
-          },
-        }
-      ]
-    };
+      }
+    ];
     
-    // Mock successful fetch with data
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockMeetingRequests,
+    // Mock successful API call with data
+    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
+      data: mockMeetingRequests,
+      error: null,
+      status: 200
     });
     
     render(<MeetingsPage />);
@@ -116,17 +124,9 @@ describe('MeetingsPage', () => {
     });
   });
   
-  it('makes fetch request with correct parameters', () => {
+  it('makes API request with correct endpoint', () => {
     render(<MeetingsPage />);
     
-    expect(global.fetch).toHaveBeenCalledWith(
-      API_ENDPOINTS.meetingRequests,
-      {
-        headers: {
-          'Authorization': `Bearer ${mockToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    expect(apiUtils.apiGet).toHaveBeenCalledWith(API_ENDPOINTS.meetingRequests);
   });
 }); 

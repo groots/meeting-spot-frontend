@@ -47,9 +47,10 @@ export default function MeetingsPage() {
         return;
       }
 
-      if (data) {
+      if (data && Array.isArray(data)) {
         setMeetingRequests(data);
       } else {
+        // If data is not an array, set to empty array
         setMeetingRequests([]);
       }
       
@@ -117,7 +118,7 @@ export default function MeetingsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {meetingRequests.map((meeting) => {
+                {Array.isArray(meetingRequests) && meetingRequests.map((meeting) => {
                   const statusDisplay = getStatusDisplay(meeting.status);
                   return (
                     <tr key={meeting.id || meeting.request_id}>
