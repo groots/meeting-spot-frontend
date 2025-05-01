@@ -90,25 +90,129 @@ export async function apiRequest<T>(
 }
 
 /**
- * Make a GET request to the API
+ * Generic GET request with proper error handling
  */
-export async function apiGet<T>(url: string, options: RequestInit = {}): Promise<{ data: T | null; error: string | null; status: number }> {
-  return apiRequest<T>(url, { ...options, method: 'GET' });
+export async function apiGet<T>(url: string, options?: RequestInit): Promise<{ data: T | null; error: string | null }> {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+        ...(options?.headers || {})
+      },
+      ...options
+    });
+
+    // Handle token expiration
+    if (response.status === 401) {
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+      return { data: null, error: 'Your session has expired. Please log in again.' };
+    }
+
+    // Handle other error responses
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      return { data: null, error: errorData.message || `Error: ${response.status}` };
+    }
+
+    // Handle case where response is ok but empty
+    if (response.status === 204) {
+      return { data: null, error: null };
+    }
+
+    // Parse JSON response
+    const responseData = await response.json();
+    return { data: responseData as T, error: null };
+  } catch (error) {
+    console.error('API error:', error);
+    return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }
 
 /**
- * Make a POST request to the API
+ * Generic POST request with proper error handling
  */
-export async function apiPost<T>(url: string, body: any, options: RequestInit = {}): Promise<{ data: T | null; error: string | null; status: number }> {
-  return apiRequest<T>(url, {
-    ...options,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    body: JSON.stringify(body),
-  });
+export async function apiPost<T>(url: string, body: any, options?: RequestInit): Promise<{ data: T | null; error: string | null }> {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+        ...(options?.headers || {})
+      },
+      body: JSON.stringify(body),
+      ...options
+    });
+
+    // Handle token expiration
+    if (response.status === 401) {
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+      return { data: null, error: 'Your session has expired. Please log in again.' };
+    }
+
+    // Handle other error responses
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      return { data: null, error: errorData.message || `Error: ${response.status}` };
+    }
+
+    // Handle case where response is ok but empty
+    if (response.status === 204) {
+      return { data: null, error: null };
+    }
+
+    // Parse JSON response
+    const responseData = await response.json();
+    return { data: responseData as T, error: null };
+  } catch (error) {
+    console.error('API error:', error);
+    return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Generic DELETE request with proper error handling
+ */
+export async function apiDelete(url: string, options?: RequestInit): Promise<{ success: boolean; error: string | null }> {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+        ...(options?.headers || {})
+      },
+      ...options
+    });
+
+    // Handle token expiration
+    if (response.status === 401) {
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+      return { success: false, error: 'Your session has expired. Please log in again.' };
+    }
+
+    // Handle other error responses
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      return { success: false, error: errorData.message || `Error: ${response.status}` };
+    }
+
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('API error:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }
 
 /**
@@ -124,11 +228,4 @@ export async function apiPut<T>(url: string, body: any, options: RequestInit = {
     },
     body: JSON.stringify(body),
   });
-}
-
-/**
- * Make a DELETE request to the API
- */
-export async function apiDelete<T>(url: string, options: RequestInit = {}): Promise<{ data: T | null; error: string | null; status: number }> {
-  return apiRequest<T>(url, { ...options, method: 'DELETE' });
 } 
