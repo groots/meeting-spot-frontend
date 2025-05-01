@@ -1,7 +1,5 @@
 'use client';
 
-import AppNavigation from "../components/navigation/AppNavigation";
-
 export default function DashboardLayout({
   children,
 }: {
@@ -9,7 +7,6 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen">
-      <AppNavigation />
       <div className="container mx-auto">
         {children}
       </div>

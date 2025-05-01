@@ -3,8 +3,8 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
-import Navbar from './Navbar';
 import Footer from '../../components/Footer';
+import AppNavigation from './navigation/AppNavigation';
 
 // Wrapper component that delays rendering until auth state is determined
 function AuthStateWrapper({ children }: { children: React.ReactNode }) {
@@ -46,7 +46,7 @@ export default function ClientLayout({
     <AuthProvider>
       <AuthStateWrapper>
         <div className="min-h-screen flex flex-col">
-          {!isHomePage && <Navbar />}
+          {!isHomePage && <AppNavigation />}
           <main className={`flex-grow ${!isHomePage ? "py-10" : ""}`}>
             {children}
           </main>
