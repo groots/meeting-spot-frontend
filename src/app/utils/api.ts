@@ -96,6 +96,8 @@ export async function apiGet<T>(url: string, options?: RequestInit): Promise<{ d
   try {
     const token = localStorage.getItem('token');
     
+    console.log(`[API] Making GET request to: ${url}`);
+    
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -105,6 +107,9 @@ export async function apiGet<T>(url: string, options?: RequestInit): Promise<{ d
       },
       ...options
     });
+
+    // Log response status
+    console.log(`[API] Response status: ${response.status}`);
 
     // Handle token expiration
     if (response.status === 401) {
@@ -116,19 +121,23 @@ export async function apiGet<T>(url: string, options?: RequestInit): Promise<{ d
     // Handle other error responses
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      console.log(`[API] Error response:`, errorData);
       return { data: null, error: errorData.message || `Error: ${response.status}` };
     }
 
     // Handle case where response is ok but empty
     if (response.status === 204) {
+      console.log(`[API] Empty response (204)`);
       return { data: null, error: null };
     }
 
     // Parse JSON response
     const responseData = await response.json();
+    console.log(`[API] Response data:`, responseData);
+    
     return { data: responseData as T, error: null };
   } catch (error) {
-    console.error('API error:', error);
+    console.error('[API] Error:', error);
     return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
