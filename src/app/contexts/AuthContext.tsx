@@ -51,6 +51,7 @@ interface AuthContextType extends AuthState {
     username?: string
   ) => Promise<void>;
   logout: () => void;
+  refreshUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -388,8 +389,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('[Auth] 🟢 Logout successful - user is now logged out');
   };
 
+  const refreshUserProfile = async () => {
+    if (!authState.token) return;
+    
+    try {
+      const response = await fetch(API_ENDPOINTS.profile, {
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${authState.token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        console.log('[Auth] ✅ Profile refreshed successfully:', userData.email || 'User (email unavailable)');
+        
+        setAuthState(prev => ({
+          ...prev,
+          user: userData,
+          loading: false,
+          error: null,
+        }));
+      }
+    } catch (error) {
+      console.error('[Auth] Error refreshing user profile:', error);
+    }
+  };
+
+  const contextValue: AuthContextType = {
+    user: authState.user,
+    token: authState.token,
+    refreshToken: authState.refreshToken,
+    loading: authState.loading,
+    error: authState.error,
+    login,
+    register,
+    logout,
+    refreshUserProfile,
+  };
+
   return (
-    <AuthContext.Provider value={{ ...authState, login, register, logout }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

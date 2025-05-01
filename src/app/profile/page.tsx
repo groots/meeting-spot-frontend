@@ -1,26 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { API_ENDPOINTS, API_HEADERS } from '@/config';
+import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, token, refreshUserProfile } = useAuth();
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccess, setEditSuccess] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  
+  // Form states for editing profile
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  
+  // Form states for changing password
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Initialize form values when user data is available
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.first_name || '');
+      setLastName(user.last_name || '');
+    }
+  }, [user]);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     setDeleteError(null);
 
     try {
-      // Get the token from storage
-      const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-
       if (!token) {
         throw new Error('Authentication token not found');
       }
@@ -50,18 +72,149 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setEditError(null);
+    setEditSuccess(false);
+
+    try {
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await fetch(API_ENDPOINTS.profile, {
+        method: 'PATCH',
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+        }),
+      });
+
+      if (response.ok) {
+        // Update user context
+        await refreshUserProfile();
+        setEditSuccess(true);
+        setShowEditModal(false);
+        
+        // Reset success message after 3 seconds
+        setTimeout(() => setEditSuccess(false), 3000);
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || data.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setEditError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsChangingPassword(true);
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    // Validate passwords
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match');
+      setIsChangingPassword(false);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      setIsChangingPassword(false);
+      return;
+    }
+
+    try {
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.profile}/password`, {
+        method: 'POST',
+        headers: {
+          ...API_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        setPasswordSuccess(true);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        
+        // Reset success message after 3 seconds
+        setTimeout(() => setPasswordSuccess(false), 3000);
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || data.message || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Profile</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Your Profile</h2>
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Edit
+              </button>
+            </div>
+
+            {editSuccess && (
+              <div className="mb-4 p-2 bg-green-50 text-green-700 text-sm rounded border border-green-200">
+                Profile updated successfully!
+              </div>
+            )}
+
+            {passwordSuccess && (
+              <div className="mb-4 p-2 bg-green-50 text-green-700 text-sm rounded border border-green-200">
+                Password changed successfully!
+              </div>
+            )}
 
             {user && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <div className="mt-1 text-gray-900">{user.email}</div>
+                  <div className="mt-1 text-gray-900">{user.email || 'User email unavailable'}</div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <div className="mt-1 text-gray-900">
+                    {user.first_name || user.last_name 
+                      ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                      : 'Not provided'}
+                  </div>
                 </div>
 
                 <div>
@@ -104,10 +257,10 @@ export default function ProfilePage() {
                 <div className="pt-6 border-t border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900">Account Actions</h3>
 
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-4 space-y-4">
                     <button
-                      onClick={() => router.push('/change-password')}
-                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      onClick={() => setIsEditing(true)}
+                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                       Change Password
                     </button>
@@ -124,6 +277,186 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Password change form */}
+        {isEditing && (
+          <div className="mt-6 max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="px-6 py-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {passwordError && (
+                <div className="mb-4 p-2 bg-red-50 text-red-700 text-sm rounded border border-red-200">
+                  {passwordError}
+                </div>
+              )}
+
+              <form onSubmit={handleChangePassword}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      id="current-password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      id="new-password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      required
+                      minLength={8}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      id="confirm-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={isChangingPassword}
+                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    >
+                      {isChangingPassword ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Changing Password...
+                        </>
+                      ) : (
+                        'Change Password'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Profile Modal */}
+        {showEditModal && (
+          <div className="fixed z-10 inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        Edit Profile
+                      </h3>
+                      
+                      {editError && (
+                        <div className="mt-3 p-2 bg-red-50 text-red-700 text-sm rounded border border-red-200">
+                          {editError}
+                        </div>
+                      )}
+                      
+                      <form onSubmit={handleSaveProfile} className="mt-4">
+                        <div className="mb-4">
+                          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                            First Name
+                          </label>
+                          <input
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          />
+                        </div>
+                        
+                        <div className="mb-4">
+                          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                            Last Name
+                          </label>
+                          <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          />
+                        </div>
+
+                        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                          <button
+                            type="submit"
+                            disabled={isSaving}
+                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                          >
+                            {isSaving ? (
+                              <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Saving...
+                              </>
+                            ) : (
+                              'Save Changes'
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowEditModal(false)}
+                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Delete Account Confirmation Modal */}
         {showDeleteModal && (
