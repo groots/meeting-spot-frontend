@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import MeetingsPage from '@/app/meetings/page';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
@@ -54,13 +54,21 @@ describe('MeetingsPage', () => {
     });
   });
 
-  it('should render loading state initially', () => {
+  it('should render loading state initially', async () => {
+    // Use a promise that doesn't resolve for the loading test
+    const neverResolvingPromise = new Promise(() => {});
+    (apiUtils.getMeetingRequestsWithContacts as jest.Mock).mockReturnValue(neverResolvingPromise);
+    
     render(<MeetingsPage />);
+    
+    // Since the promise never resolves, the component should stay in loading state
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
   it('should render meeting requests when loaded', async () => {
-    render(<MeetingsPage />);
+    await act(async () => {
+      render(<MeetingsPage />);
+    });
     
     await waitFor(() => {
       expect(apiUtils.getMeetingRequestsWithContacts).toHaveBeenCalled();
@@ -71,8 +79,8 @@ describe('MeetingsPage', () => {
     });
     
     expect(screen.getByText('Your Meeting Requests')).toBeInTheDocument();
-    expect(screen.getByText('PENDING_B_ADDRESS')).toBeInTheDocument();
-    expect(screen.getByText('COMPLETED')).toBeInTheDocument();
+    expect(screen.getByText('Awaiting Address')).toBeInTheDocument();
+    expect(screen.getByText('Complete')).toBeInTheDocument();
   });
 
   it('should render error message when API returns error', async () => {
@@ -82,7 +90,9 @@ describe('MeetingsPage', () => {
       error: errorMessage,
     });
     
-    render(<MeetingsPage />);
+    await act(async () => {
+      render(<MeetingsPage />);
+    });
     
     await waitFor(() => {
       expect(apiUtils.getMeetingRequestsWithContacts).toHaveBeenCalled();
@@ -101,7 +111,9 @@ describe('MeetingsPage', () => {
       error: null,
     });
     
-    render(<MeetingsPage />);
+    await act(async () => {
+      render(<MeetingsPage />);
+    });
     
     await waitFor(() => {
       expect(apiUtils.getMeetingRequestsWithContacts).toHaveBeenCalled();

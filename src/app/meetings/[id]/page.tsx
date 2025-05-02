@@ -49,29 +49,42 @@ export default function MeetingDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchMeetingRequest = async () => {
-      if (!token || !params?.id) return;
-
-      setLoading(true);
-      setError(null);
-
-      const { data, error: apiError } = await apiGet<MeetingRequest>(`${API_ENDPOINTS.meetingRequests}/${params.id}`);
-      
-      if (apiError) {
-        console.error('Error fetching meeting request:', apiError);
-        setError(apiError);
-        setLoading(false);
-        return;
-      }
-
-      if (data) {
-        setMeetingRequest(data);
-      }
-      
+    if (!token || !params?.id) {
       setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchMeetingRequest = async () => {
+      try {
+        const { data, error: apiError } = await apiGet<MeetingRequest>(`${API_ENDPOINTS.meetingRequests}/${params.id}`);
+        
+        if (!isMounted) return;
+        
+        if (apiError) {
+          console.error('Error fetching meeting request:', apiError);
+          setError(apiError);
+        } else if (data) {
+          setMeetingRequest(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Unexpected error:', err);
+          setError('An unexpected error occurred');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
     fetchMeetingRequest();
+
+    return () => {
+      isMounted = false;
+    };
   }, [token, params?.id]);
 
   const getStatusDisplay = (status: string) => {
