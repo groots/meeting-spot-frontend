@@ -184,7 +184,7 @@ function SocialSignIn() {
   const handleFacebookLogin = () => {
     // Only proceed if Facebook SDK is loaded
     if (window.FB) {
-      window.FB.login(function(response) {
+      window.FB.login(function(response: { authResponse: { accessToken: string } | null }) {
         if (response.authResponse) {
           console.log('[Auth] 🔑 Facebook access token received');
           const accessToken = response.authResponse.accessToken;
