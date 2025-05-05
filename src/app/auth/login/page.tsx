@@ -43,34 +43,6 @@ function SocialSignIn() {
   const socialRef = useRef<HTMLDivElement>(null);
   const [socialError, setSocialError] = useState<string | null>(null);
 
-  // Initialize Google Sign-In
-  const initGoogleSignIn = () => {
-    if (window.google && API_CLIENT_ID && socialRef.current) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: API_CLIENT_ID,
-          callback: handleGoogleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-        window.google.accounts.id.renderButton(socialRef.current, {
-          theme: 'outline',
-          size: 'large',
-          width: '300px',
-          text: 'signin_with',
-          logo_alignment: 'center',
-        });
-      } catch (e) {
-        console.error('Error initializing Google Sign-In:', e);
-        setSocialError('Failed to initialize Google Sign-In');
-      }
-    }
-  };
-
-  useEffect(() => {
-    initGoogleSignIn();
-  }, []);
-
   // Handle Google credential response
   const handleGoogleCredentialResponse = async (response: any) => {
     try {
@@ -124,6 +96,60 @@ function SocialSignIn() {
       setSocialError('An error occurred during Google authentication');
     }
   };
+
+  // Initialize Google Sign-In
+  const initGoogleSignIn = () => {
+    try {
+      // Check if Google is defined
+      if (typeof window !== 'undefined' && window.google && API_CLIENT_ID && socialRef.current) {
+        console.log('[Auth] Initializing Google Sign-In');
+        window.google.accounts.id.initialize({
+          client_id: API_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        window.google.accounts.id.renderButton(socialRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: '300px',
+          text: 'signin_with',
+          logo_alignment: 'center',
+        });
+      } else {
+        console.warn('[Auth] Could not initialize Google Sign-In:', { 
+          googleExists: typeof window !== 'undefined' && !!window.google,
+          clientIdExists: !!API_CLIENT_ID,
+          refExists: !!socialRef.current
+        });
+      }
+    } catch (e) {
+      console.error('Error initializing Google Sign-In:', e);
+      setSocialError('Failed to initialize Google Sign-In');
+    }
+  };
+
+  useEffect(() => {
+    // Load Google Sign-In library
+    const googleScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    
+    if (googleScript) {
+      // If script is already loaded, initialize
+      initGoogleSignIn();
+    } else {
+      // If script isn't loaded yet, add an event listener
+      const handleGoogleScriptLoad = () => {
+        console.log('[Auth] Google Sign-In script loaded');
+        initGoogleSignIn();
+      };
+      
+      window.addEventListener('load', handleGoogleScriptLoad);
+      
+      return () => {
+        window.removeEventListener('load', handleGoogleScriptLoad);
+      };
+    }
+  }, []);
 
   // Handle Facebook login
   const handleFacebookLogin = () => {
@@ -220,6 +246,14 @@ export default function Login() {
   const { login, error, user, token } = useAuth();
   const [sessionError, setSessionError] = useState<string | null>(null);
 
+  // Initialize Google Sign-In - reference to the function for Script onLoad
+  const initGoogleSignIn = () => {
+    console.log('[Auth] Calling Google Sign-In initialization from main component');
+    // This is just a placeholder to call the actual initialization in SocialSignIn
+    // We'll trigger a re-render of the SocialSignIn component to initialize
+    setSessionError(prev => prev); // Force re-render
+  };
+
   // Check if URL has session_expired parameter
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -267,8 +301,20 @@ export default function Login() {
   return (
     <>
       {/* Load external scripts */}
-      <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
-      <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="lazyOnload" id="facebook-sdk-script" />
+      <Script 
+        src="https://accounts.google.com/gsi/client" 
+        strategy="afterInteractive"
+        onLoad={() => {
+          console.log('[Auth] Google client script loaded');
+          initGoogleSignIn();
+        }}
+      />
+      <Script 
+        src="https://connect.facebook.net/en_US/sdk.js" 
+        strategy="afterInteractive" 
+        id="facebook-sdk-script"
+        onLoad={() => console.log('[Auth] Facebook SDK script loaded')} 
+      />
       
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
