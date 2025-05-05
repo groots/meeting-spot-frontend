@@ -5,10 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 import Script from 'next/script';
-import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
-
-// Client ID for Google OAuth
-const API_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+import { API_ENDPOINTS, API_HEADERS, GOOGLE_CLIENT_ID } from '@/app/config';
 
 // Add a utility function to check server status
 const checkServerStatus = async () => {
@@ -101,10 +98,10 @@ function SocialSignIn() {
   const initGoogleSignIn = () => {
     try {
       // Check if Google is defined
-      if (typeof window !== 'undefined' && window.google && API_CLIENT_ID && socialRef.current) {
+      if (typeof window !== 'undefined' && window.google && GOOGLE_CLIENT_ID && socialRef.current) {
         console.log('[Auth] Initializing Google Sign-In');
         window.google.accounts.id.initialize({
-          client_id: API_CLIENT_ID,
+          client_id: GOOGLE_CLIENT_ID,
           callback: handleGoogleCredentialResponse,
           auto_select: false,
           cancel_on_tap_outside: true,
@@ -119,7 +116,7 @@ function SocialSignIn() {
       } else {
         console.warn('[Auth] Could not initialize Google Sign-In:', { 
           googleExists: typeof window !== 'undefined' && !!window.google,
-          clientIdExists: !!API_CLIENT_ID,
+          clientIdExists: !!GOOGLE_CLIENT_ID,
           refExists: !!socialRef.current
         });
       }
