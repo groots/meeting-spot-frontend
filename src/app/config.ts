@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   login: `${API_BASE_URL}/v1/auth/login`,
   loginDirect: `${API_BASE_URL}/v1/auth/login/direct`, // Direct login endpoint that bypasses ORM
   register: `${API_BASE_URL}/v1/auth/register`,
+  registerDirect: `${API_BASE_URL}/v1/auth/register/direct`, // Direct register endpoint that bypasses ORM
   profile: `${API_BASE_URL}/v1/auth/me`,
   profilePicture: `${API_BASE_URL}/v1/auth/me/picture`,
   refresh: `${API_BASE_URL}/v1/auth/refresh`,
@@ -35,6 +36,7 @@ export const API_ENDPOINTS = {
   // Social auth endpoints
   googleAuth: `${API_BASE_URL}/v1/auth/google`,
   googleCallback: `${API_BASE_URL}/v1/auth/google/callback`,
+  googleCallbackDirect: `${API_BASE_URL}/v1/auth/google/callback/direct`,
   facebookAuth: `${API_BASE_URL}/v1/auth/facebook`,
   facebookCallback: `${API_BASE_URL}/v1/auth/facebook/callback`,
   linkedinAuth: `${API_BASE_URL}/v1/auth/linkedin`,

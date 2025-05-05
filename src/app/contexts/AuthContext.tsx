@@ -350,12 +350,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (username) payload.username = username;
       if (phone) payload.phone = phone;
 
-      const response = await fetch(API_ENDPOINTS.register, {
+      // Try regular register endpoint first
+      let response = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
         headers: API_HEADERS,
         body: JSON.stringify(payload),
       });
 
+      // If server error occurs, try direct register endpoint
+      if (response.status >= 500) {
+        console.log('[Auth] ⚠️ Server error with standard register, trying direct register endpoint');
+        response = await fetch(API_ENDPOINTS.registerDirect, {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify(payload),
+        });
+      }
+
+      let errorMessage = 'Registration failed';
+      
+      // Process the response
       if (response.ok) {
         const data = await response.json();
         console.log('[Auth] ✅ Registration successful');
@@ -363,28 +377,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // After registration, log the user in
         await login(email, password, true); // Remember by default for new registrations
       } else {
-        // Handle different error status codes
+        // Handle error without trying to read the body twice
         console.error(`[Auth] ❌ Registration failed with status: ${response.status}`);
         
         try {
+          // Try to read the response as JSON
           const errorData = await response.json();
           console.error(`[Auth] 📋 Error response:`, errorData);
-          throw new Error(errorData.message || 'Registration failed');
+          errorMessage = errorData.message || errorData.error || 'Registration failed';
         } catch (parseError) {
-          // Handle error if response is not JSON
+          // If it's not JSON or body was already read, use status code
           console.error('[Auth] 🔄 Failed to parse error response:', parseError);
-          
-          // Try to get the raw text
-          const rawText = await response.text();
-          console.error('[Auth] 📄 Raw error response:', rawText);
-          
-          throw new Error(`Registration failed with status ${response.status}`);
+          errorMessage = `Registration failed with status ${response.status}`;
         }
+        
+        throw new Error(errorMessage);
       }
     } catch (err) {
       console.error('[Auth] Registration error:', err);
       setAuthState(prev => ({
         ...prev,
+        loading: false,
         error: err instanceof Error ? err.message : 'An error occurred',
       }));
       console.log('[Auth] 🔴 Registration failed - user is not logged in');

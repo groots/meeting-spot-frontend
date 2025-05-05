@@ -79,7 +79,8 @@ function SocialSignIn() {
       // Log the received credential
       console.log('[Auth] 🔑 Google credential received:', response.credential.substring(0, 20) + '...');
       
-      const serverResponse = await fetch(API_ENDPOINTS.googleCallback, {
+      // Try regular endpoint first
+      let serverResponse = await fetch(API_ENDPOINTS.googleCallback, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,17 +88,36 @@ function SocialSignIn() {
         body: JSON.stringify({ token: response.credential }),
       });
 
+      // If server error occurs, try direct endpoint
+      if (serverResponse.status >= 500) {
+        console.log('[Auth] ⚠️ Server error with standard Google auth, trying direct endpoint');
+        serverResponse = await fetch(API_ENDPOINTS.googleCallbackDirect, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: response.credential }),
+        });
+      }
+
       // Log server response status
       console.log(`[Auth] Google callback response status: ${serverResponse.status}`);
       
-      const data = await serverResponse.json();
+      let errorMessage = 'Google authentication failed';
       
       if (serverResponse.ok) {
         console.log('[Auth] Google authentication successful');
         window.location.href = '/create';
       } else {
-        console.error('Google authentication failed:', data);
-        setSocialError(data.message || 'Google authentication failed. Please try again.');
+        try {
+          const errorData = await serverResponse.json();
+          console.error('Google authentication failed:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError);
+        }
+        
+        setSocialError(errorMessage);
       }
     } catch (err) {
       console.error('Error during Google authentication:', err);
