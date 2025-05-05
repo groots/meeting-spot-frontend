@@ -7,6 +7,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import Script from 'next/script';
 import { API_ENDPOINTS, API_HEADERS, GOOGLE_CLIENT_ID } from '@/app/config';
 
+// Augment the Window interface for global GoogleAuth
+declare global {
+  interface Window {
+    google?: any;
+    FB?: any;
+    googleScriptLoaded?: boolean;
+  }
+}
+
 // Add a utility function to check server status
 const checkServerStatus = async () => {
   try {
@@ -41,7 +50,7 @@ function SocialSignIn() {
   const [socialError, setSocialError] = useState<string | null>(null);
 
   // Handle Google credential response
-  const handleGoogleCredentialResponse = async (response: any) => {
+  const handleGoogleCredentialResponse = async (response: { credential: string }) => {
     try {
       setSocialError(null);
       
@@ -130,20 +139,43 @@ function SocialSignIn() {
     // Load Google Sign-In library
     const googleScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
     
-    if (googleScript) {
+    if (googleScript && window.googleScriptLoaded && window.google) {
       // If script is already loaded, initialize
+      console.log('[Auth] Google script already loaded, initializing immediately');
       initGoogleSignIn();
     } else {
-      // If script isn't loaded yet, add an event listener
-      const handleGoogleScriptLoad = () => {
-        console.log('[Auth] Google Sign-In script loaded');
-        initGoogleSignIn();
+      // If script isn't loaded yet, add an event listener and set up a timer
+      console.log('[Auth] Google script not ready, setting up retry mechanism');
+      
+      // Retry every 500ms for up to 10 seconds (20 attempts)
+      let attempts = 0;
+      const maxAttempts = 20;
+      
+      const checkAndInit = () => {
+        attempts++;
+        console.log(`[Auth] Attempt ${attempts}/${maxAttempts} to initialize Google Sign-In`);
+        
+        if (window.googleScriptLoaded && window.google) {
+          console.log('[Auth] Google script now available, initializing');
+          initGoogleSignIn();
+          return true;
+        } else if (attempts >= maxAttempts) {
+          console.error('[Auth] Failed to initialize Google Sign-In after maximum attempts');
+          setSocialError('Google Sign-In is currently unavailable');
+          return true;
+        }
+        
+        return false;
       };
       
-      window.addEventListener('load', handleGoogleScriptLoad);
+      const intervalId = setInterval(() => {
+        if (checkAndInit()) {
+          clearInterval(intervalId);
+        }
+      }, 500);
       
       return () => {
-        window.removeEventListener('load', handleGoogleScriptLoad);
+        clearInterval(intervalId);
       };
     }
   }, []);
@@ -303,6 +335,9 @@ export default function Login() {
         strategy="afterInteractive"
         onLoad={() => {
           console.log('[Auth] Google client script loaded');
+          // Set a flag in window to indicate the script is loaded
+          window.googleScriptLoaded = true;
+          // Try to initialize Google Sign-In immediately
           initGoogleSignIn();
         }}
       />
