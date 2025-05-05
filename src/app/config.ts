@@ -20,8 +20,10 @@ export const API_ENDPOINTS = {
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
   meetingRequestResendInvitation: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/resend-invitation`,
   dbCheck: `${BASE_URL}/debug/db-check`,
+  health: `${API_BASE_URL}/v1/health`,
   // Auth endpoints
   login: `${API_BASE_URL}/v1/auth/login`,
+  loginDirect: `${API_BASE_URL}/v1/auth/login/direct`, // Direct login endpoint that bypasses ORM
   register: `${API_BASE_URL}/v1/auth/register`,
   profile: `${API_BASE_URL}/v1/auth/me`,
   profilePicture: `${API_BASE_URL}/v1/auth/me/picture`,

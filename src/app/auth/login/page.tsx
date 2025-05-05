@@ -13,13 +13,17 @@ const API_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 // Add a utility function to check server status
 const checkServerStatus = async () => {
   try {
-    const response = await fetch(`${API_ENDPOINTS.login.split('/auth/login')[0]}/health`, {
+    const response = await fetch(API_ENDPOINTS.health, {
       method: 'GET',
       headers: API_HEADERS,
     });
     
     if (response.ok) {
-      return { status: 'ok', message: 'Server is running' };
+      const data = await response.json();
+      return { 
+        status: data.status === 'ok' ? 'ok' : 'error', 
+        message: data.status === 'ok' ? 'Server is running' : `Server health check: ${data.status}`
+      };
     }
     
     return { 

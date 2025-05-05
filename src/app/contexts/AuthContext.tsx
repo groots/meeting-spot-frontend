@@ -253,11 +253,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setAuthState(prev => ({ ...prev, error: null }));
       console.log('[Auth] 📡 Sending login request');
-      const response = await fetch(API_ENDPOINTS.login, {
+      
+      // Try regular login endpoint first
+      let response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: API_HEADERS,
         body: JSON.stringify({ email, password, remember_me: remember }),
       });
+
+      // If server error occurs, try direct login endpoint
+      if (response.status >= 500) {
+        console.log('[Auth] ⚠️ Server error with standard login, trying direct login endpoint');
+        response = await fetch(API_ENDPOINTS.loginDirect, {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ email, password, remember_me: remember }),
+        });
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -370,7 +382,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error('[Auth] �� Registration error:', err);
+      console.error('[Auth] Registration error:', err);
       setAuthState(prev => ({
         ...prev,
         error: err instanceof Error ? err.message : 'An error occurred',
