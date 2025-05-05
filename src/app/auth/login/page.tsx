@@ -13,6 +13,7 @@ declare global {
     google?: any;
     FB?: any;
     googleScriptLoaded?: boolean;
+    fbAsyncInit?: () => void;
   }
 }
 
