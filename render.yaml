@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: meeting-spot-frontend
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    repo: https://github.com/groots/meeting-spot-frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://meeting-spot-backend.onrender.com/api
+      - key: PORT
+        value: 8080
+    healthCheckPath: /
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./ 
