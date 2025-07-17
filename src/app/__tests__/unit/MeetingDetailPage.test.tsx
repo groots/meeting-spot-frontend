@@ -1,9 +1,8 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import MeetingDetailPage from '@/app/meetings/[id]/page';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
-import { useParams, useRouter } from 'next/navigation';
-import * as apiUtils from '@/app/utils/api';
+import { useParams } from 'next/navigation';
 
 // Mock the dependencies
 jest.mock('@/app/contexts/AuthContext', () => ({
@@ -17,17 +16,10 @@ jest.mock('@/app/components/ProtectedRoute', () => ({
 
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
-  useRouter: jest.fn(() => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
-  })),
 }));
 
-// Mock the API utils
-jest.mock('@/app/utils/api', () => ({
-  apiGet: jest.fn(),
-}));
+// Mock the fetch function
+global.fetch = jest.fn();
 
 describe('MeetingDetailPage', () => {
   const mockToken = 'mock-token';
@@ -42,74 +34,75 @@ describe('MeetingDetailPage', () => {
     // Mock useParams to return the meeting ID
     (useParams as jest.Mock).mockReturnValue({ id: mockId });
     
-    // Reset API mocks
-    jest.spyOn(apiUtils, 'apiGet').mockClear();
+    // Reset fetch mocks
+    (global.fetch as jest.Mock).mockReset();
   });
   
-  it('displays loading state initially', async () => {
-    // Mock API to never resolve during this test
-    const apiGetPromise = new Promise(() => {});
-    jest.spyOn(apiUtils, 'apiGet').mockReturnValue(apiGetPromise as any);
+  it('displays loading state initially', () => {
+    // Mock fetch to never resolve during this test
+    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
     
-    // Use act to render the component
-    await act(async () => {
-      render(<MeetingDetailPage />);
-    });
+    render(<MeetingDetailPage />);
     
-    // Check for loading spinner
+    // Check for loading spinner instead of role="status"
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
   
   it('displays error message when fetch fails', async () => {
-    // Mock API to return an error
-    const mockError = 'Failed to fetch';
-    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
-      data: null,
-      error: mockError
-    });
+    // Mock fetch to reject
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to fetch'));
     
-    // Use act for the initial render
-    await act(async () => {
-      render(<MeetingDetailPage />);
-    });
+    render(<MeetingDetailPage />);
     
-    // Wait for the component to update with the error
     await waitFor(() => {
-      expect(screen.getByText(mockError)).toBeInTheDocument();
+      // Update to match actual error message
+      expect(screen.getByText('Failed to load meeting details. Please try again later.')).toBeInTheDocument();
     });
   });
   
-  it('displays meeting details when fetch succeeds', async () => {
-    // Mock successful API call with meeting data
-    const mockMeeting = {
-      id: mockId,
-      status: 'COMPLETED',
-      user_b_contact: 'contact@example.com',
-      location_type: 'Restaurant',
-      created_at: '2023-01-01T00:00:00Z',
-      selected_place: {
-        id: 'place-1',
-        name: 'Test Restaurant',
-        address: '123 Test St'
-      }
-    };
-    
-    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
-      data: mockMeeting,
-      error: null
+  it('does not display anything when meeting request is null', async () => {
+    // Mock successful fetch with null data
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => null,
     });
     
-    // Use act for the initial render and state updates
-    await act(async () => {
-      render(<MeetingDetailPage />);
-    });
+    render(<MeetingDetailPage />);
     
-    // Wait for the component to update with the meeting data
+    // The component returns null when meetingRequest is null
+    // So we just verify the loading state disappears
     await waitFor(() => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-      expect(screen.getByText('Test Restaurant')).toBeInTheDocument();
-      expect(screen.getByText('contact@example.com')).toBeInTheDocument();
-      expect(screen.getByText('Restaurant')).toBeInTheDocument();
+    });
+  });
+  
+  it('displays meeting details when data is available', async () => {
+    // Mock meeting request data
+    const mockMeetingRequest = {
+      id: mockId,
+      status: 'PENDING_B_ADDRESS',
+      user_b_contact: 'test@example.com',
+      location_type: 'Restaurant',
+      created_at: new Date().toISOString(),
+      address_a: '123 Test St, City',
+    };
+    
+    // Mock successful fetch with data
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMeetingRequest,
+    });
+    
+    render(<MeetingDetailPage />);
+    
+    await waitFor(() => {
+      // Check for basic information
+      expect(screen.getByText('Meeting Details')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for other party')).toBeInTheDocument(); // Status display text
+      expect(screen.getByText(mockMeetingRequest.user_b_contact)).toBeInTheDocument();
+      expect(screen.getByText(mockMeetingRequest.location_type)).toBeInTheDocument();
+      expect(screen.getByText(mockMeetingRequest.address_a)).toBeInTheDocument();
+      expect(screen.getByText('Not provided')).toBeInTheDocument(); // address_b not provided
     });
   });
   
@@ -131,10 +124,10 @@ describe('MeetingDetailPage', () => {
       }
     };
     
-    // Mock successful API call with data
-    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
-      data: mockMeetingRequest,
-      error: null
+    // Mock successful fetch with data
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMeetingRequest,
     });
     
     render(<MeetingDetailPage />);
@@ -180,10 +173,10 @@ describe('MeetingDetailPage', () => {
       ]
     };
     
-    // Mock successful API call with data
-    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
-      data: mockMeetingRequest,
-      error: null
+    // Mock successful fetch with data
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMeetingRequest,
     });
     
     render(<MeetingDetailPage />);
@@ -201,17 +194,17 @@ describe('MeetingDetailPage', () => {
     });
   });
   
-  it('calls apiGet with correct parameters', async () => {
-    // Mock API to resolve with null data
-    jest.spyOn(apiUtils, 'apiGet').mockResolvedValue({
-      data: null,
-      error: null
-    });
-    
+  it('makes fetch request with correct parameters', () => {
     render(<MeetingDetailPage />);
     
-    expect(apiUtils.apiGet).toHaveBeenCalledWith(
-      `${API_ENDPOINTS.meetingRequests}/${mockId}`
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${API_ENDPOINTS.meetingRequests}/${mockId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${mockToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
   });
 }); 

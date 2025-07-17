@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
-import Image from 'next/image';
-import Link from 'next/link';
 
 export default function ProfilePage() {
   const { user, logout, token, refreshUserProfile } = useAuth();
@@ -23,16 +21,9 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   
-  // Profile picture states
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
   // Form states for editing profile
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
   
   // Form states for changing password
   const [currentPassword, setCurrentPassword] = useState('');
@@ -44,8 +35,6 @@ export default function ProfilePage() {
     if (user) {
       setFirstName(user.first_name || '');
       setLastName(user.last_name || '');
-      setPhone(user.phone || '');
-      setProfilePicture(user.profile_picture || null);
     }
   }, [user]);
 
@@ -89,19 +78,6 @@ export default function ProfilePage() {
     setEditError(null);
     setEditSuccess(false);
 
-    // Validate required fields
-    if (!firstName.trim()) {
-      setEditError('First name is required');
-      setIsSaving(false);
-      return;
-    }
-
-    if (!lastName.trim()) {
-      setEditError('Last name is required');
-      setIsSaving(false);
-      return;
-    }
-
     try {
       if (!token) {
         throw new Error('Authentication token not found');
@@ -116,7 +92,6 @@ export default function ProfilePage() {
         body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,
-          phone: phone
         }),
       });
 
@@ -196,52 +171,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleProfilePictureClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleProfilePictureUpload = async (file: File) => {
-    setIsUploading(true);
-    setUploadError(null);
-    
-    try {
-      const formData = new FormData();
-      formData.append('profile_picture', file);
-      
-      // Important: Do NOT set Content-Type header with FormData
-      // The browser will set the appropriate multipart/form-data Content-Type with boundary
-      const response = await fetch(API_ENDPOINTS.profilePicture, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // Let the browser set the Content-Type for FormData
-        },
-        body: formData
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Error uploading picture' }));
-        throw new Error(errorData.message || 'Failed to upload profile picture');
-      }
-      
-      const data = await response.json();
-      
-      // Update the profile picture URL
-      setProfilePicture(data.profile_picture_url);
-      // Refresh the user profile to get the updated picture URL
-      await refreshUserProfile();
-      
-      setEditSuccess(true);
-    } catch (error) {
-      console.error('Error uploading profile picture:', error);
-      setUploadError(error instanceof Error ? error.message : 'Failed to upload profile picture');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -272,69 +201,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Profile Picture Section */}
-            <div className="flex flex-col items-center mb-6">
-              <div 
-                className="relative group cursor-pointer mb-2"
-                onClick={handleProfilePictureClick}
-              >
-                <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-2 border-gray-300">
-                  {profilePicture ? (
-                    <img 
-                      src={profilePicture} 
-                      alt="Profile" 
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-4xl font-bold text-gray-400">
-                      {user?.first_name && user?.last_name 
-                        ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
-                        : user?.first_name 
-                          ? user.first_name[0].toUpperCase()
-                          : user?.email?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                  )}
-                </div>
-                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white text-sm font-medium">Change photo</span>
-                </div>
-                {isUploading && (
-                  <div className="absolute inset-0 bg-white bg-opacity-70 rounded-full flex items-center justify-center">
-                    <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-                  </div>
-                )}
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden" 
-                accept="image/*" 
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    // Validate file type
-                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-                    if (!validTypes.includes(file.type)) {
-                      setUploadError('Please select a valid image file (JPEG, PNG, or GIF)');
-                      return;
-                    }
-                    
-                    // Validate file size (max 5MB)
-                    if (file.size > 5 * 1024 * 1024) {
-                      setUploadError('Image size should be less than 5MB');
-                      return;
-                    }
-                    
-                    handleProfilePictureUpload(file);
-                  }
-                }}
-              />
-              <p className="text-sm text-gray-500">Click to upload a profile picture</p>
-              {uploadError && (
-                <p className="text-red-500 text-xs mt-1">{uploadError}</p>
-              )}
-            </div>
-
             {user && (
               <div className="space-y-4">
                 <div>
@@ -353,23 +219,15 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
-                  <div className="mt-1 text-gray-900 flex items-center">
+                  <div className="mt-1 text-gray-900">
                     {user.is_premium ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800">
                         Premium
                       </span>
                     ) : (
-                      <div className="flex items-center space-x-3">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
-                          Free
-                        </span>
-                        <Link 
-                          href="/subscription" 
-                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          Upgrade to Premium
-                        </Link>
-                      </div>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
+                        Free
+                      </span>
                     )}
                   </div>
                 </div>
@@ -539,7 +397,7 @@ export default function ProfilePage() {
                       <form onSubmit={handleSaveProfile} className="mt-4">
                         <div className="mb-4">
                           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                            First Name <span className="text-red-500">*</span>
+                            First Name
                           </label>
                           <input
                             type="text"
@@ -548,13 +406,12 @@ export default function ProfilePage() {
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                            required
                           />
                         </div>
                         
                         <div className="mb-4">
                           <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                            Last Name <span className="text-red-500">*</span>
+                            Last Name
                           </label>
                           <input
                             type="text"
@@ -562,21 +419,6 @@ export default function ProfilePage() {
                             name="lastName"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
-                            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                            required
-                          />
-                        </div>
-
-                        <div className="mb-4">
-                          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                            Phone
-                          </label>
-                          <input
-                            type="text"
-                            id="phone"
-                            name="phone"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
                             className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                           />
                         </div>

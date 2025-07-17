@@ -5,32 +5,21 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 import Script from 'next/script';
-import { API_ENDPOINTS, API_HEADERS, GOOGLE_CLIENT_ID } from '@/app/config';
+import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
 
-// Augment the Window interface for global GoogleAuth
-declare global {
-  interface Window {
-    google?: any;
-    FB?: any;
-    googleScriptLoaded?: boolean;
-    fbAsyncInit?: () => void;
-  }
-}
+// Client ID for Google OAuth
+const API_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 // Add a utility function to check server status
 const checkServerStatus = async () => {
   try {
-    const response = await fetch(API_ENDPOINTS.health, {
+    const response = await fetch(`${API_ENDPOINTS.login.split('/auth/login')[0]}/health`, {
       method: 'GET',
       headers: API_HEADERS,
     });
     
     if (response.ok) {
-      const data = await response.json();
-      return { 
-        status: data.status === 'ok' ? 'ok' : 'error', 
-        message: data.status === 'ok' ? 'Server is running' : `Server health check: ${data.status}`
-      };
+      return { status: 'ok', message: 'Server is running' };
     }
     
     return { 
@@ -50,68 +39,12 @@ function SocialSignIn() {
   const socialRef = useRef<HTMLDivElement>(null);
   const [socialError, setSocialError] = useState<string | null>(null);
 
-  // Handle Google credential response
-  const handleGoogleCredentialResponse = async (response: { credential: string }) => {
-    try {
-      setSocialError(null);
-      
-      // Log the received credential
-      console.log('[Auth] 🔑 Google credential received:', response.credential.substring(0, 20) + '...');
-      
-      // Try regular endpoint first
-      let serverResponse = await fetch(API_ENDPOINTS.googleCallback, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: response.credential }),
-      });
-
-      // If server error occurs, try direct endpoint
-      if (serverResponse.status >= 500) {
-        console.log('[Auth] ⚠️ Server error with standard Google auth, trying direct endpoint');
-        serverResponse = await fetch(API_ENDPOINTS.googleCallbackDirect, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token: response.credential }),
-        });
-      }
-
-      // Log server response status
-      console.log(`[Auth] Google callback response status: ${serverResponse.status}`);
-      
-      let errorMessage = 'Google authentication failed';
-      
-      if (serverResponse.ok) {
-        console.log('[Auth] Google authentication successful');
-        window.location.href = '/create';
-      } else {
-        try {
-          const errorData = await serverResponse.json();
-          console.error('Google authentication failed:', errorData);
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
-          console.error('Failed to parse error response:', parseError);
-        }
-        
-        setSocialError(errorMessage);
-      }
-    } catch (err) {
-      console.error('Error during Google authentication:', err);
-      setSocialError('An error occurred during Google authentication');
-    }
-  };
-
   // Initialize Google Sign-In
   const initGoogleSignIn = () => {
-    try {
-      // Check if Google is defined
-      if (typeof window !== 'undefined' && window.google && GOOGLE_CLIENT_ID && socialRef.current) {
-        console.log('[Auth] Initializing Google Sign-In');
+    if (window.google && API_CLIENT_ID && socialRef.current) {
+      try {
         window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
+          client_id: API_CLIENT_ID,
           callback: handleGoogleCredentialResponse,
           auto_select: false,
           cancel_on_tap_outside: true,
@@ -123,69 +56,56 @@ function SocialSignIn() {
           text: 'signin_with',
           logo_alignment: 'center',
         });
-      } else {
-        console.warn('[Auth] Could not initialize Google Sign-In:', { 
-          googleExists: typeof window !== 'undefined' && !!window.google,
-          clientIdExists: !!GOOGLE_CLIENT_ID,
-          refExists: !!socialRef.current
-        });
+      } catch (e) {
+        console.error('Error initializing Google Sign-In:', e);
+        setSocialError('Failed to initialize Google Sign-In');
       }
-    } catch (e) {
-      console.error('Error initializing Google Sign-In:', e);
-      setSocialError('Failed to initialize Google Sign-In');
     }
   };
 
   useEffect(() => {
-    // Load Google Sign-In library
-    const googleScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-    
-    if (googleScript && window.googleScriptLoaded && window.google) {
-      // If script is already loaded, initialize
-      console.log('[Auth] Google script already loaded, initializing immediately');
-      initGoogleSignIn();
-    } else {
-      // If script isn't loaded yet, add an event listener and set up a timer
-      console.log('[Auth] Google script not ready, setting up retry mechanism');
-      
-      // Retry every 500ms for up to 10 seconds (20 attempts)
-      let attempts = 0;
-      const maxAttempts = 20;
-      
-      const checkAndInit = () => {
-        attempts++;
-        console.log(`[Auth] Attempt ${attempts}/${maxAttempts} to initialize Google Sign-In`);
-        
-        if (window.googleScriptLoaded && window.google) {
-          console.log('[Auth] Google script now available, initializing');
-          initGoogleSignIn();
-          return true;
-        } else if (attempts >= maxAttempts) {
-          console.error('[Auth] Failed to initialize Google Sign-In after maximum attempts');
-          setSocialError('Google Sign-In is currently unavailable');
-          return true;
-        }
-        
-        return false;
-      };
-      
-      const intervalId = setInterval(() => {
-        if (checkAndInit()) {
-          clearInterval(intervalId);
-        }
-      }, 500);
-      
-      return () => {
-        clearInterval(intervalId);
-      };
-    }
+    initGoogleSignIn();
   }, []);
+
+  // Handle Google credential response
+  const handleGoogleCredentialResponse = async (response: any) => {
+    try {
+      setSocialError(null);
+      
+      // Log the received credential
+      console.log('[Auth] 🔑 Google credential received:', response.credential.substring(0, 20) + '...');
+      
+      const serverResponse = await fetch(API_ENDPOINTS.googleCallback, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: response.credential }),
+      });
+
+      // Log server response status
+      console.log(`[Auth] Google callback response status: ${serverResponse.status}`);
+      
+      const data = await serverResponse.json();
+      
+      if (serverResponse.ok) {
+        console.log('[Auth] Google authentication successful');
+        window.location.href = '/create';
+      } else {
+        console.error('Google authentication failed:', data);
+        setSocialError(data.message || 'Google authentication failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error during Google authentication:', err);
+      setSocialError('An error occurred during Google authentication');
+    }
+  };
 
   // Handle Facebook login
   const handleFacebookLogin = () => {
     // Only proceed if Facebook SDK is loaded
     if (window.FB) {
-      window.FB.login(function(response: { authResponse: { accessToken: string } | null }) {
+      window.FB.login(function(response) {
         if (response.authResponse) {
           console.log('[Auth] 🔑 Facebook access token received');
           const accessToken = response.authResponse.accessToken;
@@ -276,14 +196,6 @@ export default function Login() {
   const { login, error, user, token } = useAuth();
   const [sessionError, setSessionError] = useState<string | null>(null);
 
-  // Initialize Google Sign-In - reference to the function for Script onLoad
-  const initGoogleSignIn = () => {
-    console.log('[Auth] Calling Google Sign-In initialization from main component');
-    // This is just a placeholder to call the actual initialization in SocialSignIn
-    // We'll trigger a re-render of the SocialSignIn component to initialize
-    setSessionError(prev => prev); // Force re-render
-  };
-
   // Check if URL has session_expired parameter
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -331,23 +243,8 @@ export default function Login() {
   return (
     <>
       {/* Load external scripts */}
-      <Script 
-        src="https://accounts.google.com/gsi/client" 
-        strategy="afterInteractive"
-        onLoad={() => {
-          console.log('[Auth] Google client script loaded');
-          // Set a flag in window to indicate the script is loaded
-          window.googleScriptLoaded = true;
-          // Try to initialize Google Sign-In immediately
-          initGoogleSignIn();
-        }}
-      />
-      <Script 
-        src="https://connect.facebook.net/en_US/sdk.js" 
-        strategy="afterInteractive" 
-        id="facebook-sdk-script"
-        onLoad={() => console.log('[Auth] Facebook SDK script loaded')} 
-      />
+      <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
+      <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="lazyOnload" id="facebook-sdk-script" />
       
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">

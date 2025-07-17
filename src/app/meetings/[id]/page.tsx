@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
 import ProtectedRoute from '@/app/components/ProtectedRoute';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { apiGet } from '@/app/utils/api';
 
 interface MeetingRequest {
   id: string;
@@ -42,49 +41,38 @@ interface MeetingRequest {
 
 export default function MeetingDetailPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const { token } = useAuth();
   const [meetingRequest, setMeetingRequest] = useState<MeetingRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token || !params?.id) {
-      setLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-
     const fetchMeetingRequest = async () => {
+      if (!token || !params?.id) return;
+
       try {
-        const { data, error: apiError } = await apiGet<MeetingRequest>(`${API_ENDPOINTS.meetingRequests}/${params.id}`);
-        
-        if (!isMounted) return;
-        
-        if (apiError) {
-          console.error('Error fetching meeting request:', apiError);
-          setError(apiError);
-        } else if (data) {
-          setMeetingRequest(data);
+        const response = await fetch(`${API_ENDPOINTS.meetingRequests}/${params.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch meeting request');
         }
+
+        const data = await response.json();
+        setMeetingRequest(data);
+        setLoading(false);
       } catch (err) {
-        if (isMounted) {
-          console.error('Unexpected error:', err);
-          setError('An unexpected error occurred');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        console.error('Error fetching meeting request:', err);
+        setError('Failed to load meeting details. Please try again later.');
+        setLoading(false);
       }
     };
 
     fetchMeetingRequest();
-
-    return () => {
-      isMounted = false;
-    };
   }, [token, params?.id]);
 
   const getStatusDisplay = (status: string) => {

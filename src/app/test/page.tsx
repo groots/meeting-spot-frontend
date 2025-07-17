@@ -15,7 +15,7 @@ export default function TestPage() {
 
     try {
       // Test the health endpoint
-      const response = await fetch('https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2/health', {
+      const response = await fetch('https://meeting-spot-backend.onrender.com/api/v2/health', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

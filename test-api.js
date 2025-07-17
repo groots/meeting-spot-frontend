@@ -1,7 +1,7 @@
 // Simple script to test the API connection
 const https = require('https');
 
-const apiUrl = 'https://meeting-spot-backend-zylogyedtq-ue.a.run.app/api/v2/health';
+const apiUrl = 'https://meeting-spot-backend.onrender.com/api/v2/health';
 
 console.log(`Testing connection to: ${apiUrl}`);
 

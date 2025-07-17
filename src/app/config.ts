@@ -5,12 +5,12 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Hard-code the production API URL for deployed environments
 // Use environment variables or localhost for development/testing
 const API_BASE_URL = isProduction
-  ? 'https://api.findameetingspot.com/api'
+  ? 'https://meeting-spot-backend.onrender.com/api'
   : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api');
 
 // Base URL without the /api suffix for non-standard endpoints
 const BASE_URL = isProduction
-  ? 'https://api.findameetingspot.com'
+  ? 'https://meeting-spot-backend.onrender.com'
   : (process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8081');
 
 export const API_ENDPOINTS = {
@@ -20,14 +20,10 @@ export const API_ENDPOINTS = {
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
   meetingRequestResendInvitation: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/resend-invitation`,
   dbCheck: `${BASE_URL}/debug/db-check`,
-  health: `${API_BASE_URL}/v1/health`,
   // Auth endpoints
   login: `${API_BASE_URL}/v1/auth/login`,
-  loginDirect: `${API_BASE_URL}/v1/auth/login/direct`, // Direct login endpoint that bypasses ORM
   register: `${API_BASE_URL}/v1/auth/register`,
-  registerDirect: `${API_BASE_URL}/v1/auth/register/direct`, // Direct register endpoint that bypasses ORM
   profile: `${API_BASE_URL}/v1/auth/me`,
-  profilePicture: `${API_BASE_URL}/v1/auth/me/picture`,
   refresh: `${API_BASE_URL}/v1/auth/refresh`,
   resetPassword: `${API_BASE_URL}/v1/auth/reset-password`,
   resetPasswordConfirm: `${API_BASE_URL}/v1/auth/reset-password/confirm`,
@@ -36,7 +32,6 @@ export const API_ENDPOINTS = {
   // Social auth endpoints
   googleAuth: `${API_BASE_URL}/v1/auth/google`,
   googleCallback: `${API_BASE_URL}/v1/auth/google/callback`,
-  googleCallbackDirect: `${API_BASE_URL}/v1/auth/google/callback/direct`,
   facebookAuth: `${API_BASE_URL}/v1/auth/facebook`,
   facebookCallback: `${API_BASE_URL}/v1/auth/facebook/callback`,
   linkedinAuth: `${API_BASE_URL}/v1/auth/linkedin`,

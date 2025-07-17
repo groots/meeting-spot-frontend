@@ -1,8 +1,7 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import MeetingsPage from '@/app/meetings/page';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/app/config';
-import * as apiUtils from '@/app/utils/api';
 
 // Mock the AuthContext
 jest.mock('@/app/contexts/AuthContext', () => ({
@@ -15,115 +14,119 @@ jest.mock('@/app/components/ProtectedRoute', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-// Mock the API utilities
-jest.mock('@/app/utils/api', () => ({
-  apiGet: jest.fn(),
-  getMeetingRequestsWithContacts: jest.fn(),
-  initApiHelpers: jest.fn(),
-}));
+// Mock the fetch function
+global.fetch = jest.fn();
 
 describe('MeetingsPage', () => {
   const mockToken = 'mock-token';
-  const mockUser = { id: '123', email: 'user@example.com' };
-  const mockMeetingRequests = [
-    {
-      id: '1',
-      status: 'PENDING_B_ADDRESS',
-      user_b_contact: 'user2@example.com',
-      location_type: 'restaurant',
-      created_at: '2023-01-01T00:00:00Z',
-    },
-    {
-      id: '2',
-      status: 'COMPLETED',
-      user_b_contact: 'user3@example.com',
-      location_type: 'cafe',
-      created_at: '2023-01-02T00:00:00Z',
-    },
-  ];
-
+  const mockUser = { id: '123', email: 'test@example.com' };
+  
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Mock implementation of useAuth hook
     (useAuth as jest.Mock).mockReturnValue({
-      user: mockUser,
       token: mockToken,
+      user: mockUser,
     });
-    (apiUtils.getMeetingRequestsWithContacts as jest.Mock).mockResolvedValue({
-      data: mockMeetingRequests,
-      error: null,
-    });
+    
+    // Reset fetch mocks
+    (global.fetch as jest.Mock).mockReset();
   });
-
-  it('should render loading state initially', async () => {
-    // Use a promise that doesn't resolve for the loading test
-    const neverResolvingPromise = new Promise(() => {});
-    (apiUtils.getMeetingRequestsWithContacts as jest.Mock).mockReturnValue(neverResolvingPromise);
+  
+  it('displays loading state initially', () => {
+    // Mock fetch to never resolve during this test
+    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
     
     render(<MeetingsPage />);
     
-    // Since the promise never resolves, the component should stay in loading state
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
-
-  it('should render meeting requests when loaded', async () => {
-    await act(async () => {
-      render(<MeetingsPage />);
-    });
+  
+  it('displays error message when fetch fails', async () => {
+    // Mock fetch to reject
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to fetch'));
+    
+    render(<MeetingsPage />);
     
     await waitFor(() => {
-      expect(apiUtils.getMeetingRequestsWithContacts).toHaveBeenCalled();
+      expect(screen.getByText('Failed to load your meeting requests. Please try again later.')).toBeInTheDocument();
     });
-    
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-    
-    expect(screen.getByText('Your Meeting Requests')).toBeInTheDocument();
-    expect(screen.getByText('Awaiting Address')).toBeInTheDocument();
-    expect(screen.getByText('Complete')).toBeInTheDocument();
   });
-
-  it('should render error message when API returns error', async () => {
-    const errorMessage = 'Failed to fetch meetings';
-    (apiUtils.getMeetingRequestsWithContacts as jest.Mock).mockResolvedValue({
-      data: null,
-      error: errorMessage,
+  
+  it('displays empty state when no meetings are returned', async () => {
+    // Mock successful fetch with empty array
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ requests: [] }),
     });
     
-    await act(async () => {
-      render(<MeetingsPage />);
-    });
+    render(<MeetingsPage />);
     
     await waitFor(() => {
-      expect(apiUtils.getMeetingRequestsWithContacts).toHaveBeenCalled();
+      expect(screen.getByText("You don't have any meeting requests yet.")).toBeInTheDocument();
     });
-    
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-    
-    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
-
-  it('should render empty state when there are no meeting requests', async () => {
-    (apiUtils.getMeetingRequestsWithContacts as jest.Mock).mockResolvedValue({
-      data: [],
-      error: null,
+  
+  it('displays meeting requests when available', async () => {
+    // Mock meeting request data
+    const mockMeetingRequests = {
+      requests: [
+        {
+          id: '1',
+          status: 'PENDING_B_ADDRESS',
+          user_b_contact: 'test@example.com',
+          location_type: 'Restaurant',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          status: 'COMPLETED',
+          user_b_contact: 'another@example.com',
+          location_type: 'Coffee',
+          created_at: new Date().toISOString(),
+          selected_place: {
+            id: 'place1',
+            name: 'Test Cafe',
+            address: '123 Test St',
+          },
+        }
+      ]
+    };
+    
+    // Mock successful fetch with data
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMeetingRequests,
     });
     
-    await act(async () => {
-      render(<MeetingsPage />);
-    });
+    render(<MeetingsPage />);
     
     await waitFor(() => {
-      expect(apiUtils.getMeetingRequestsWithContacts).toHaveBeenCalled();
+      // Check for table column headers
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Meeting With')).toBeInTheDocument();
+      expect(screen.getByText('Type')).toBeInTheDocument();
+      
+      // Check for meeting request data
+      expect(screen.getByText('Waiting for other party')).toBeInTheDocument();
+      expect(screen.getByText('Complete')).toBeInTheDocument();
+      expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      expect(screen.getByText('another@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Restaurant')).toBeInTheDocument();
+      expect(screen.getByText('Coffee')).toBeInTheDocument();
     });
+  });
+  
+  it('makes fetch request with correct parameters', () => {
+    render(<MeetingsPage />);
     
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-    
-    expect(screen.getByText("You don't have any meeting requests yet.")).toBeInTheDocument();
-    expect(screen.getByText('Create a Meeting Request')).toBeInTheDocument();
+    expect(global.fetch).toHaveBeenCalledWith(
+      API_ENDPOINTS.meetingRequests,
+      {
+        headers: {
+          'Authorization': `Bearer ${mockToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
   });
 }); 

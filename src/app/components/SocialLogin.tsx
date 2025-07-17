@@ -4,6 +4,24 @@ import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
 import { API_ENDPOINTS, GOOGLE_CLIENT_ID, FACEBOOK_APP_ID } from '../config';
 
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: any) => void;
+          renderButton: (element: HTMLElement, config: any) => void;
+        };
+      };
+    };
+    FB?: {
+      init: (config: any) => void;
+      login: (callback: (response: any) => void, config: any) => void;
+    };
+    fbAsyncInit?: () => void;
+  }
+}
+
 export default function SocialLogin() {
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const [googleError, setGoogleError] = useState<string | null>(null);
@@ -49,7 +67,7 @@ export default function SocialLogin() {
     initializeGoogleSignIn();
   }, []);
 
-  const handleGoogleResponse = async (response: { credential: string }) => {
+  const handleGoogleResponse = async (response: any) => {
     try {
       setGoogleError(null);
       const res = await fetch(API_ENDPOINTS.googleCallback, {
@@ -75,7 +93,7 @@ export default function SocialLogin() {
   };
 
   const handleFacebookLogin = () => {
-    window.FB?.login(function(response: { authResponse: { accessToken: string } | null }) {
+    window.FB?.login(function(response) {
       if (response.authResponse) {
         // Get the access token
         const accessToken = response.authResponse.accessToken;
