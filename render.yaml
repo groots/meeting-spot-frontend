@@ -10,7 +10,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: https://meeting-spot-backend.onrender.com/api
+        value: https://api.findameetingspot.com/api
       - key: PORT
         value: 8080
     healthCheckPath: /

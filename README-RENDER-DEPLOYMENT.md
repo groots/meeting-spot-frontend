@@ -95,10 +95,11 @@ services:
 
 ## Expected URLs
 
-After deployment, your frontend will be available at:
+After deployment, your application will be available at:
 
-- **Render URL**: `https://meeting-spot-frontend.onrender.com`
-- **Custom domain**: Configure in Render dashboard if needed
+- **Frontend**: `https://findameetingspot.com` (custom domain)
+- **Backend API**: `https://api.findameetingspot.com` (custom domain)
+- **Render URLs**: `https://meeting-spot-frontend.onrender.com` (fallback)
 
 ## Troubleshooting
 
