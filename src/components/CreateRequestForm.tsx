@@ -191,20 +191,20 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
   // Form progress bar
   const ProgressBar = () => (
     <div className="mb-8">
-      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-surface-muted rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-teal-500 transition-all duration-300 ease-in-out"
+          className="h-full bg-gradient-primary transition-all duration-300 ease-in-out"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         />
       </div>
-      <p className="text-sm text-gray-500 mt-2 text-right">{`Step ${currentStep} of ${totalSteps}`}</p>
+      <p className="text-sm text-muted-foreground mt-2 text-right">{`Step ${currentStep} of ${totalSteps}`}</p>
     </div>
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2 text-center">Create Meeting Request</h1>
-      <p className="text-gray-600 text-center mb-6">Find the perfect middle ground between you and a contact</p>
+    <div className="w-full max-w-4xl mx-auto bg-surface p-8 rounded-2xl shadow-sm border border-border">
+      <h1 className="text-2xl font-bold mb-2 text-center text-foreground">Create Meeting Request</h1>
+      <p className="text-muted-foreground text-center mb-6">Find the perfect middle ground between you and a contact</p>
 
       <ProgressBar />
 
@@ -212,11 +212,11 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         {/* Step 1: Location */}
         {currentStep === 1 && (
           <div className="space-y-4 min-h-[240px]">
-            <h2 className="text-xl font-semibold">Step 1: Your Location</h2>
-            <p className="text-gray-600 mb-4">Enter your starting location</p>
+            <h2 className="text-xl font-semibold text-foreground">Step 1: Your Location</h2>
+            <p className="text-muted-foreground mb-4">Enter your starting location</p>
 
             <div className="space-y-2">
-              <Label htmlFor="address" className="text-gray-700">Your Address</Label>
+              <Label htmlFor="address">Your Address</Label>
               <div className="space-y-2">
                 <Input
                   id="address"
@@ -225,13 +225,12 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                   value={addressInput}
                   onChange={handleAddressChange}
                   disabled={isLoading}
-                  className="border-gray-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
                 />
                 {geocodingInProgress && (
-                  <p className="text-xs text-blue-600">Looking up location...</p>
+                  <p className="text-xs text-info">Looking up location...</p>
                 )}
                 {coords.lat && coords.lon && (
-                  <p className="text-xs text-green-600">✓ Coordinates found</p>
+                  <p className="text-xs text-success">✓ Coordinates found</p>
                 )}
                 <LocationButton
                   onLocationSuccess={handleLocationSuccess}
@@ -246,7 +245,6 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={nextStep}
                 disabled={!canAdvanceStep1}
-                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:shadow-none"
               >
                 Next Step
               </Button>
@@ -257,8 +255,8 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         {/* Step 2: Preferences */}
         {currentStep === 2 && (
           <div className="space-y-4 min-h-[240px]">
-            <h2 className="text-xl font-semibold">Step 2: Meeting Preferences</h2>
-            <p className="text-gray-600 mb-4">Select what type of place you'd like to meet at</p>
+            <h2 className="text-xl font-semibold text-foreground">Step 2: Meeting Preferences</h2>
+            <p className="text-muted-foreground mb-4">Select what type of place you'd like to meet at</p>
 
             <LocationTypeSelector
               selectedType={category}
@@ -268,12 +266,12 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
 
             {category === 'Food & Drink' && (
               <div className="space-y-2 mt-4">
-                <Label htmlFor="subcategory" className="text-gray-700">Specific Food Preference</Label>
+                <Label htmlFor="subcategory">Specific Food Preference</Label>
                 <select
                   id="subcategory"
                   value={subcategory}
                   onChange={(e) => setSubcategory(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="flex h-10 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                   disabled={isLoading}
                 >
                   {FOOD_SUBCATEGORIES.map((subcat) => (
@@ -288,7 +286,6 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={prevStep}
                 variant="outline"
-                className="border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors"
               >
                 Back
               </Button>
@@ -296,7 +293,6 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={nextStep}
                 disabled={!canAdvanceStep2}
-                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:shadow-none"
               >
                 Next Step
               </Button>
@@ -307,8 +303,8 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         {/* Step 3: Contact Information */}
         {currentStep === 3 && (
           <div className="space-y-4 min-h-[240px]">
-            <h2 className="text-xl font-semibold">Step 3: Contact Information</h2>
-            <p className="text-gray-600 mb-4">How should your contact reach you?</p>
+            <h2 className="text-xl font-semibold text-foreground">Step 3: Contact Information</h2>
+            <p className="text-muted-foreground mb-4">How should your contact reach you?</p>
 
             <ContactSelector
               onChange={handleContactChange}
@@ -321,18 +317,16 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 type="button"
                 onClick={prevStep}
                 variant="outline"
-                className="border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors"
               >
                 Back
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !canAdvanceStep3}
-                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:shadow-none"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
                     Creating...
                   </div>
                 ) : (
@@ -344,8 +338,8 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         )}
 
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="mt-4 p-3 bg-error/10 border border-error/20 rounded-lg">
+            <p className="text-sm text-error">{error}</p>
           </div>
         )}
       </form>

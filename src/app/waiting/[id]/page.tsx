@@ -157,7 +157,7 @@ export default function WaitingPage() {
               Loading Request Status...
             </h1>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
             </div>
           </div>
         </div>
@@ -203,19 +203,19 @@ export default function WaitingPage() {
                 <div className="flex flex-col items-center space-y-4">
                   {/* Spinner only if actively polling */}
                   {isPolling && (
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                      <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
                   )}
                    {/* Paused icon if polling stopped (and not loading a manual check) */}
                    {pollingStopped && !isLoading && !error && (
-                       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                        </svg>
                    )}
                    {/* Loading indicator specifically for manual check */}
                    {isLoading && pollingStopped && (
-                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                       <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
                    )}
-                  <p className="text-lg text-secondary">
+                  <p className="text-lg text-foreground">
                     {status === 'pending_b_address' && 'Waiting for the other person to submit their address...'}
                     {status === 'calculating' && 'Finding the best meeting spots...'}
                     {status === 'error' && 'An error occurred processing the request.'}
@@ -236,7 +236,7 @@ export default function WaitingPage() {
                       >
                         {isResendingInvitation ? (
                           <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent mr-2"></div>
                             Resending...
                           </div>
                         ) : resendCooldownMinutes > 0 ? (
@@ -246,7 +246,7 @@ export default function WaitingPage() {
                         )}
                       </Button>
                       {lastResendTime && resendCooldownMinutes === 0 && (
-                        <p className="text-xs text-green-600 mt-1">Invitation can be resent now</p>
+                        <p className="text-xs text-success mt-1">Invitation can be resent now</p>
                       )}
                       {lastResendTime && resendCooldownMinutes > 0 && (
                         <p className="text-xs text-muted-foreground mt-1">
@@ -258,7 +258,7 @@ export default function WaitingPage() {
                   
                   {/* Rate Limit Message */}
                   {rateLimited && (
-                    <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-md w-full">
+                    <div className="mt-4 p-3 bg-warning/15 text-warning rounded-lg w-full">
                       <p className="text-sm text-center">
                         Checking too frequently. Waiting {retryAfter} seconds before the next automatic check...
                       </p>
@@ -267,7 +267,7 @@ export default function WaitingPage() {
                   
                   {/* Manual Refresh Section */}
                    {pollingStopped && !error && (
-                     <div className="mt-4 p-3 bg-blue-100 text-blue-800 rounded-md w-full">
+                     <div className="mt-4 p-3 bg-info/15 text-info rounded-lg w-full">
                        <p className="text-sm text-center">
                          Automatic status checks have stopped. You can check manually.
                        </p>

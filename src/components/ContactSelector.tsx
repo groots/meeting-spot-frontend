@@ -10,7 +10,7 @@ import type { Contact } from '@/app/api/contacts';
 // Simple inline spinner component
 const SimpleSpinner = () => (
   <div className="flex justify-center p-4">
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+    <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
   </div>
 );
 
@@ -150,9 +150,9 @@ export default function ContactSelector({
                 value="existing"
                 checked={useExistingContact}
                 onChange={() => setUseExistingContact(true)}
-                className="border-gray-300 text-blue-500 focus:ring-blue-500"
+                className="border-border text-primary focus:ring-ring"
               />
-              <Label htmlFor="existing" className="text-gray-700 font-medium cursor-pointer">
+              <Label htmlFor="existing" className="font-medium cursor-pointer">
                 Use existing contact
               </Label>
             </div>
@@ -164,9 +164,9 @@ export default function ContactSelector({
                 value="new"
                 checked={!useExistingContact}
                 onChange={() => setUseExistingContact(false)}
-                className="border-gray-300 text-blue-500 focus:ring-blue-500"
+                className="border-border text-primary focus:ring-ring"
               />
-              <Label htmlFor="new" className="text-gray-700 font-medium cursor-pointer">
+              <Label htmlFor="new" className="font-medium cursor-pointer">
                 Enter new contact
               </Label>
             </div>
@@ -192,7 +192,7 @@ export default function ContactSelector({
                 }
               }}
               value={selectedContactId || ""}
-              className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
+              className="w-full rounded-lg border border-border bg-surface p-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
             >
               <option value="" disabled>Select a contact</option>
               {contactsArray.map((contact) => {
@@ -207,10 +207,10 @@ export default function ContactSelector({
               })}
             </select>
           ) : (
-            <div className="text-sm text-gray-500 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="text-sm text-muted-foreground p-3 bg-surface-muted border border-border rounded-lg">
               {loadingContacts ? (
                 <div className="flex items-center justify-center py-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-500 mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
                   <span>Loading your contacts...</span>
                 </div>
               ) : (
@@ -220,7 +220,6 @@ export default function ContactSelector({
                     variant="outline"
                     size="sm"
                     onClick={() => setUseExistingContact(false)}
-                    className="text-blue-600 border-blue-300 hover:bg-blue-50"
                   >
                     Enter a new contact instead
                   </Button>
@@ -233,7 +232,7 @@ export default function ContactSelector({
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex-1 space-y-1">
-              <Label htmlFor="contactType" className="text-gray-600 text-sm">
+              <Label htmlFor="contactType" className="text-sm">
                 Contact Type
               </Label>
               <select
@@ -242,7 +241,7 @@ export default function ContactSelector({
                 onChange={(e) => {
                   handleContactTypeChange(e.target.value as "email" | "phone");
                 }}
-                className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200 p-2"
+                className="w-full rounded-lg border border-border bg-surface p-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
               >
                 <option value="email">Email</option>
                 <option value="phone">Phone</option>
@@ -250,7 +249,7 @@ export default function ContactSelector({
             </div>
 
             <div className="flex-1 space-y-1">
-              <Label htmlFor="contactInfo" className="text-gray-600 text-sm">
+              <Label htmlFor="contactInfo" className="text-sm">
                 {contactType === "email" ? "Email Address" : "Phone Number"}
               </Label>
               <Input
@@ -263,13 +262,12 @@ export default function ContactSelector({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleContactInfoChange(e.target.value);
                 }}
-                className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="contactName" className="text-gray-600 text-sm">
+            <Label htmlFor="contactName" className="text-sm">
               Contact Name (Optional)
             </Label>
             <Input
@@ -278,7 +276,6 @@ export default function ContactSelector({
               placeholder="John Doe"
               value={contactName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContactName(e.target.value)}
-              className="w-full border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg shadow-sm transition-all duration-200"
             />
           </div>
 
@@ -289,9 +286,9 @@ export default function ContactSelector({
                 id="saveContact"
                 checked={shouldSaveContact}
                 onChange={(e) => setShouldSaveContact(e.target.checked)}
-                className="border-gray-300 text-blue-500 focus:ring-blue-500 mr-2"
+                className="border-border text-primary focus:ring-ring mr-2"
               />
-              <Label htmlFor="saveContact" className="text-gray-600 text-sm cursor-pointer">
+              <Label htmlFor="saveContact" className="text-sm cursor-pointer">
                 Save this contact for future use
               </Label>
             </div>
@@ -300,13 +297,13 @@ export default function ContactSelector({
       )}
 
       {error && (
-        <div className="mt-2 text-red-500 text-sm bg-red-50 p-2 rounded-md border border-red-100">
+        <div className="mt-2 text-error text-sm bg-error/10 p-2 rounded-lg border border-error/20">
           {error}
         </div>
       )}
 
       {loadingError && (
-        <div className="mt-2 text-red-500 text-sm bg-red-50 p-2 rounded-md border border-red-100">
+        <div className="mt-2 text-error text-sm bg-error/10 p-2 rounded-lg border border-error/20">
           {loadingError}
         </div>
       )}

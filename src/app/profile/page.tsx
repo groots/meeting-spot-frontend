@@ -173,14 +173,14 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="px-6 py-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Your Profile</h2>
+              <h2 className="text-2xl font-bold text-foreground">Your Profile</h2>
               <button
                 onClick={() => setShowEditModal(true)}
-                className="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm"
+                className="inline-flex items-center px-3 py-1.5 border border-primary text-primary rounded-md hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring text-sm transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -190,13 +190,13 @@ export default function ProfilePage() {
             </div>
 
             {editSuccess && (
-              <div className="mb-4 p-2 bg-green-50 text-green-700 text-sm rounded border border-green-200">
+              <div className="mb-4 p-2 bg-success/10 text-success text-sm rounded-lg border border-success/20">
                 Profile updated successfully!
               </div>
             )}
 
             {passwordSuccess && (
-              <div className="mb-4 p-2 bg-green-50 text-green-700 text-sm rounded border border-green-200">
+              <div className="mb-4 p-2 bg-success/10 text-success text-sm rounded-lg border border-success/20">
                 Password changed successfully!
               </div>
             )}
@@ -204,28 +204,28 @@ export default function ProfilePage() {
             {user && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <div className="mt-1 text-gray-900">{user.email || 'User email unavailable'}</div>
+                  <label className="block text-sm font-medium text-muted-foreground">Email</label>
+                  <div className="mt-1 text-foreground">{user.email || 'User email unavailable'}</div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <div className="mt-1 text-gray-900">
-                    {user.first_name || user.last_name 
+                  <label className="block text-sm font-medium text-muted-foreground">Name</label>
+                  <div className="mt-1 text-foreground">
+                    {user.first_name || user.last_name
                       ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
                       : 'Not provided'}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Account Type</label>
-                  <div className="mt-1 text-gray-900">
+                  <label className="block text-sm font-medium text-muted-foreground">Account Type</label>
+                  <div className="mt-1 text-foreground">
                     {user.is_premium ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-primary/10 text-primary">
                         Premium
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-surface-muted text-muted-foreground">
                         Free
                       </span>
                     )}
@@ -233,16 +233,16 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Created</label>
-                  <div className="mt-1 text-gray-900">
+                  <label className="block text-sm font-medium text-muted-foreground">Created</label>
+                  <div className="mt-1 text-foreground">
                     {new Date(user.created_at).toLocaleDateString()}
                   </div>
                 </div>
 
                 {user.subscription && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Subscription</label>
-                    <div className="mt-1 text-gray-900">
+                    <label className="block text-sm font-medium text-muted-foreground">Subscription</label>
+                    <div className="mt-1 text-foreground">
                       <p><span className="font-medium">Plan:</span> {user.subscription.plan_type}</p>
                       <p><span className="font-medium">Status:</span> {user.subscription.status}</p>
                       {user.subscription.end_date && (
@@ -254,20 +254,20 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                <div className="pt-6 border-t border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Account Actions</h3>
+                <div className="pt-6 border-t border-border">
+                  <h3 className="text-lg font-medium text-foreground">Account Actions</h3>
 
                   <div className="mt-4 space-y-4">
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-colors"
                     >
                       Change Password
                     </button>
 
                     <button
                       onClick={() => setShowDeleteModal(true)}
-                      className="w-full inline-flex justify-center py-2 px-4 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className="w-full inline-flex justify-center py-2 px-4 border border-error/30 rounded-md shadow-sm text-sm font-medium text-error bg-surface hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error transition-colors"
                     >
                       Delete Account
                     </button>
@@ -280,13 +280,13 @@ export default function ProfilePage() {
 
         {/* Password change form */}
         {isEditing && (
-          <div className="mt-6 max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="mt-6 max-w-md mx-auto bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
+                <h2 className="text-xl font-bold text-foreground">Change Password</h2>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -295,7 +295,7 @@ export default function ProfilePage() {
               </div>
 
               {passwordError && (
-                <div className="mb-4 p-2 bg-red-50 text-red-700 text-sm rounded border border-red-200">
+                <div className="mb-4 p-2 bg-error/10 text-error text-sm rounded-lg border border-error/20">
                   {passwordError}
                 </div>
               )}
@@ -303,7 +303,7 @@ export default function ProfilePage() {
               <form onSubmit={handleChangePassword}>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="current-password" className="block text-sm font-medium text-muted-foreground">
                       Current Password
                     </label>
                     <input
@@ -311,13 +311,13 @@ export default function ProfilePage() {
                       id="current-password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring sm:text-sm"
                       required
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="new-password" className="block text-sm font-medium text-muted-foreground">
                       New Password
                     </label>
                     <input
@@ -325,14 +325,14 @@ export default function ProfilePage() {
                       id="new-password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring sm:text-sm"
                       required
                       minLength={8}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="confirm-password" className="block text-sm font-medium text-muted-foreground">
                       Confirm New Password
                     </label>
                     <input
@@ -340,7 +340,7 @@ export default function ProfilePage() {
                       id="confirm-password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring sm:text-sm"
                       required
                     />
                   </div>
@@ -349,11 +349,11 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={isChangingPassword}
-                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                      className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-colors"
                     >
                       {isChangingPassword ? (
                         <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -375,28 +375,28 @@ export default function ProfilePage() {
           <div className="fixed z-10 inset-0 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
               </div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="inline-block align-bottom bg-surface border border-border rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      <h3 className="text-lg leading-6 font-medium text-foreground">
                         Edit Profile
                       </h3>
-                      
+
                       {editError && (
-                        <div className="mt-3 p-2 bg-red-50 text-red-700 text-sm rounded border border-red-200">
+                        <div className="mt-3 p-2 bg-error/10 text-error text-sm rounded-lg border border-error/20">
                           {editError}
                         </div>
                       )}
-                      
+
                       <form onSubmit={handleSaveProfile} className="mt-4">
                         <div className="mb-4">
-                          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="firstName" className="block text-sm font-medium text-muted-foreground mb-1">
                             First Name
                           </label>
                           <input
@@ -405,12 +405,12 @@ export default function ProfilePage() {
                             name="firstName"
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
-                            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            className="shadow-sm block w-full sm:text-sm rounded-lg border border-border bg-surface text-foreground px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                           />
                         </div>
-                        
+
                         <div className="mb-4">
-                          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="lastName" className="block text-sm font-medium text-muted-foreground mb-1">
                             Last Name
                           </label>
                           <input
@@ -419,7 +419,7 @@ export default function ProfilePage() {
                             name="lastName"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
-                            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            className="shadow-sm block w-full sm:text-sm rounded-lg border border-border bg-surface text-foreground px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                           />
                         </div>
 
@@ -427,11 +427,11 @@ export default function ProfilePage() {
                           <button
                             type="submit"
                             disabled={isSaving}
-                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-primary-foreground hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 transition-colors"
                           >
                             {isSaving ? (
                               <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
@@ -444,7 +444,7 @@ export default function ProfilePage() {
                           <button
                             type="button"
                             onClick={() => setShowEditModal(false)}
-                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                            className="mt-3 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-surface text-base font-medium text-foreground hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring sm:mt-0 sm:w-auto sm:text-sm transition-colors"
                           >
                             Cancel
                           </button>
@@ -463,29 +463,29 @@ export default function ProfilePage() {
           <div className="fixed z-10 inset-0 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
               </div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="inline-block align-bottom bg-surface border border-border rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
-                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                      <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-error/10 sm:mx-0 sm:h-10 sm:w-10">
+                      <svg className="h-6 w-6 text-error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
                     </div>
                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900">Delete Account</h3>
+                      <h3 className="text-lg leading-6 font-medium text-foreground">Delete Account</h3>
                       <div className="mt-2">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Are you sure you want to delete your account? All of your data will be permanently removed.
                           This action cannot be undone.
                         </p>
 
                         {deleteError && (
-                          <div className="mt-3 p-2 bg-red-50 text-red-700 text-sm rounded">
+                          <div className="mt-3 p-2 bg-error/10 text-error text-sm rounded-lg">
                             {deleteError}
                           </div>
                         )}
@@ -493,12 +493,12 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-surface-muted px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="button"
                     disabled={isDeleting}
                     onClick={handleDeleteAccount}
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-error text-base font-medium text-white hover:bg-error/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 transition-colors"
                   >
                     {isDeleting ? (
                       <>
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                     type="button"
                     disabled={isDeleting}
                     onClick={() => setShowDeleteModal(false)}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-surface text-base font-medium text-foreground hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors"
                   >
                     Cancel
                   </button>

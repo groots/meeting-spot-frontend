@@ -23,6 +23,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -87,6 +89,31 @@ export default function DashboardPage() {
     }
   };
 
+  const resendInvitation = async (id: string) => {
+    try {
+      setResendLoading(id);
+      setResendMessage(null);
+      const response = await fetch(API_ENDPOINTS.meetingRequestResendInvitation(id), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to resend invitation');
+      }
+
+      setResendMessage('Invitation resent successfully.');
+    } catch (err) {
+      console.error('Error resending invitation:', err);
+      setResendMessage('Could not resend the invitation. Please try again later.');
+    } finally {
+      setResendLoading(null);
+    }
+  };
+
   // Helper function to get the correct ID (some APIs use id, others use request_id)
   const getRequestId = (request: MeetingRequest) => {
     // Make sure we have a valid ID and log the values for debugging
@@ -100,30 +127,30 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <Link href="/meeting/new" className="btn-accent">
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <Link href="/create" className="btn-accent">
             Create New Meeting
           </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Summary Cards */}
-          <div className="card bg-primary text-white">
+          <div className="rounded-xl bg-gradient-primary p-6 text-primary-foreground shadow-sm">
             <h3 className="text-xl font-semibold mb-2">Welcome Back</h3>
-            <p>{user?.email}</p>
+            <p className="opacity-90">{user?.email}</p>
           </div>
 
           <div className="card">
-            <h3 className="text-xl font-semibold mb-2">Active Meetings</h3>
+            <h3 className="text-xl font-semibold mb-2 text-foreground">Active Meetings</h3>
             <p className="text-4xl font-bold text-accent">
               {loading ? '...' : meetingRequests.filter(req => req.status !== 'COMPLETED').length}
             </p>
           </div>
 
           <div className="card">
-            <h3 className="text-xl font-semibold mb-2">Quick Actions</h3>
+            <h3 className="text-xl font-semibold mb-2 text-foreground">Quick Actions</h3>
             <div className="space-y-2">
-              <Link href="/meeting/new" className="block text-primary hover:underline">
+              <Link href="/create" className="block text-primary hover:underline">
                 Create a meeting
               </Link>
               <Link href="/profile" className="block text-primary hover:underline">
@@ -133,13 +160,19 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-2xl font-bold mb-6">Your Meeting Requests</h2>
+        <div className="bg-surface border border-border rounded-xl shadow-sm p-6">
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Your Meeting Requests</h2>
+
+          {resendMessage && (
+            <div className="mb-4 rounded-lg bg-surface-muted p-3 text-sm text-foreground">
+              {resendMessage}
+            </div>
+          )}
 
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-neutral-500">Loading your meeting requests...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent mx-auto"></div>
+              <p className="mt-2 text-muted-foreground">Loading your meeting requests...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8 text-error">
@@ -147,56 +180,56 @@ export default function DashboardPage() {
             </div>
           ) : meetingRequests.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-lg text-neutral-500">You don't have any meeting requests yet.</p>
-              <Link href="/meeting/new" className="btn-primary mt-4 inline-block">
+              <p className="text-lg text-muted-foreground">You don't have any meeting requests yet.</p>
+              <Link href="/create" className="btn-primary mt-4 inline-block">
                 Create Your First Meeting
               </Link>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-neutral-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Contact
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Location Type
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-200">
+                <tbody className="divide-y divide-border">
                   {meetingRequests.map((request) => {
                     const requestId = getRequestId(request);
                     return (
-                      <tr key={requestId} className="hover:bg-neutral-50">
+                      <tr key={requestId} className="hover:bg-surface-muted">
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            request.status === 'PENDING' ? 'bg-purple-light text-white' :
-                            request.status === 'ACCEPTED' ? 'bg-info text-white' :
-                            request.status === 'DECLINED' ? 'bg-error text-white' :
-                            request.status === 'COMPLETED' ? 'bg-success text-white' :
-                            'bg-neutral-200 text-neutral-700'
+                          <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${
+                            request.status === 'PENDING' ? 'bg-warning/15 text-warning' :
+                            request.status === 'ACCEPTED' ? 'bg-info/15 text-info' :
+                            request.status === 'DECLINED' ? 'bg-error/15 text-error' :
+                            request.status === 'COMPLETED' ? 'bg-success/15 text-success' :
+                            'bg-surface-muted text-muted-foreground'
                           }`}>
                             {request.status}
                           </span>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 whitespace-nowrap text-foreground">
                           {request.user_b_contact}
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 whitespace-nowrap text-foreground">
                           {request.location_type}
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 whitespace-nowrap text-muted-foreground">
                           {formatDistanceToNow(new Date(request.created_at), { addSuffix: true })}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
@@ -209,12 +242,21 @@ export default function DashboardPage() {
                                 View Details
                               </Link>
                             ) : (
-                              <span className="text-gray-400">ID Missing</span>
+                              <span className="text-muted-foreground">ID Missing</span>
+                            )}
+                            {requestId && request.status === 'PENDING' && (
+                              <button
+                                onClick={() => resendInvitation(requestId)}
+                                disabled={resendLoading === requestId}
+                                className="text-primary hover:underline disabled:opacity-50"
+                              >
+                                {resendLoading === requestId ? 'Resending...' : 'Resend Invite'}
+                              </button>
                             )}
                             <button
                               onClick={() => deleteMeetingRequest(requestId)}
                               disabled={deleteLoading === requestId}
-                              className="text-red-500 hover:underline"
+                              className="text-error hover:underline disabled:opacity-50"
                             >
                               {deleteLoading === requestId ? 'Deleting...' : 'Delete'}
                             </button>

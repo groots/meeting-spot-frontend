@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,24 +9,60 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Semantic surface tokens (flip in dark mode)
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        surface: {
+          DEFAULT: 'var(--surface)',
+          muted: 'var(--surface-muted)',
+        },
+        border: 'var(--border)',
+        'muted-foreground': 'var(--muted-foreground)',
+
+        // shadcn-compatible aliases used by existing components
+        card: {
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)',
+        },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--destructive)',
+          foreground: 'var(--destructive-foreground)',
+        },
+        ring: 'var(--ring)',
+        input: 'var(--input)',
+
+        // Brand
         primary: {
           DEFAULT: 'var(--primary)',
           hover: 'var(--primary-hover)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
           DEFAULT: 'var(--secondary)',
           hover: 'var(--secondary-hover)',
+          foreground: 'var(--secondary-foreground)',
         },
         accent: {
           DEFAULT: 'var(--accent)',
           hover: 'var(--accent-hover)',
+          foreground: 'var(--accent-foreground)',
         },
+
+        // Status
         error: 'var(--error)',
         success: 'var(--success)',
         warning: 'var(--warning)',
         info: 'var(--info)',
+
+        // Neutral ramp
         neutral: {
           100: 'var(--neutral-100)',
           200: 'var(--neutral-200)',
@@ -37,17 +74,30 @@ module.exports = {
           800: 'var(--neutral-800)',
           900: 'var(--neutral-900)',
         },
-        // Our professional yet fun palette
+
+        // Legacy brand aliases (kept so existing components don't break;
+        // now driven by brand tokens so they theme correctly)
         purple: {
-          light: '#b87ebb', // Secondary color (orchid)
-          DEFAULT: '#5a55a6', // Primary color
-          dark: '#4a4591',    // Primary hover
+          light: 'var(--secondary)',
+          DEFAULT: 'var(--primary)',
+          dark: 'var(--primary-hover)',
         },
         green: {
-          light: '#71e9a2',
-          DEFAULT: '#02de7a', // Accent color
-          dark: '#00c46c',    // Accent hover
-        }
+          light: 'var(--accent-hover)',
+          DEFAULT: 'var(--accent)',
+          dark: 'var(--accent-hover)',
+        },
+      },
+      borderRadius: {
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+      },
+      boxShadow: {
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -55,7 +105,7 @@ module.exports = {
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont'],
+        sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont'],
       },
       animation: {
         bounce: 'bounce 2s infinite',
@@ -70,4 +120,4 @@ module.exports = {
     },
   },
   plugins: [],
-} 
+}

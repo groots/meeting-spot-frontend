@@ -37,7 +37,7 @@ export default function ResendVerification({ email }: { email: string }) {
 
   if (success) {
     return (
-      <div className="text-sm text-green-600">
+      <div className="text-sm text-success">
         Verification email sent! Please check your inbox.
       </div>
     );
@@ -48,11 +48,11 @@ export default function ResendVerification({ email }: { email: string }) {
       <button
         onClick={handleResend}
         disabled={isLoading}
-        className="text-sm font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50"
+        className="text-sm font-medium text-primary hover:text-primary-hover disabled:opacity-50"
       >
         {isLoading ? 'Sending...' : 'Resend verification email'}
       </button>
-      {error && <div className="mt-2 text-sm text-red-600">{error}</div>}
+      {error && <div className="mt-2 text-sm text-error">{error}</div>}
     </div>
   );
 }

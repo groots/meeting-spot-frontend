@@ -173,43 +173,43 @@ function SubscriptionContent() {
   if (loading && subscriptions.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Subscription Management</h1>
+      <h1 className="text-3xl font-bold mb-8 text-foreground">Subscription Management</h1>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+        <div className="bg-error/10 border border-error/30 text-error px-4 py-3 rounded-lg mb-4" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
+        <div className="bg-success/10 border border-success/30 text-success px-4 py-3 rounded-lg mb-4" role="alert">
           <span className="block sm:inline">{successMessage}</span>
         </div>
       )}
 
       {/* Current Subscription Status */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Current Subscription</h2>
+      <div className="bg-surface border border-border shadow-sm rounded-xl p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-foreground">Current Subscription</h2>
 
         {activeSubscription ? (
-          <div>
+          <div className="text-foreground">
             <p><span className="font-medium">Plan:</span> {activeSubscription.plan_id.charAt(0).toUpperCase() + activeSubscription.plan_id.slice(1)}</p>
             <p><span className="font-medium">Status:</span> {activeSubscription.status.charAt(0).toUpperCase() + activeSubscription.status.slice(1)}</p>
             {subscriptionEndsAt && <p><span className="font-medium">Current period ends:</span> {subscriptionEndsAt}</p>}
             {activeSubscription.cancel_at_period_end && (
-              <p className="mt-2 text-amber-600">Your subscription is set to cancel at the end of the current billing period.</p>
+              <p className="mt-2 text-warning">Your subscription is set to cancel at the end of the current billing period.</p>
             )}
             {activeSubscription.status === 'active' && !activeSubscription.cancel_at_period_end && (
               <button
                 onClick={handleCancelSubscription}
-                className="mt-4 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded"
+                className="mt-4 bg-error hover:bg-error/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 disabled={loading}
               >
                 {loading ? 'Processing...' : 'Cancel Subscription'}
@@ -217,32 +217,32 @@ function SubscriptionContent() {
             )}
           </div>
         ) : (
-          <p>You currently don't have an active subscription.</p>
+          <p className="text-muted-foreground">You currently don't have an active subscription.</p>
         )}
       </div>
 
       {/* Subscription Plans */}
       {(!activeSubscription || activeSubscription.cancel_at_period_end) && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Available Plans</h2>
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Available Plans</h2>
 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Free Plan */}
             <div
-              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'free' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
+              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'free' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}
               onClick={() => handleSelectPlan('free')}
             >
               <h3 className="text-lg font-semibold mb-2">Free</h3>
-              <p className="text-2xl font-bold mb-4">$0 <span className="text-sm font-normal text-gray-600">/month</span></p>
+              <p className="text-2xl font-bold mb-4">$0 <span className="text-sm font-normal text-muted-foreground">/month</span></p>
               <ul className="space-y-2 mb-4">
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>5 meeting requests/month</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Basic features</span>
@@ -252,20 +252,20 @@ function SubscriptionContent() {
 
             {/* Basic Plan */}
             <div
-              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
+              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}
               onClick={() => handleSelectPlan('basic')}
             >
               <h3 className="text-lg font-semibold mb-2">Basic</h3>
-              <p className="text-2xl font-bold mb-4">$9.99 <span className="text-sm font-normal text-gray-600">/month</span></p>
+              <p className="text-2xl font-bold mb-4">$9.99 <span className="text-sm font-normal text-muted-foreground">/month</span></p>
               <ul className="space-y-2 mb-4">
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Unlimited meeting requests</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Contact management</span>
@@ -275,26 +275,26 @@ function SubscriptionContent() {
 
             {/* Premium Plan */}
             <div
-              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'premium' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
+              className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedPlan === 'premium' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}
               onClick={() => handleSelectPlan('premium')}
             >
               <h3 className="text-lg font-semibold mb-2">Premium</h3>
-              <p className="text-2xl font-bold mb-4">$19.99 <span className="text-sm font-normal text-gray-600">/month</span></p>
+              <p className="text-2xl font-bold mb-4">$19.99 <span className="text-sm font-normal text-muted-foreground">/month</span></p>
               <ul className="space-y-2 mb-4">
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Everything in Basic</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Advanced analytics</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-5 w-5 text-success mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Priority support</span>
@@ -306,7 +306,7 @@ function SubscriptionContent() {
           <div className="mt-6">
             <button
               onClick={handleSubscribe}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded"
+              className="bg-primary hover:bg-primary-hover text-primary-foreground font-medium py-2 px-6 rounded-lg transition-colors"
               disabled={loading}
             >
               {loading ? 'Processing...' : `Subscribe to ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)}`}
@@ -318,24 +318,24 @@ function SubscriptionContent() {
       {/* Subscription History */}
       {subscriptions.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-4">Subscription History</h2>
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Subscription History</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200">
+            <table className="min-w-full bg-surface border border-border rounded-xl">
               <thead>
-                <tr>
-                  <th className="px-4 py-2 border-b text-left">Plan</th>
-                  <th className="px-4 py-2 border-b text-left">Status</th>
-                  <th className="px-4 py-2 border-b text-left">Created</th>
-                  <th className="px-4 py-2 border-b text-left">Period End</th>
+                <tr className="text-muted-foreground">
+                  <th className="px-4 py-2 border-b border-border text-left">Plan</th>
+                  <th className="px-4 py-2 border-b border-border text-left">Status</th>
+                  <th className="px-4 py-2 border-b border-border text-left">Created</th>
+                  <th className="px-4 py-2 border-b border-border text-left">Period End</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-foreground">
                 {subscriptions.map(sub => (
                   <tr key={sub.id}>
-                    <td className="px-4 py-2 border-b">{sub.plan_id.charAt(0).toUpperCase() + sub.plan_id.slice(1)}</td>
-                    <td className="px-4 py-2 border-b">{sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}</td>
-                    <td className="px-4 py-2 border-b">{new Date(sub.created_at).toLocaleDateString()}</td>
-                    <td className="px-4 py-2 border-b">{sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : 'N/A'}</td>
+                    <td className="px-4 py-2 border-b border-border">{sub.plan_id.charAt(0).toUpperCase() + sub.plan_id.slice(1)}</td>
+                    <td className="px-4 py-2 border-b border-border">{sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}</td>
+                    <td className="px-4 py-2 border-b border-border">{new Date(sub.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-2 border-b border-border">{sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -352,7 +352,7 @@ export default function SubscriptionPage() {
   return (
     <Suspense fallback={
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
       </div>
     }>
       <SubscriptionContent />

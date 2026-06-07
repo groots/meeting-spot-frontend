@@ -92,13 +92,13 @@ export default function LocationTypeSelector({
               className={`
                 flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-colors
                 ${isSelected
-                  ? 'border-lime-500 bg-lime-50 text-lime-700'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-surface text-foreground hover:border-primary/40'
                 }
                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}
             >
-              <Icon className={`w-8 h-8 mb-2 ${isSelected ? 'text-lime-600' : 'text-gray-500'}`} />
+              <Icon className={`w-8 h-8 mb-2 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
               <span className="text-sm font-medium">{type.label}</span>
             </button>
           );
@@ -107,7 +107,7 @@ export default function LocationTypeSelector({
 
       {/* Description of selected type */}
       {selectedType && (
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           {locationTypes.find(t => t.key === selectedType)?.description}
         </p>
       )}

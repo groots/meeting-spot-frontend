@@ -76,10 +76,10 @@ export default function AddContactModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface border border-border text-foreground rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Add to Contacts</h2>
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Add to Contacts</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -143,7 +143,7 @@ export default function AddContactModal({
             </div>
 
             {error && (
-              <div className="p-3 bg-red-100 text-red-800 rounded-md">
+              <div className="p-3 bg-error/10 text-error rounded-lg">
                 {error}
               </div>
             )}

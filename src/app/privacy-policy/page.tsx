@@ -76,7 +76,7 @@ export default function PrivacyPolicy() {
         <p>
           If you have any questions about this privacy policy or our privacy practices, please contact us at:
           <br />
-          <a href="mailto:privacy@findameetingspot.com" className="text-blue-600 hover:underline">
+          <a href="mailto:privacy@findameetingspot.com" className="text-primary hover:underline">
             privacy@findameetingspot.com
           </a>
         </p>

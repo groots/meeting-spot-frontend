@@ -58,11 +58,11 @@ const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({
   // Color mapping for strength levels
   const getColor = (): string => {
     switch (strength) {
-      case 'weak': return 'bg-red-500';
-      case 'fair': return 'bg-yellow-500';
-      case 'good': return 'bg-blue-500';
-      case 'strong': return 'bg-green-500';
-      default: return 'bg-gray-200';
+      case 'weak': return 'bg-error';
+      case 'fair': return 'bg-warning';
+      case 'good': return 'bg-info';
+      case 'strong': return 'bg-success';
+      default: return 'bg-surface-muted';
     }
   };
 
@@ -89,20 +89,20 @@ const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({
       <div className="h-10">
         {password && (
           <div className="space-y-1">
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className={`h-full ${getColor()} transition-all duration-300 ease-in-out`} 
+            <div className="h-2 bg-surface-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full ${getColor()} transition-all duration-300 ease-in-out`}
                 style={{ width: getWidth() }}
               ></div>
             </div>
-            <p className="text-xs text-gray-600 flex justify-between">
+            <p className="text-xs text-muted-foreground flex justify-between">
               <span>Password strength:</span>
               <span className={`
                 font-medium
-                ${strength === 'weak' ? 'text-red-500' : ''}
-                ${strength === 'fair' ? 'text-yellow-600' : ''}
-                ${strength === 'good' ? 'text-blue-600' : ''}
-                ${strength === 'strong' ? 'text-green-600' : ''}
+                ${strength === 'weak' ? 'text-error' : ''}
+                ${strength === 'fair' ? 'text-warning' : ''}
+                ${strength === 'good' ? 'text-info' : ''}
+                ${strength === 'strong' ? 'text-success' : ''}
               `}>
                 {getLabel()}
               </span>

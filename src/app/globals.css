@@ -2,45 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Color System - CSS Variables */
+/* =====================================================================
+   Design tokens — fresh modern palette
+   Semantic tokens (--background, --foreground, --surface, --border, --muted)
+   flip between light and dark. Brand + status colors stay vibrant in both.
+   ===================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
+  /* Semantic surface tokens (light) */
+  --background: #f8fafc; /* app canvas (slate-50) */
+  --foreground: #0f172a; /* primary text (slate-900) */
+  --surface: #ffffff; /* cards / panels */
+  --surface-muted: #f1f5f9; /* subtle fills (slate-100) */
+  --border: #e2e8f0; /* hairlines (slate-200) */
+  --muted-foreground: #64748b; /* secondary text (slate-500) */
 
-  /* Primary Colors */
-  --primary: #5a55a6;
-  --primary-hover: #4a4591;
+  /* Brand — indigo primary, violet secondary, emerald accent */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-foreground: #ffffff;
 
-  /* Secondary Colors */
-  --secondary: #b87ebb;
-  --secondary-hover: #a76eaa;
+  --secondary: #7c3aed;
+  --secondary-hover: #6d28d9;
+  --secondary-foreground: #ffffff;
 
-  /* Accent Colors */
-  --accent: #02de7a;
-  --accent-hover: #00c46c;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-foreground: #ffffff;
 
-  /* Status Colors */
-  --error: #e11d48;
-  --success: #10b981;
+  /* Status */
+  --error: #ef4444;
+  --success: #22c55e;
   --warning: #f59e0b;
   --info: #3b82f6;
 
-  /* Neutrals */
-  --neutral-100: #f5f5f5;
-  --neutral-200: #e5e5e5;
-  --neutral-300: #d4d4d4;
-  --neutral-400: #a3a3a3;
-  --neutral-500: #737373;
-  --neutral-600: #525252;
-  --neutral-700: #404040;
-  --neutral-800: #262626;
-  --neutral-900: #171717;
+  /* Neutral scale (fixed slate palette, used as a ramp) */
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+
+  /* Radius scale */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  /* Elevation scale */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.1), 0 2px 6px -2px rgb(15 23 42 / 0.06);
+  --shadow-lg: 0 12px 32px -8px rgb(15 23 42 / 0.18), 0 4px 12px -4px rgb(15 23 42 / 0.1);
+
+  /* shadcn-compatible aliases (so existing components resolve correctly) */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --destructive: var(--error);
+  --destructive-foreground: #ffffff;
+  --ring: var(--primary);
+  --input: var(--border);
 }
 
-/* Add the following custom styles at the end of the file */
+.dark {
+  --background: #0b1120; /* deep slate canvas */
+  --foreground: #e2e8f0; /* primary text */
+  --surface: #131a2a; /* cards / panels */
+  --surface-muted: #1e293b; /* subtle fills */
+  --border: #283449; /* hairlines */
+  --muted-foreground: #94a3b8; /* secondary text */
 
-/* Font setup - if you're already using Inter, you can skip this import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --primary-foreground: #0b1120;
+
+  --secondary: #a78bfa;
+  --secondary-hover: #c4b5fd;
+  --secondary-foreground: #0b1120;
+
+  --accent: #34d399;
+  --accent-hover: #6ee7b7;
+  --accent-foreground: #0b1120;
+
+  --error: #f87171;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --info: #60a5fa;
+
+  /* Neutrals inverted for dark surfaces */
+  --neutral-100: #1e293b;
+  --neutral-200: #283449;
+  --neutral-300: #334155;
+  --neutral-400: #475569;
+  --neutral-500: #94a3b8;
+  --neutral-600: #cbd5e1;
+  --neutral-700: #e2e8f0;
+  --neutral-800: #f1f5f9;
+  --neutral-900: #f8fafc;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 4px 12px -4px rgb(0 0 0 / 0.5);
+}
+
+/* Base element defaults driven by semantic tokens */
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
+
+/* =====================================================================
+   Typography — Inter (loaded via next/font in layout)
+   ===================================================================== */
 
 /* Animation for the phone mockup */
 @keyframes float {
@@ -61,15 +141,15 @@
 
 /* Gradient backgrounds */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #5a55a6 0%, #4a4591 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
 }
 
 .bg-gradient-secondary {
-  background: linear-gradient(135deg, #b87ebb 0%, #a76eaa 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--primary-hover) 100%);
 }
 
 .bg-gradient-accent {
-  background: linear-gradient(135deg, #02de7a 0%, #00c46c 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
 }
 
 /* Fancy gradient text */
@@ -80,39 +160,36 @@
   background-image: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
 }
 
-/* Button styles */
+/* Button styles (backwards-compatible utility classes) */
 .btn-primary {
-  @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover transition-colors;
+  @apply bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-primary-hover transition-colors;
 }
 
 .btn-secondary {
-  @apply bg-secondary text-white px-4 py-2 rounded-md hover:bg-secondary-hover transition-colors;
+  @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-secondary-hover transition-colors;
 }
 
 .btn-accent {
-  @apply bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-hover transition-colors;
+  @apply bg-accent text-accent-foreground px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-accent-hover transition-colors;
 }
 
 .btn-outline {
-  @apply border border-primary text-primary px-4 py-2 rounded-md hover:bg-primary hover:text-white transition-colors;
+  @apply border border-primary text-primary px-4 py-2 rounded-lg font-medium hover:bg-primary hover:text-primary-foreground transition-colors;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: var(--neutral-100);
+  background: var(--surface-muted);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
+  background: var(--neutral-300);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-hover);
+  background: var(--neutral-400);
 }
 
 /* Smooth scrolling */
@@ -120,9 +197,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Card styles */
+/* Card styles (backwards-compatible) */
 .card {
-  @apply bg-white rounded-xl shadow-md p-6 transition-shadow hover:shadow-lg;
+  @apply bg-surface text-foreground rounded-xl border border-border shadow-md p-6 transition-shadow hover:shadow-lg;
 }
 
 /* Mobile optimization */
@@ -130,11 +207,9 @@ html {
   .hide-on-mobile {
     display: none;
   }
-
   h1 {
     font-size: 2.5rem !important;
   }
-
   .mobile-py {
     padding-top: 2rem;
     padding-bottom: 2rem;

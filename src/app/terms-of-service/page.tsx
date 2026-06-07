@@ -63,7 +63,7 @@ export default function TermsOfService() {
         <p>
           If you have any questions about these Terms, please contact us at:
           <br />
-          <a href="mailto:terms@findameetingspot.com" className="text-blue-600 hover:underline">
+          <a href="mailto:terms@findameetingspot.com" className="text-primary hover:underline">
             terms@findameetingspot.com
           </a>
         </p>

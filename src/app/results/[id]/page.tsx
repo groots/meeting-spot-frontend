@@ -30,16 +30,6 @@ interface ResultsData {
     lat: number;
     lng: number;
   };
-  locations?: {
-    a: {
-      lat: number;
-      lng: number;
-    };
-    b: {
-      lat: number;
-      lng: number;
-    };
-  };
   meeting_contact_info?: {
     email?: string;
     phone?: string;
@@ -87,7 +77,6 @@ export default function ResultsPage() {
         }
 
         const data = await response.json();
-        console.log('Results data:', data);
         setResultsData(data);
         setMeetingSpots(data.suggested_options || []);
       } catch (error) {
@@ -145,7 +134,7 @@ export default function ResultsPage() {
               Loading Results...
             </h1>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
             </div>
           </div>
         </div>
@@ -166,7 +155,7 @@ export default function ResultsPage() {
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover"
             >
               Try Again
             </button>
@@ -198,17 +187,14 @@ export default function ResultsPage() {
 
           {/* Success message for contact add */}
           {contactAddedSuccessMessage && (
-            <div className="my-4 p-4 bg-green-100 text-green-800 rounded-md max-w-md mx-auto">
+            <div className="my-4 p-4 bg-success/15 text-success rounded-lg max-w-md mx-auto">
               {contactAddedSuccessMessage}
             </div>
           )}
 
           <div className="flex justify-center gap-4 mb-8">
             {resultsData?.midpoint && (
-              <Button
-                onClick={openMidpointMap}
-                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
+              <Button onClick={openMidpointMap}>
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
@@ -217,10 +203,8 @@ export default function ResultsPage() {
             )}
 
             {contactEmail && (
-              <Button
-                onClick={handleAddContact}
-                className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-              >
+              <Button onClick={handleAddContact} variant="accent">
+
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
@@ -234,7 +218,7 @@ export default function ResultsPage() {
           {meetingSpots.map((spot, index) => (
             <div
               key={index}
-              className="bg-card rounded-lg shadow-lg overflow-hidden"
+              className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden"
             >
               {spot.photos && spot.photos[0] && (
                 <div className="aspect-w-16 aspect-h-9">
@@ -250,18 +234,18 @@ export default function ResultsPage() {
                   <h3 className="text-xl font-semibold text-foreground">
                     {spot.name}
                   </h3>
-                  <span className="inline-block px-2 py-1 bg-gray-100 text-sm font-semibold rounded dark:bg-gray-700">
+                  <span className="inline-block px-2 py-1 bg-surface-muted text-foreground text-sm font-semibold rounded">
                     {getPriceLevel(spot.price_level)}
                   </span>
                 </div>
-                <p className="text-secondary mb-4">{spot.address}</p>
+                <p className="text-muted-foreground mb-4">{spot.address}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     {spot.distance.toFixed(1)} km away
                   </span>
                   {spot.rating && (
                     <div className="flex items-center">
-                      <span className="text-yellow-400 mr-1">★</span>
+                      <span className="text-warning mr-1">★</span>
                       <span className="text-sm text-muted-foreground">
                         {spot.rating.toFixed(1)}
                       </span>
@@ -270,7 +254,7 @@ export default function ResultsPage() {
                 </div>
                 <button
                   onClick={() => openInMaps(spot)}
-                  className="mt-4 w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  className="mt-4 w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
                 >
                   Open in Maps
                 </button>
@@ -281,7 +265,7 @@ export default function ResultsPage() {
 
         {meetingSpots.length === 0 && (
           <div className="text-center mt-8">
-            <p className="text-lg text-secondary">
+            <p className="text-lg text-muted-foreground">
               No meeting spots found. Please try again with different criteria.
             </p>
           </div>

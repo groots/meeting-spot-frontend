@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { MapPin } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Script from 'next/script';
-import { API_ENDPOINTS, API_HEADERS } from '@/app/config';
+import { API_ENDPOINTS, API_HEADERS, FACEBOOK_LOGIN_ENABLED } from '@/app/config';
 
 // Client ID for Google OAuth
 const API_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
@@ -151,35 +151,37 @@ function SocialSignIn() {
     <div className="mt-6">
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+          <span className="px-2 bg-surface text-muted-foreground">Or continue with</span>
         </div>
       </div>
-      
+
       {socialError && (
-        <div className="mt-4 rounded-md bg-red-50 p-3">
-          <div className="text-sm text-red-700">{socialError}</div>
+        <div className="mt-4 rounded-lg bg-error/10 p-3">
+          <div className="text-sm text-error">{socialError}</div>
         </div>
       )}
-      
-      <div className="mt-6 grid grid-cols-2 gap-3">
+
+      <div className={`mt-6 grid gap-3 ${FACEBOOK_LOGIN_ENABLED ? 'grid-cols-2' : 'grid-cols-1'}`}>
         <div ref={socialRef} className="w-full" />
-        
-        <button
-          onClick={handleFacebookLogin}
-          className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-        >
-          <span className="sr-only">Sign in with Facebook</span>
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-            <path
-              fillRule="evenodd"
-              d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
+
+        {FACEBOOK_LOGIN_ENABLED && (
+          <button
+            onClick={handleFacebookLogin}
+            className="w-full inline-flex justify-center py-2 px-4 border border-border rounded-lg shadow-sm bg-surface text-sm font-medium text-muted-foreground hover:bg-surface-muted"
+          >
+            <span className="sr-only">Sign in with Facebook</span>
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path
+                fillRule="evenodd"
+                d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -192,7 +194,6 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [statusCheck, setStatusCheck] = useState<{ status: string; message: string } | null>(null);
   
-  const router = useRouter();
   const { login, error, user, token } = useAuth();
   const [sessionError, setSessionError] = useState<string | null>(null);
 
@@ -244,42 +245,50 @@ export default function Login() {
     <>
       {/* Load external scripts */}
       <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
-      <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="lazyOnload" id="facebook-sdk-script" />
+      {FACEBOOK_LOGIN_ENABLED && (
+        <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="lazyOnload" id="facebook-sdk-script" />
+      )}
       
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Sign in to your account
+      <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full">
+          <div className="mb-8 flex flex-col items-center">
+            <Link href="/" className="mb-6 flex items-center gap-2">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                <MapPin className="h-5 w-5" />
+              </span>
+              <span className="font-bold text-lg">Find a Meeting Spot</span>
+            </Link>
+            <h2 className="text-center text-2xl font-bold tracking-tight text-foreground">
+              Welcome back
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{' '}
-              <Link href="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                create a new account
+            <p className="mt-2 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{' '}
+              <Link href="/auth/register" className="font-medium text-primary hover:text-primary-hover">
+                Create one
               </Link>
             </p>
           </div>
-          
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-            <input type="hidden" name="remember" value={rememberMe ? 'true' : 'false'} />
-            
-            {/* Error messages */}
-            {(sessionError || error || statusCheck?.status === 'error') && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">
-                  {sessionError || error || statusCheck?.message}
-                </p>
-                {statusCheck?.status === 'error' && (
-                  <p className="text-xs mt-1 text-red-500">
-                    The server appears to be having issues. Please try again later or contact support.
+
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+            <form className="space-y-5" onSubmit={handleLogin}>
+              <input type="hidden" name="remember" value={rememberMe ? 'true' : 'false'} />
+
+              {/* Error messages */}
+              {(sessionError || error || statusCheck?.status === 'error') && (
+                <div className="p-3 bg-error/10 border border-error/20 rounded-lg">
+                  <p className="text-sm text-error">
+                    {sessionError || error || statusCheck?.message}
                   </p>
-                )}
-              </div>
-            )}
-            
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="email-address" className="sr-only">
+                  {statusCheck?.status === 'error' && (
+                    <p className="text-xs mt-1 text-error/80">
+                      The server appears to be having issues. Please try again later or contact support.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label htmlFor="email-address" className="text-sm font-medium text-foreground">
                   Email address
                 </label>
                 <input
@@ -288,105 +297,70 @@ export default function Login() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
+                  className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                  placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="text-sm font-medium text-foreground">
+                    Password
+                  </label>
+                  <Link
+                    href="/auth/reset-password"
+                    className="text-sm font-medium text-primary hover:text-primary-hover"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <input
                   id="password"
                   name="password"
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
+                  className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
                   Remember me
                 </label>
               </div>
 
-              <div className="text-sm">
-                <Link
-                  href="/auth/reset-password"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
-            </div>
-
-            <div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="relative w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                     Signing in...
                   </>
                 ) : (
                   'Sign in'
                 )}
               </button>
-            </div>
-            
-            <div className="mt-6">
-              <p className="text-center text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link
-                  href="/auth/register"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
-          </form>
-          
-          <SocialSignIn />
+            </form>
+
+            <SocialSignIn />
+          </div>
         </div>
       </div>
     </>

@@ -71,11 +71,11 @@ export default function MeetingDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-purple-500';
-      case 'ACCEPTED': return 'bg-blue-500';
-      case 'DECLINED': return 'bg-red-500';
-      case 'COMPLETED': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'PENDING': return 'bg-warning/15 text-warning';
+      case 'ACCEPTED': return 'bg-info/15 text-info';
+      case 'DECLINED': return 'bg-error/15 text-error';
+      case 'COMPLETED': return 'bg-success/15 text-success';
+      default: return 'bg-surface-muted text-muted-foreground';
     }
   };
 
@@ -83,71 +83,71 @@ export default function MeetingDetailPage() {
     <ProtectedRoute>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Link href="/dashboard" className="text-indigo-600 hover:text-indigo-800">
+          <Link href="/dashboard" className="text-primary hover:underline">
             &larr; Back to Dashboard
           </Link>
         </div>
 
         {loading ? (
           <div className="flex justify-center items-center min-h-[300px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
           </div>
         ) : error ? (
-          <div className="bg-red-100 p-4 rounded-lg">
-            <p className="text-red-700">{error}</p>
+          <div className="bg-error/10 p-4 rounded-lg">
+            <p className="text-error">{error}</p>
           </div>
         ) : !meetingRequest ? (
-          <div className="bg-yellow-100 p-4 rounded-lg">
-            <p className="text-yellow-700">Meeting request not found.</p>
+          <div className="bg-warning/10 p-4 rounded-lg">
+            <p className="text-warning">Meeting request not found.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-6 border-b">
+          <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-border">
               <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">Meeting Request Details</h1>
-                <span 
-                  className={`px-3 py-1 text-sm font-semibold text-white rounded-full ${getStatusColor(meetingRequest.status)}`}
+                <h1 className="text-2xl font-bold text-foreground">Meeting Request Details</h1>
+                <span
+                  className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(meetingRequest.status)}`}
                 >
                   {meetingRequest.status}
                 </span>
               </div>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Created {formatDistanceToNow(new Date(meetingRequest.created_at), { addSuffix: true })}
               </p>
             </div>
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h2 className="text-lg font-semibold mb-3">Basic Information</h2>
+                <h2 className="text-lg font-semibold mb-3 text-foreground">Basic Information</h2>
                 <ul className="space-y-3">
                   <li className="flex">
-                    <span className="font-medium w-32">Meeting ID:</span>
-                    <span className="text-gray-700">{meetingRequest.request_id || meetingRequest.id}</span>
+                    <span className="font-medium w-32 text-foreground">Meeting ID:</span>
+                    <span className="text-muted-foreground">{meetingRequest.request_id || meetingRequest.id}</span>
                   </li>
                   <li className="flex">
-                    <span className="font-medium w-32">Contact:</span>
-                    <span className="text-gray-700">{meetingRequest.user_b_contact}</span>
+                    <span className="font-medium w-32 text-foreground">Contact:</span>
+                    <span className="text-muted-foreground">{meetingRequest.user_b_contact}</span>
                   </li>
                   <li className="flex">
-                    <span className="font-medium w-32">Location Type:</span>
-                    <span className="text-gray-700">{meetingRequest.location_type}</span>
+                    <span className="font-medium w-32 text-foreground">Location Type:</span>
+                    <span className="text-muted-foreground">{meetingRequest.location_type}</span>
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold mb-3">Locations</h2>
+                <h2 className="text-lg font-semibold mb-3 text-foreground">Locations</h2>
                 <ul className="space-y-3">
                   {meetingRequest.address_a && (
                     <li className="flex">
-                      <span className="font-medium w-32">Your Address:</span>
-                      <span className="text-gray-700">{meetingRequest.address_a}</span>
+                      <span className="font-medium w-32 text-foreground">Your Address:</span>
+                      <span className="text-muted-foreground">{meetingRequest.address_a}</span>
                     </li>
                   )}
                   {meetingRequest.address_b && (
                     <li className="flex">
-                      <span className="font-medium w-32">Their Address:</span>
-                      <span className="text-gray-700">{meetingRequest.address_b}</span>
+                      <span className="font-medium w-32 text-foreground">Their Address:</span>
+                      <span className="text-muted-foreground">{meetingRequest.address_b}</span>
                     </li>
                   )}
                 </ul>
@@ -155,34 +155,34 @@ export default function MeetingDetailPage() {
             </div>
 
             {meetingRequest.selected_place && (
-              <div className="p-6 border-t">
-                <h2 className="text-lg font-semibold mb-3">Selected Meeting Place</h2>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-bold text-green-800">{meetingRequest.selected_place.name}</h3>
-                  <p className="text-green-700">{meetingRequest.selected_place.address}</p>
+              <div className="p-6 border-t border-border">
+                <h2 className="text-lg font-semibold mb-3 text-foreground">Selected Meeting Place</h2>
+                <div className="bg-success/10 p-4 rounded-lg">
+                  <h3 className="font-bold text-success">{meetingRequest.selected_place.name}</h3>
+                  <p className="text-success/90">{meetingRequest.selected_place.address}</p>
                 </div>
               </div>
             )}
 
             {meetingRequest.suggested_places && meetingRequest.suggested_places.length > 0 && (
-              <div className="p-6 border-t">
-                <h2 className="text-lg font-semibold mb-3">Suggested Meeting Places</h2>
+              <div className="p-6 border-t border-border">
+                <h2 className="text-lg font-semibold mb-3 text-foreground">Suggested Meeting Places</h2>
                 <ul className="space-y-4">
                   {meetingRequest.suggested_places.map((place) => (
-                    <li key={place.id} className="p-3 bg-gray-50 rounded-lg">
-                      <h3 className="font-bold">{place.name}</h3>
-                      <p className="text-gray-700">{place.address}</p>
+                    <li key={place.id} className="p-3 bg-surface-muted rounded-lg">
+                      <h3 className="font-bold text-foreground">{place.name}</h3>
+                      <p className="text-muted-foreground">{place.address}</p>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            <div className="p-6 border-t">
+            <div className="p-6 border-t border-border">
               <div className="flex justify-between">
-                <Link 
-                  href="/dashboard" 
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 bg-surface-muted text-foreground rounded-md hover:bg-border transition-colors"
                 >
                   Back to Dashboard
                 </Link>

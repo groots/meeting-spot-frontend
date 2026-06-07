@@ -46,13 +46,13 @@ export default function DataDeletionPage() {
       <h1 className="text-3xl font-bold mb-6">Data Deletion Instructions</h1>
 
       {deleted ? (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="bg-success/10 border border-success/30 text-success px-4 py-3 rounded-lg mb-4">
           Your account and all associated data have been successfully deleted. Thank you for using Find A Meeting Spot.
         </div>
       ) : (
         <>
           <section className="mb-8">
-            <p className="mb-5 text-gray-700">
+            <p className="mb-5 text-muted-foreground">
               At Find A Meeting Spot, we value your privacy and understand the importance of having control over your personal data.
               We've made the process of deleting your data straightforward and comprehensive, ensuring all your information is
               properly removed from our systems when requested.
@@ -112,14 +112,14 @@ export default function DataDeletionPage() {
               This process is irreversible and typically completed within 30 days. Once processed, your data cannot be recovered.
               If you wish to use our service again after deletion, you'll need to create a new account.
             </p>
-            <p className="mb-3 text-gray-600 italic">
+            <p className="mb-3 text-muted-foreground italic">
               Note: While we remove all personal data immediately, some anonymized aggregate data used for analytics may remain.
               This data cannot be used to identify you in any way.
             </p>
           </section>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-error/10 border border-error/30 text-error px-4 py-3 rounded-lg mb-4">
               {error}
             </div>
           )}
@@ -128,23 +128,23 @@ export default function DataDeletionPage() {
             <button
               onClick={handleDeleteAccount}
               disabled={loading}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+              className="bg-error hover:bg-error/90 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline disabled:opacity-50"
             >
               {loading ? 'Deleting...' : 'Delete My Account and Data'}
             </button>
           ) : (
-            <p className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+            <p className="bg-warning/10 border border-warning/30 text-warning px-4 py-3 rounded-lg">
               You must be logged in to delete your account. Please log in first.
             </p>
           )}
         </>
       )}
 
-      <section className="mt-8 pt-6 border-t border-gray-200">
+      <section className="mt-8 pt-6 border-t border-border">
         <h2 className="text-2xl font-semibold mb-3">Contact Us</h2>
         <p>
           If you have any questions about data deletion, privacy concerns, or need assistance with removing your account, please contact us at{' '}
-          <a href="mailto:privacy@findameetingspot.com" className="text-blue-600 hover:underline">
+          <a href="mailto:privacy@findameetingspot.com" className="text-primary hover:underline">
             privacy@findameetingspot.com
           </a>. We're here to help you with any data-related inquiries.
         </p>

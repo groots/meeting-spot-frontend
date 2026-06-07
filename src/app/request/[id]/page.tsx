@@ -148,14 +148,14 @@ export default function RequestPage() {
 
   if (isLoading && !status) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+      <div className="min-h-screen bg-background py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-8">
               Loading Request...
             </h1>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
             </div>
           </div>
         </div>
@@ -165,18 +165,18 @@ export default function RequestPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+      <div className="min-h-screen bg-background py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-8">
               Error
             </h1>
-            <div className="max-w-md mx-auto p-6 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-lg">
+            <div className="max-w-md mx-auto p-6 bg-error/10 text-error rounded-lg">
               {error}
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors"
             >
               Try Again
             </button>
@@ -187,13 +187,13 @@ export default function RequestPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+    <main className="min-h-screen bg-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+          <h1 className="text-4xl font-bold text-foreground mb-8">
             Meeting Request
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
+          <p className="text-xl text-muted-foreground mb-12">
             {status === 'completed'
               ? 'Here are the suggested meeting spots!'
               : 'Enter your address to find a meeting spot.'}
@@ -201,7 +201,7 @@ export default function RequestPage() {
         </div>
 
         {isLoading && (
-          <div className="max-w-md mx-auto mb-8 p-4 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100 rounded-lg">
+          <div className="max-w-md mx-auto mb-8 p-4 bg-info/10 text-info rounded-lg">
             Loading...
           </div>
         )}
@@ -216,15 +216,15 @@ export default function RequestPage() {
 
         {/* Show status if calculating */}
         {status === 'calculating' && (
-          <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="max-w-md mx-auto p-6 bg-surface border border-border rounded-lg shadow-sm">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               Calculating Meeting Spots
             </h2>
-            <div className="text-lg text-gray-700 dark:text-gray-300">
+            <div className="text-lg text-muted-foreground">
               <p>We're finding the perfect meeting location for you. This may take a moment...</p>
             </div>
             <div className="mt-4 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
             </div>
           </div>
         )}

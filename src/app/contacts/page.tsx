@@ -217,7 +217,7 @@ const ContactsPage = () => {
   if (loading && contacts.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
       </div>
     );
   }
@@ -225,10 +225,9 @@ const ContactsPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Contacts</h1>
+        <h1 className="text-3xl font-bold text-foreground">Contacts</h1>
         <Button
           onClick={handleCreateContact}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           disabled={loading || premiumRequired}
         >
           Add Contact
@@ -236,18 +235,18 @@ const ContactsPage = () => {
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+        <div className="bg-error/10 border border-error/30 text-error px-4 py-3 rounded-lg mb-4" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
+        <div className="bg-success/10 border border-success/30 text-success px-4 py-3 rounded-lg mb-4" role="alert">
           <span className="block sm:inline">{successMessage}</span>
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div className="bg-surface border border-border shadow-sm rounded-xl p-6 mb-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
           {/* Search Bar */}
           <div className="w-full md:w-1/2">
@@ -262,16 +261,16 @@ const ContactsPage = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex border rounded-md">
+          <div className="flex border border-border rounded-lg overflow-hidden">
             <button
-              className={`px-4 py-2 ${activeTab === 'all' ? 'bg-blue-100 text-blue-700 font-medium' : 'bg-white text-gray-600'}`}
+              className={`px-4 py-2 transition-colors ${activeTab === 'all' ? 'bg-primary/10 text-primary font-medium' : 'bg-surface text-muted-foreground hover:bg-surface-muted'}`}
               onClick={() => setActiveTab('all')}
               disabled={loading || premiumRequired}
             >
               All Contacts
             </button>
             <button
-              className={`px-4 py-2 ${activeTab === 'recent' ? 'bg-blue-100 text-blue-700 font-medium' : 'bg-white text-gray-600'}`}
+              className={`px-4 py-2 transition-colors ${activeTab === 'recent' ? 'bg-primary/10 text-primary font-medium' : 'bg-surface text-muted-foreground hover:bg-surface-muted'}`}
               onClick={() => setActiveTab('recent')}
               disabled={loading || premiumRequired}
             >
@@ -283,17 +282,17 @@ const ContactsPage = () => {
 
       {/* Premium required message */}
       {premiumRequired && (
-        <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-lg shadow-sm mb-6">
-          <h3 className="text-xl font-semibold text-yellow-800 mb-2">Premium Feature</h3>
-          <p className="text-yellow-700 mb-4">Contact management is a premium feature that allows you to save and organize your meeting participants.</p>
+        <div className="bg-warning/10 border border-warning/20 p-6 rounded-xl shadow-sm mb-6">
+          <h3 className="text-xl font-semibold text-warning mb-2">Premium Feature</h3>
+          <p className="text-warning/90 mb-4">Contact management is a premium feature that allows you to save and organize your meeting participants.</p>
           <div className="flex justify-between items-center">
-            <ul className="list-disc list-inside text-yellow-700 space-y-1">
+            <ul className="list-disc list-inside text-warning/90 space-y-1">
               <li>Save contacts from meeting requests</li>
               <li>Organize your contacts</li>
               <li>Quick access to previous meeting participants</li>
             </ul>
             <Button
-              className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white"
+              variant="accent"
               onClick={() => router.push('/subscription')}
             >
               Upgrade to Premium
@@ -303,8 +302,8 @@ const ContactsPage = () => {
       )}
 
       {displayedContacts.length === 0 ? (
-        <div className="bg-white shadow-md rounded-lg p-6 text-center">
-          <p className="text-gray-600">
+        <div className="bg-surface border border-border shadow-sm rounded-xl p-6 text-center">
+          <p className="text-muted-foreground">
             {activeTab === 'all'
               ? (searchQuery
                 ? 'No contacts match your search.'
@@ -317,55 +316,55 @@ const ContactsPage = () => {
           {!searchQuery && (
             <Button
               onClick={handleCreateContact}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="mt-4"
             >
               Add Your First Contact
             </Button>
           )}
         </div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-surface border border-border shadow-sm rounded-xl overflow-hidden">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-surface-muted">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Company</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {displayedContacts.map(contact => (
-                <tr key={contact.id} className="hover:bg-gray-50">
+                <tr key={contact.id} className="hover:bg-surface-muted">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                    <div className="text-sm font-medium text-foreground">{contact.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{contact.email || '—'}</div>
+                    <div className="text-sm text-muted-foreground">{contact.email || '—'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{contact.phone || '—'}</div>
+                    <div className="text-sm text-muted-foreground">{contact.phone || '—'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{contact.company || '—'}</div>
+                    <div className="text-sm text-muted-foreground">{contact.company || '—'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleViewContact(contact.id)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      className="text-primary hover:underline mr-3"
                     >
                       View
                     </button>
                     <button
                       onClick={() => handleEditContact(contact)}
-                      className="text-green-600 hover:text-green-900 mr-3"
+                      className="text-success hover:underline mr-3"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteContact(contact.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-error hover:underline"
                     >
                       Delete
                     </button>
@@ -379,10 +378,10 @@ const ContactsPage = () => {
 
       {/* Contact Form Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-surface border border-border text-foreground rounded-xl shadow-lg max-w-md w-full">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">
+              <h2 className="text-xl font-semibold mb-4 text-foreground">
                 {isCreateMode ? 'Add New Contact' : (selectedContact ? 'Contact Details' : '')}
               </h2>
 
@@ -456,23 +455,23 @@ const ContactsPage = () => {
                 {/* Contact Meetings (when viewing details) */}
                 {!isCreateMode && selectedContact?.meetings && selectedContact.meetings.length > 0 && (
                   <div className="mt-4">
-                    <h3 className="text-lg font-medium mb-2">Meeting History</h3>
-                    <div className="max-h-40 overflow-y-auto border rounded">
+                    <h3 className="text-lg font-medium mb-2 text-foreground">Meeting History</h3>
+                    <div className="max-h-40 overflow-y-auto border border-border rounded-lg">
                       {selectedContact.meetings.map(meeting => (
-                        <div key={meeting.id} className="p-3 border-b last:border-b-0">
+                        <div key={meeting.id} className="p-3 border-b border-border last:border-b-0">
                           <div className="flex justify-between">
                             <div>
-                              <p className="text-sm font-medium">
+                              <p className="text-sm font-medium text-foreground">
                                 {new Date(meeting.created_at).toLocaleDateString()}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-muted-foreground">
                                 Status: {meeting.status}
                               </p>
                             </div>
                             {meeting.selected_place && (
-                              <div className="text-right text-sm">
+                              <div className="text-right text-sm text-foreground">
                                 <p className="font-medium">{meeting.selected_place.name}</p>
-                                <p className="text-xs truncate max-w-[180px]">
+                                <p className="text-xs truncate max-w-[180px] text-muted-foreground">
                                   {meeting.selected_place.address}
                                 </p>
                               </div>
@@ -486,12 +485,13 @@ const ContactsPage = () => {
 
                 {/* Premium required message */}
                 {selectedContact?.premium_required && (
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+                  <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg text-sm text-warning">
                     Upgrade to premium to view meeting history with this contact.
                     <Button
                       type="button"
+                      variant="accent"
                       onClick={() => router.push('/subscription')}
-                      className="mt-2 w-full py-1 text-sm bg-yellow-500 hover:bg-yellow-600"
+                      className="mt-2 w-full py-1 text-sm"
                     >
                       Upgrade Now
                     </Button>

@@ -143,10 +143,6 @@ sequenceDiagram
   "midpoint": {
     "lat": 37.7842,
     "lng": -122.4079
-  },
-  "locations": {
-    "a": { "lat": 37.7749, "lng": -122.4194 },
-    "b": { "lat": 37.7935, "lng": -122.3964 }
   }
 }
 ```

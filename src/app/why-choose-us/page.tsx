@@ -15,23 +15,23 @@ import {
 
 export default function WhyChooseUs() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-neutral-50 to-white">
+      <section className="py-20 px-6 bg-gradient-to-b from-surface-muted to-background">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gradient">Why Choose Us</h1>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
             We help you find the perfect middle ground for all your meetings - whether it's a date, catching up with friends, or an important business meeting.
           </p>
         </div>
       </section>
 
       {/* Mission Statement */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 bg-background">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-neutral-50 p-8 md:p-12 rounded-2xl shadow-sm">
+          <div className="bg-surface p-8 md:p-12 rounded-2xl shadow-sm">
             <h2 className="text-3xl font-bold mb-6 text-center">Our Mission</h2>
-            <p className="text-lg text-gray-600 mb-6 text-center max-w-4xl mx-auto">
+            <p className="text-lg text-muted-foreground mb-6 text-center max-w-4xl mx-auto">
               At Find A Meeting Spot, we believe that meeting up should be convenient for everyone involved. Our mission is to eliminate the stress of finding places to meet by providing a platform that helps you discover perfect middle grounds that work for all parties.
             </p>
             <div className="flex justify-center">
@@ -44,40 +44,40 @@ export default function WhyChooseUs() {
       </section>
 
       {/* Who We Serve */}
-      <section className="py-16 px-6 bg-neutral-50">
+      <section className="py-16 px-6 bg-surface-muted">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">Who We Serve</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Dating */}
-            <div className="bg-white p-8 rounded-xl shadow-sm transition-all hover:shadow-md">
-              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <HeartIcon className="h-8 w-8 text-pink-500" />
+            <div className="bg-surface p-8 rounded-xl shadow-sm transition-all hover:shadow-md">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <HeartIcon className="h-8 w-8 text-accent" />
               </div>
               <h3 className="text-xl font-bold mb-4 text-center">Dating</h3>
-              <p className="text-gray-600 text-center">
+              <p className="text-muted-foreground text-center">
                 Make your dates convenient and comfortable by finding neutral locations that are fair distance-wise for both parties. Perfect for first meet-ups!
               </p>
             </div>
             
             {/* Friends */}
-            <div className="bg-white p-8 rounded-xl shadow-sm transition-all hover:shadow-md">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <UserGroupIcon className="h-8 w-8 text-green-500" />
+            <div className="bg-surface p-8 rounded-xl shadow-sm transition-all hover:shadow-md">
+              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <UserGroupIcon className="h-8 w-8 text-success" />
               </div>
               <h3 className="text-xl font-bold mb-4 text-center">Friend Meetups</h3>
-              <p className="text-gray-600 text-center">
+              <p className="text-muted-foreground text-center">
                 Coordinating with multiple friends from different parts of town? We'll help you find the perfect central location for your group hangouts.
               </p>
             </div>
             
             {/* Business */}
-            <div className="bg-white p-8 rounded-xl shadow-sm transition-all hover:shadow-md">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <BriefcaseIcon className="h-8 w-8 text-blue-500" />
+            <div className="bg-surface p-8 rounded-xl shadow-sm transition-all hover:shadow-md">
+              <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <BriefcaseIcon className="h-8 w-8 text-info" />
               </div>
               <h3 className="text-xl font-bold mb-4 text-center">Business Meetings</h3>
-              <p className="text-gray-600 text-center">
+              <p className="text-muted-foreground text-center">
                 Impress clients or colleagues by suggesting convenient meeting spots that respect everyone's time and travel constraints.
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function WhyChooseUs() {
       </section>
 
       {/* Key Features */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 bg-background">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">Key Features</h2>
           
@@ -100,7 +100,7 @@ export default function WhyChooseUs() {
               </div>
               <div>
                 <h3 className="text-xl font-bold mb-2">Perfect Middle Grounds</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Our intelligent algorithm calculates the ideal meeting spot between all participants, ensuring fair travel times and distances for everyone.
                 </p>
               </div>
@@ -115,7 +115,7 @@ export default function WhyChooseUs() {
               </div>
               <div>
                 <h3 className="text-xl font-bold mb-2">Privacy Protection</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Share only what you're comfortable with. Our platform lets you coordinate meetings without revealing your exact location or personal details.
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function WhyChooseUs() {
               </div>
               <div>
                 <h3 className="text-xl font-bold mb-2">Smart Recommendations</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Get curated suggestions for restaurants, cafes, parks, or business venues based on your preferences and the meeting type.
                 </p>
               </div>
@@ -139,13 +139,13 @@ export default function WhyChooseUs() {
             {/* Feature 4 */}
             <div className="flex gap-6">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                  <ClockIcon className="h-6 w-6 text-green-500" />
+                <div className="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+                  <ClockIcon className="h-6 w-6 text-success" />
                 </div>
               </div>
               <div>
                 <h3 className="text-xl font-bold mb-2">Time Efficiency</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Skip the back-and-forth messaging about where to meet. Our platform streamlines the process so you can focus on the actual meeting.
                 </p>
               </div>
@@ -155,40 +155,40 @@ export default function WhyChooseUs() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 px-6 bg-neutral-50">
+      <section className="py-16 px-6 bg-surface-muted">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">How It Works</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
                 1
               </div>
               <h3 className="text-xl font-bold mb-2">Enter Locations</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Input your location and the location of your meeting participant(s). You can use addresses or landmarks.
               </p>
             </div>
             
             {/* Step 2 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
                 2
               </div>
               <h3 className="text-xl font-bold mb-2">Choose Preferences</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Specify the type of meeting place you need—restaurant, cafe, park, office space, and more.
               </p>
             </div>
             
             {/* Step 3 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
                 3
               </div>
               <h3 className="text-xl font-bold mb-2">Get Suggestions</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Review our tailored suggestions and share them with your meeting partners for a quick decision.
               </p>
             </div>
@@ -203,55 +203,55 @@ export default function WhyChooseUs() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 bg-background">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">What People Say</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Testimonial 1 */}
-            <div className="bg-neutral-50 p-6 rounded-xl">
+            <div className="bg-surface p-6 rounded-xl">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="h-6 w-6 text-purple-500" />
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <UserIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="ml-4">
                   <h4 className="font-bold">Sarah J.</h4>
-                  <p className="text-gray-500 text-sm">Dating App User</p>
+                  <p className="text-muted-foreground text-sm">Dating App User</p>
                 </div>
               </div>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 "I used to stress about where to meet first dates. This app helps me find neutral spots that feel safe and fair for both of us. Game changer!"
               </p>
             </div>
             
             {/* Testimonial 2 */}
-            <div className="bg-neutral-50 p-6 rounded-xl">
+            <div className="bg-surface p-6 rounded-xl">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="h-6 w-6 text-blue-500" />
+                <div className="w-12 h-12 bg-info/10 rounded-full flex items-center justify-center">
+                  <UserIcon className="h-6 w-6 text-info" />
                 </div>
                 <div className="ml-4">
                   <h4 className="font-bold">Michael T.</h4>
-                  <p className="text-gray-500 text-sm">Business Professional</p>
+                  <p className="text-muted-foreground text-sm">Business Professional</p>
                 </div>
               </div>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 "When meeting clients from different areas, this tool helps me find convenient spots that impress them with my thoughtfulness. It's become part of my client meeting workflow."
               </p>
             </div>
             
             {/* Testimonial 3 */}
-            <div className="bg-neutral-50 p-6 rounded-xl">
+            <div className="bg-surface p-6 rounded-xl">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="h-6 w-6 text-green-500" />
+                <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                  <UserIcon className="h-6 w-6 text-success" />
                 </div>
                 <div className="ml-4">
                   <h4 className="font-bold">Aisha R.</h4>
-                  <p className="text-gray-500 text-sm">Social Coordinator</p>
+                  <p className="text-muted-foreground text-sm">Social Coordinator</p>
                 </div>
               </div>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 "Planning outings with friends who live all across town used to be a headache. Now I just plug in everyone's locations and get perfect meeting spots that work for the whole group."
               </p>
             </div>
@@ -260,10 +260,10 @@ export default function WhyChooseUs() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-6 bg-gradient-to-b from-neutral-50 to-white">
+      <section className="py-16 px-6 bg-gradient-to-b from-surface-muted to-background">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Find Your Perfect Meeting Spot?</h2>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-muted-foreground mb-8">
             Join thousands of users who have simplified their meetups with our intelligent meeting spot finder.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
