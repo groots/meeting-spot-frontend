@@ -26,7 +26,9 @@ export default function RequestPage() {
 
       try {
         setIsLoading(true);
-        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId));
+        const response = await fetch(
+          `${API_ENDPOINTS.meetingRequestStatus(requestId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch status');
         }
@@ -38,7 +40,9 @@ export default function RequestPage() {
         if (data.status === 'completed') {
           setShowResults(true);
           // Fetch results when status is completed
-          const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId));
+          const resultsResponse = await fetch(
+            `${API_ENDPOINTS.meetingRequestResults(requestId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`
+          );
           if (!resultsResponse.ok) {
             throw new Error('Failed to fetch results');
           }
@@ -65,7 +69,9 @@ export default function RequestPage() {
       if (!requestId) return;
 
       try {
-        const response = await fetch(API_ENDPOINTS.meetingRequestStatus(requestId));
+        const response = await fetch(
+          `${API_ENDPOINTS.meetingRequestStatus(requestId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch status');
         }
@@ -77,7 +83,9 @@ export default function RequestPage() {
         if (data.status === 'completed') {
           setShowResults(true);
           // Fetch results when status is completed
-          const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId));
+          const resultsResponse = await fetch(
+            `${API_ENDPOINTS.meetingRequestResults(requestId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`
+          );
           if (!resultsResponse.ok) {
             throw new Error('Failed to fetch results');
           }
