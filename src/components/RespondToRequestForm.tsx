@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LocationButton from './LocationButton';
+import { geocodeAddress } from '@/utils/geocoding';
 
 interface RespondToRequestFormProps {
   token: string;
@@ -35,11 +36,22 @@ export default function RespondToRequestForm({ token, onSubmit }: RespondToReque
 
       const submitData: any = { address_b: address.trim() };
 
-      // If we have coordinates (from geolocation), add them
-      if (latitude !== undefined && longitude !== undefined) {
-        submitData.address_b_lat = latitude;
-        submitData.address_b_lon = longitude;
+      // The backend requires coordinates. Use the ones from geolocation if we
+      // have them; otherwise geocode the typed address before submitting.
+      let lat = latitude;
+      let lon = longitude;
+      if (lat === undefined || lon === undefined) {
+        const coords = await geocodeAddress(address.trim());
+        if (!coords) {
+          setError("We couldn't find that address. Please check it and try again.");
+          return;
+        }
+        lat = coords.lat;
+        lon = coords.lng;
       }
+
+      submitData.address_b_lat = lat;
+      submitData.address_b_lon = lon;
 
       await onSubmit(submitData);
     } catch (error) {
