@@ -64,6 +64,8 @@ export const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
 export const FACEBOOK_LOGIN_ENABLED =
   process.env.NEXT_PUBLIC_FACEBOOK_LOGIN_ENABLED === 'true' && Boolean(FACEBOOK_APP_ID);
 
-// Maps API configuration
-export const GOOGLE_MAPS_API_KEY =
-  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyDLR7KhhfKqH7F1S0X-D0ZB7LSpGIGCqsI';
+// Maps API configuration. Geocoding is proxied through the backend
+// (POST /v1/geocoding) so no key is required in the browser. This is only a
+// fallback for direct Google Maps calls; leave empty unless a referrer-
+// restricted public key is explicitly provided.
+export const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
