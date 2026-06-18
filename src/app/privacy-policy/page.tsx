@@ -39,20 +39,40 @@ export default function PrivacyPolicy() {
           <li>To administer and protect our business and website.</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold mt-6 mb-3">4. Data Security</h2>
+        <h2 className="text-2xl font-semibold mt-6 mb-3">4. Location Data &amp; Your Privacy</h2>
+        <p>
+          When you create or respond to a meeting request, each participant enters their own location. We use both
+          locations only to compute a set of suggested venues near the midpoint between them.
+        </p>
+        <ul className="list-disc pl-5 my-3">
+          <li>
+            We never share one participant&apos;s exact address or coordinates with the other participant. The person who
+            created the request does not receive the responder&apos;s location, and vice versa.
+          </li>
+          <li>
+            Both participants see the same suggested venues. Because these venues are computed near the midpoint of the
+            two locations, they may allow a participant to approximate the other&apos;s general area, but never an exact
+            address or coordinates.
+          </li>
+          <li>
+            Locations are used to generate suggestions for your meeting and are not sold or shared with advertisers.
+          </li>
+        </ul>
+
+        <h2 className="text-2xl font-semibold mt-6 mb-3">5. Data Security</h2>
         <p>
           We have implemented appropriate security measures to prevent your personal data from being accidentally lost,
           used, or accessed in an unauthorized way. We limit access to your personal data to those employees, agents,
           contractors, and other third parties who have a business need to know.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-6 mb-3">5. Data Retention</h2>
+        <h2 className="text-2xl font-semibold mt-6 mb-3">6. Data Retention</h2>
         <p>
           We will only retain your personal data for as long as necessary to fulfill the purposes we collected it for,
           including for the purposes of satisfying any legal, accounting, or reporting requirements.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-6 mb-3">6. Your Legal Rights</h2>
+        <h2 className="text-2xl font-semibold mt-6 mb-3">7. Your Legal Rights</h2>
         <p>
           Under certain circumstances, you have rights under data protection laws in relation to your personal data, including:
         </p>
@@ -66,13 +86,13 @@ export default function PrivacyPolicy() {
           <li>The right to withdraw consent.</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold mt-6 mb-3">7. Changes to This Privacy Policy</h2>
+        <h2 className="text-2xl font-semibold mt-6 mb-3">8. Changes to This Privacy Policy</h2>
         <p>
           We may update our privacy policy from time to time. We will notify you of any changes by posting the new
           privacy policy on this page and updating the "Last Updated" date at the top of this privacy policy.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-6 mb-3">8. Contact Us</h2>
+        <h2 className="text-2xl font-semibold mt-6 mb-3">9. Contact Us</h2>
         <p>
           If you have any questions about this privacy policy or our privacy practices, please contact us at:
           <br />

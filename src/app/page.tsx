@@ -24,7 +24,7 @@ const features = [
   {
     icon: ShieldCheck,
     title: 'Privacy first',
-    body: 'Share a meeting point without revealing your exact address. You decide how much others can see.',
+    body: 'Find a meeting point without revealing your exact address. Your location is never shared with the other person.',
     color: 'text-secondary bg-secondary/10',
   },
   {

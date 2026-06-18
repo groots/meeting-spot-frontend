@@ -116,7 +116,7 @@ export default function WhyChooseUs() {
               <div>
                 <h3 className="text-xl font-bold mb-2">Privacy Protection</h3>
                 <p className="text-muted-foreground">
-                  Share only what you're comfortable with. Our platform lets you coordinate meetings without revealing your exact location or personal details.
+                  Coordinate meetings without revealing your exact location. Your address is never shared with the other person &mdash; both of you only ever see suggested venues near the midpoint.
                 </p>
               </div>
             </div>
