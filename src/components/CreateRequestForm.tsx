@@ -116,7 +116,14 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
     }
 
     try {
-      const locationType = category === 'Food & Drink' ? subcategory : category;
+      // For restaurants, append the chosen cuisine as "Category: Cuisine" so the
+      // backend can apply it as a Places keyword. "Any Food"/"Other" carry no
+      // cuisine, so we send the bare category.
+      const hasCuisine =
+        category === 'Restaurant / Food' &&
+        subcategory !== 'Any Food' &&
+        subcategory !== 'Other';
+      const locationType = hasCuisine ? `${category}: ${subcategory}` : category;
 
       await onSubmit({
         address_a: address,
@@ -264,7 +271,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
               disabled={isLoading}
             />
 
-            {category === 'Food & Drink' && (
+            {category === 'Restaurant / Food' && (
               <div className="space-y-2 mt-4">
                 <Label htmlFor="subcategory">Specific Food Preference</Label>
                 <select
