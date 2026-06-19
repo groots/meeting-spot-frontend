@@ -27,8 +27,9 @@ export const meetingSpotSchema = z
 export type MeetingSpot = z.infer<typeof meetingSpotSchema>;
 
 // GET /:id/results. `suggested_options` is null until calculation completes, so
-// normalize null/undefined to an empty array for the UI. `midpoint` and
-// `meeting_contact_info` are optional (not always present in the DTO).
+// normalize null/undefined to an empty array for the UI. `meeting_contact_info`
+// is owner-only (the backend attaches User B's email only for the authenticated
+// owner, never on the invitee/token path) so it's optional here.
 export const meetingResultsSchema = z
   .object({
     request_id: z.string().nullish(),
@@ -38,7 +39,6 @@ export const meetingResultsSchema = z
       .nullish()
       .transform((v) => v ?? []),
     selected_place: z.unknown().nullish(),
-    midpoint: z.object({ lat: z.number(), lng: z.number() }).nullish(),
     meeting_contact_info: z
       .object({
         email: z.string().nullish(),

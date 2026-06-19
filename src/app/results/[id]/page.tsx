@@ -79,11 +79,25 @@ export default function ResultsPage() {
     }
   };
 
-  const openMidpointMap = () => {
-    if (resultsData?.midpoint) {
-      const { lat, lng } = resultsData.midpoint;
-      window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-    }
+  // Center a map on the centroid of the suggested venues. We deliberately avoid
+  // the true A/B midpoint: it's the geometric mean of both addresses, so anyone
+  // who knows their own location could reflect it to derive the other person's
+  // exact address. The venue locations are already shown to both parties, so
+  // averaging them exposes nothing new.
+  const spotsWithLocation = meetingSpots.filter((spot) => spot.location);
+
+  const openMeetingArea = () => {
+    if (spotsWithLocation.length === 0) return;
+    const sum = spotsWithLocation.reduce(
+      (acc, spot) => ({
+        lat: acc.lat + spot.location!.lat,
+        lng: acc.lng + spot.location!.lng,
+      }),
+      { lat: 0, lng: 0 }
+    );
+    const lat = sum.lat / spotsWithLocation.length;
+    const lng = sum.lng / spotsWithLocation.length;
+    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
   };
 
   const handleAddContact = () => {
@@ -169,12 +183,12 @@ export default function ResultsPage() {
           )}
 
           <div className="flex justify-center gap-4 mb-8">
-            {resultsData?.midpoint && (
-              <Button onClick={openMidpointMap}>
+            {spotsWithLocation.length > 0 && (
+              <Button onClick={openMeetingArea}>
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
-                View Midpoint on Map
+                View Meeting Area on Map
               </Button>
             )}
 
