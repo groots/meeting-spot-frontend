@@ -6,40 +6,15 @@ import { API_ENDPOINTS, API_HEADERS } from '../../config';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import AddContactModal from '@/components/AddContactModal';
-
-interface MeetingSpot {
-  name: string;
-  address: string;
-  distance: number;
-  rating?: number;
-  photos?: string[];
-  price_level?: number;
-  category?: string;
-  subcategory?: string;
-  place_id?: string;
-  location?: {
-    lat: number;
-    lng: number;
-  };
-}
-
-interface ResultsData {
-  suggested_options: MeetingSpot[];
-  status: string;
-  midpoint?: {
-    lat: number;
-    lng: number;
-  };
-  meeting_contact_info?: {
-    email?: string;
-    phone?: string;
-    name?: string;
-  };
-}
+import {
+  parseMeetingResults,
+  type MeetingResults,
+  type MeetingSpot,
+} from '@/lib/schemas';
 
 // Helper function to display price level
-const getPriceLevel = (level?: number) => {
-  if (level === undefined) return 'Price not available';
+const getPriceLevel = (level?: number | null) => {
+  if (level == null) return 'Price not available';
 
   const symbols = ['$', '$$', '$$$', '$$$$'];
   return level >= 0 && level < symbols.length ? symbols[level] : 'Price not available';
@@ -51,7 +26,7 @@ export default function ResultsPage() {
   const { user, token } = useAuth();
   const requestId = params?.id as string;
   const [meetingSpots, setMeetingSpots] = useState<MeetingSpot[]>([]);
-  const [resultsData, setResultsData] = useState<ResultsData | null>(null);
+  const [resultsData, setResultsData] = useState<MeetingResults | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
@@ -77,8 +52,9 @@ export default function ResultsPage() {
         }
 
         const data = await response.json();
-        setResultsData(data);
-        setMeetingSpots(data.suggested_options || []);
+        const parsed = parseMeetingResults(data);
+        setResultsData(parsed);
+        setMeetingSpots(parsed.suggested_options);
       } catch (error) {
         console.error('Error fetching results:', error);
         setError(error instanceof Error ? error.message : 'Failed to fetch results');
@@ -241,9 +217,9 @@ export default function ResultsPage() {
                 <p className="text-muted-foreground mb-4">{spot.address}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
-                    {spot.distance.toFixed(1)} km away
+                    {typeof spot.distance === 'number' ? `${spot.distance.toFixed(1)} km away` : ''}
                   </span>
-                  {spot.rating && (
+                  {typeof spot.rating === 'number' && (
                     <div className="flex items-center">
                       <span className="text-warning mr-1">★</span>
                       <span className="text-sm text-muted-foreground">

@@ -6,6 +6,11 @@ import RespondToRequestForm from '@/components/RespondToRequestForm';
 import RequestStatus from '@/components/RequestStatus';
 import MeetingSpotResults from '@/components/MeetingSpotResults';
 import { API_ENDPOINTS } from '@/app/config';
+import {
+  parseMeetingResults,
+  parseMeetingStatus,
+  type MeetingSpot,
+} from '@/lib/schemas';
 
 export default function RequestPage() {
   const params = useParams();
@@ -14,7 +19,7 @@ export default function RequestPage() {
   const token = searchParams?.get('token');
 
   const [status, setStatus] = useState<string | null>(null);
-  const [meetingSpots, setMeetingSpots] = useState<any[]>([]);
+  const [meetingSpots, setMeetingSpots] = useState<MeetingSpot[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +37,7 @@ export default function RequestPage() {
         if (!response.ok) {
           throw new Error('Failed to fetch status');
         }
-        const data = await response.json();
+        const data = parseMeetingStatus(await response.json());
         console.log('Status response:', data);
 
         setStatus(data.status);
@@ -46,9 +51,9 @@ export default function RequestPage() {
           if (!resultsResponse.ok) {
             throw new Error('Failed to fetch results');
           }
-          const resultsData = await resultsResponse.json();
+          const resultsData = parseMeetingResults(await resultsResponse.json());
           console.log('Results data:', resultsData);
-          setMeetingSpots(resultsData.suggested_options || []);
+          setMeetingSpots(resultsData.suggested_options);
         }
       } catch (error) {
         console.error('Error fetching status:', error);
@@ -75,7 +80,7 @@ export default function RequestPage() {
         if (!response.ok) {
           throw new Error('Failed to fetch status');
         }
-        const data = await response.json();
+        const data = parseMeetingStatus(await response.json());
         console.log('Status response:', data);
 
         setStatus(data.status);
@@ -89,9 +94,9 @@ export default function RequestPage() {
           if (!resultsResponse.ok) {
             throw new Error('Failed to fetch results');
           }
-          const resultsData = await resultsResponse.json();
+          const resultsData = parseMeetingResults(await resultsResponse.json());
           console.log('Results data:', resultsData);
-          setMeetingSpots(resultsData.suggested_options || []);
+          setMeetingSpots(resultsData.suggested_options);
         }
       } catch (error) {
         console.error('Error polling status:', error);

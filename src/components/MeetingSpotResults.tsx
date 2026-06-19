@@ -1,15 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-
-interface MeetingSpot {
-  name: string;
-  address: string;
-  distance: number | null; // kilometers from the midpoint
-  rating: number | null;
-  user_ratings_total: number | null;
-}
+import type { MeetingSpot } from '@/lib/schemas';
 
 interface MeetingSpotResultsProps {
   spots: MeetingSpot[];
