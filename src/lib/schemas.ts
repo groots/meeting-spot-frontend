@@ -51,6 +51,31 @@ export const meetingResultsSchema = z
 
 export type MeetingResults = z.infer<typeof meetingResultsSchema>;
 
+// GET /:id (owner view, toOwnerDto). `user_b_contact` is the decrypted contact
+// the backend returns only to the authenticated owner. `selected_place_details`
+// is the venue the owner picked (null until chosen); `suggested_options` are the
+// computed venues (same shape as the results page).
+export const meetingOwnerSchema = z
+  .object({
+    request_id: z.string().nullish(),
+    status: z.string(),
+    user_b_contact: z.string().nullish(),
+    user_b_contact_type: z.string().nullish(),
+    location_type: z.string().nullish(),
+    selected_place_details: meetingSpotSchema.nullish(),
+    suggested_options: z
+      .array(meetingSpotSchema)
+      .nullish()
+      .transform((v) => v ?? []),
+    created_at: z.string().nullish(),
+    updated_at: z.string().nullish(),
+    expires_at: z.string().nullish(),
+    is_expired: z.boolean().nullish(),
+  })
+  .passthrough();
+
+export type MeetingOwner = z.infer<typeof meetingOwnerSchema>;
+
 // GET /:id/status.
 export const meetingStatusSchema = z
   .object({
@@ -79,3 +104,6 @@ export const parseMeetingResults = (data: unknown): MeetingResults =>
 
 export const parseMeetingStatus = (data: unknown): MeetingStatus =>
   parseOrThrow(meetingStatusSchema, data, 'meeting status');
+
+export const parseMeetingOwner = (data: unknown): MeetingOwner =>
+  parseOrThrow(meetingOwnerSchema, data, 'meeting');

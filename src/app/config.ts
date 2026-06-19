@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
 
   // Meeting requests
   meetingRequests: `${API_BASE_URL}/v1/meeting-requests/`,
+  meetingRequest: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}`,
   meetingRequestStatus: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/status`,
   meetingRequestRespond: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/respond`,
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
