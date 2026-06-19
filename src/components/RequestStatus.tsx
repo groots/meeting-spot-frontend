@@ -24,8 +24,11 @@ export default function RequestStatus({ status }: RequestStatusProps) {
             </div>
           </div>
         )}
-        {status === 'completed' && (
+        {status === 'ready' && (
           <p className="text-muted-foreground">Meeting spots have been found!</p>
+        )}
+        {status === 'completed' && (
+          <p className="text-muted-foreground">A meeting place has been agreed!</p>
         )}
       </div>
     </div>

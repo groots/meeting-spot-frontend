@@ -23,6 +23,8 @@ const statusColor = (status: string) => {
       return 'bg-warning/15 text-warning';
     case 'calculating':
       return 'bg-info/15 text-info';
+    case 'ready':
+      return 'bg-warning/15 text-warning';
     case 'completed':
       return 'bg-success/15 text-success';
     case 'expired':
@@ -184,9 +186,14 @@ export default function MeetingDetailPage() {
               <h2 className="text-lg font-semibold mb-3 text-foreground">
                 {selectedPlace ? 'Other Suggested Places' : 'Suggested Meeting Places'}
               </h2>
+              {!selectedPlace && meetingRequest.status === 'ready' && suggestions.length > 0 && (
+                <p className="text-muted-foreground mb-4">
+                  Pick a place below to agree on it and finalize the meeting.
+                </p>
+              )}
               {suggestions.length === 0 ? (
                 <p className="text-muted-foreground">
-                  {meetingRequest.status === 'completed'
+                  {meetingRequest.status === 'ready' || meetingRequest.status === 'completed'
                     ? 'No suggestions are available for this meeting.'
                     : 'Suggestions will appear here once the other person shares their address.'}
                 </p>

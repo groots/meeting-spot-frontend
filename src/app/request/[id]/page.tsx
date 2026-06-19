@@ -42,7 +42,7 @@ export default function RequestPage() {
 
         setStatus(data.status);
 
-        if (data.status === 'completed') {
+        if (data.status === 'ready' || data.status === 'completed') {
           setShowResults(true);
           // Fetch results when status is completed
           const resultsResponse = await fetch(
@@ -85,7 +85,7 @@ export default function RequestPage() {
 
         setStatus(data.status);
 
-        if (data.status === 'completed') {
+        if (data.status === 'ready' || data.status === 'completed') {
           setShowResults(true);
           // Fetch results when status is completed
           const resultsResponse = await fetch(
@@ -207,7 +207,7 @@ export default function RequestPage() {
             Meeting Request
           </h1>
           <p className="text-xl text-muted-foreground mb-12">
-            {status === 'completed'
+            {status === 'ready' || status === 'completed'
               ? 'Here are the suggested meeting spots!'
               : 'Enter your address to find a meeting spot.'}
           </p>

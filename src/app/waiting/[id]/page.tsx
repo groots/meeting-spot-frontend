@@ -54,7 +54,9 @@ export default function WaitingPage() {
       const data = await response.json();
       setStatus(data.status);
 
-      if (data.status === 'completed') {
+      // 'ready' = suggestions generated (awaiting place selection); 'completed' =
+      // a place was agreed. Either way the owner should go to the results page.
+      if (data.status === 'ready' || data.status === 'completed') {
         // Fetch results
         const resultsResponse = await fetch(API_ENDPOINTS.meetingRequestResults(requestId), {
           headers: {
