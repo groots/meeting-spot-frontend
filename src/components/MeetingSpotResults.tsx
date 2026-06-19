@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 interface MeetingSpot {
   name: string;
   address: string;
-  distance_a: number;
-  distance_b: number;
-  rating: number;
-  total_ratings: number;
+  distance: number | null; // kilometers from the midpoint
+  rating: number | null;
+  user_ratings_total: number | null;
 }
 
 interface MeetingSpotResultsProps {
@@ -32,23 +31,19 @@ export default function MeetingSpotResults({ spots }: MeetingSpotResultsProps) {
             </h3>
             <p className="text-muted-foreground mb-4">{spot.address}</p>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground">Distance from you</p>
+                <p className="text-sm text-muted-foreground">Distance from midpoint</p>
                 <p className="text-lg font-semibold">
-                  {spot.distance_a.toFixed(1)} miles
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">Distance from them</p>
-                <p className="text-lg font-semibold">
-                  {spot.distance_b.toFixed(1)} miles
+                  {typeof spot.distance === 'number' ? `${spot.distance.toFixed(1)} km` : 'N/A'}
                 </p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">Rating</p>
                 <p className="text-lg font-semibold">
-                  {spot.rating} ({spot.total_ratings})
+                  {typeof spot.rating === 'number'
+                    ? `${spot.rating.toFixed(1)}${typeof spot.user_ratings_total === 'number' ? ` (${spot.user_ratings_total})` : ''}`
+                    : 'No rating'}
                 </p>
               </div>
             </div>
