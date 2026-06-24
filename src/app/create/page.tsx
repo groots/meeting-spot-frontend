@@ -15,6 +15,7 @@ export default function CreatePage() {
     location_type: string;
     contact_method: string;
     contact_info: string;
+    selection_mode: 'owner' | 'mutual';
     address_a_lat?: number;
     address_a_lon?: number;
   }) => {
@@ -38,6 +39,7 @@ export default function CreatePage() {
       location_type: data.location_type,
       user_b_contact_type: data.contact_method.toLowerCase(),
       user_b_contact: data.contact_info,
+      selection_mode: data.selection_mode,
     };
 
     // Add coordinates if available

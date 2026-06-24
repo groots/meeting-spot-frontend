@@ -24,6 +24,14 @@ export const API_ENDPOINTS = {
   meetingRequestResults: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/results`,
   meetingRequestResendInvitation: (id: string) =>
     `${API_BASE_URL}/v1/meeting-requests/${id}/resend-invitation`,
+  meetingRequestChoose: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/choose`,
+  meetingRequestSendDirections: (id: string) =>
+    `${API_BASE_URL}/v1/meeting-requests/${id}/send-directions`,
+  meetingRequestSchedule: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/schedule`,
+  meetingRequestCalendar: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/calendar`,
+  meetingRequestSendCalendar: (id: string) =>
+    `${API_BASE_URL}/v1/meeting-requests/${id}/send-calendar`,
+  meetingRequestRefine: (id: string) => `${API_BASE_URL}/v1/meeting-requests/${id}/refine`,
 
   // Auth
   login: `${API_BASE_URL}/v1/auth/login`,

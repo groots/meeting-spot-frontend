@@ -48,6 +48,7 @@ export interface CreateRequestFormProps {
     location_type: string;
     contact_method: string;
     contact_info: string;
+    selection_mode: 'owner' | 'mutual';
     address_a_lat?: number;
     address_a_lon?: number;
   }) => Promise<void>;
@@ -62,6 +63,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
   const [subcategory, setSubcategory] = useState(FOOD_SUBCATEGORIES[0]);
   const [contactMethod, setContactMethod] = useState('EMAIL');
   const [contactInfo, setContactInfo] = useState('');
+  const [selectionMode, setSelectionMode] = useState<'owner' | 'mutual'>('owner');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [coords, setCoords] = useState<{ lat?: number; lon?: number }>({});
@@ -130,6 +132,7 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
         location_type: locationType,
         contact_method: contactMethod,
         contact_info: contactInfo,
+        selection_mode: selectionMode,
         address_a_lat: coords.lat,
         address_a_lon: coords.lon
       });
@@ -287,6 +290,62 @@ export default function CreateRequestForm({ onSubmit }: CreateRequestFormProps) 
                 </select>
               </div>
             )}
+
+            <div className="space-y-2 mt-6">
+              <Label>Who decides the spot?</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label
+                  className={`cursor-pointer rounded-lg border p-4 transition-colors ${
+                    selectionMode === 'owner'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="radio"
+                      name="selectionMode"
+                      value="owner"
+                      checked={selectionMode === 'owner'}
+                      onChange={() => setSelectionMode('owner')}
+                      disabled={isLoading}
+                      className="mt-1 border-border text-primary focus:ring-ring"
+                    />
+                    <span>
+                      <span className="block font-medium text-foreground">I&apos;ll choose the spot</span>
+                      <span className="block text-sm text-muted-foreground">
+                        You pick the final meeting place once suggestions are ready.
+                      </span>
+                    </span>
+                  </div>
+                </label>
+                <label
+                  className={`cursor-pointer rounded-lg border p-4 transition-colors ${
+                    selectionMode === 'mutual'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="radio"
+                      name="selectionMode"
+                      value="mutual"
+                      checked={selectionMode === 'mutual'}
+                      onChange={() => setSelectionMode('mutual')}
+                      disabled={isLoading}
+                      className="mt-1 border-border text-primary focus:ring-ring"
+                    />
+                    <span>
+                      <span className="block font-medium text-foreground">Decide together</span>
+                      <span className="block text-sm text-muted-foreground">
+                        You both pick; it locks in when you agree on the same place.
+                      </span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
 
             <div className="flex justify-between mt-6">
               <Button
